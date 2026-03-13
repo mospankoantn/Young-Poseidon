@@ -11,8 +11,8 @@
   "name":"obj_trident",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Weapon",
+    "path":"folders/Объекты/Weapon.yy",
   },
   "parentObjectId":null,
   "persistent":false,
@@ -33,8 +33,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_trident",
-    "path":"sprites/spr_trident/spr_trident.yy",
+    "name":"spr_weapon_trident",
+    "path":"sprites/spr_weapon_trident/spr_weapon_trident.yy",
   },
   "spriteMaskId":null,
   "visible":true,

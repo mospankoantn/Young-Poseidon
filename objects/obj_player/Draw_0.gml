@@ -1,31 +1,16 @@
 /// @description Малювання гравця з анімацією
+// obj_player Draw Event
 
-// Обновляємо анімацію залежно від стану
-if (place_meeting(x, y + 1, obj_platform))
+// Ефект блимання під час невразливості
+if (is_damage)
 {
-	// На землі
-	is_jumping = false;
-	if (vspd == 0 && (l_right || l_left))
-	{
-		image_index += image_speed; // Анімація ходи
-	}
-	else if (vspd == 0)
-	{
-		image_index = 0; // Стояння
-	}
+    // Блимаємо: кожні 4 кадри змінюємо прозорість
+    image_alpha = (current_time / 60000) mod 2 < 1 ? 0.4 : 1.0;
 }
 else
 {
-	// У повітрі
-	is_jumping = true;
-	image_index = 1; // Один кадр для стрибка
+    image_alpha = 1;
 }
-
-// Запобігаємо перевищенню индексу
-if (image_index >= image_number)
-{
-	image_index = 0;
-}
-
-// Рисуємо гравця з применённої анімацією
+ 
+// Малюємо гравця (спрайт, xscale та angle встановлені автоматично)
 draw_self();

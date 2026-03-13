@@ -10,8 +10,8 @@
   "name":"obj_giant_crab",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Enemy",
+    "path":"folders/Объекты/Enemy.yy",
   },
   "parentObjectId":{
     "name":"obj_enemy",

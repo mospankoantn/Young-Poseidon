@@ -10,8 +10,8 @@
   "name":"obj_ui_controller",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"System",
+    "path":"folders/Объекты/System.yy",
   },
   "parentObjectId":null,
   "persistent":false,

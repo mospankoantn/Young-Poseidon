@@ -1,11 +1,6 @@
-
 /// @description Ініціалізація UI
-display_width = display_get_gui_width();
-display_height = display_get_gui_height();
+// obj_ui_controller Create Event
 
-// Налаштування відображення (необов'язково)
-ui_margin = 10; // Відступ від краю екрану
+ui_margin     = 12;
 ui_text_color = c_white;
-//ui_font = font_add_sprite(spr_font_default, ord(" "), true, 1); // Замініть spr_font_default на ваш шрифт, якщо є
-draw_set_font(fnt_main);
-// Якщо немає спрайтового шрифту, можна використовувати draw_set_font() зі стандартним шрифтом
+// Примітка: draw_set_font() НЕ викликається у Create — тільки в Draw

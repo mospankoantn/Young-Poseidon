@@ -8,8 +8,8 @@
   "name":"obj_pickup_sandal",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Item",
+    "path":"folders/Объекты/Item.yy",
   },
   "parentObjectId":{
     "name":"obj_pickup",

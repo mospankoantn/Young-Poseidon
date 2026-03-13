@@ -1,30 +1,22 @@
 /// @description Зіткнення з ворогом
-// Ви можете записать свій код в этом редакторе
+/// obj_player — Collision with obj_enemy
 
-if (!is_damage) // Перевіряємо, чи гравець вже не отримує шкоду
+// ВАЖЛИВО: ця подія спрацьовує КОЖЕН кадр поки є зіткнення,
+// тому використовуємо is_damage як захист від подвійного урону
+
+if (!is_damage)
 {
-    // Зменшуємо HP гравця на силу атаки ворога
-    with (other) // Переключаємо контекст на ворога (other)
-    {
-        obj_player.hp -= atk; // Звертаємось до atk ворога
-        // Можна додати відштовхування гравця
-        var _dir = point_direction(x, y, obj_player.x, obj_player.y);
-        obj_player.vspd = -3; // Невеликий підскок
-        obj_player.hspd = lengthdir_x(5, _dir);
-    }
-    
-    is_damage = true; // Встановлюємо флаг отримання шкоди
-    
-    // Встановлюємо таймер невразливості (Alarm 0)
-    // room_speed - це кількість кроків за секунду
-    alarm[0] = room_speed * 0.5; // Невразливість на 0.5 секунди
-    
-    // Додати звук отримання шкоди
+    // Отримуємо шкоду від ворога
+    hp -= other.atk;
+ 
+    // Knockback: відштовхуємо гравця від ворога
+    var _dir = point_direction(other.x, other.y, x, y);
+    hspd  = lengthdir_x(6, _dir);
+    vspd  = -4;
+ 
+    // Вмикаємо невразливість
+    is_damage = true;
+    alarm[0]  = room_speed;   // 1 секунда невразливості
+ 
     // audio_play_sound(snd_player_hurt, 1, false);
 }
-
-
-
-
-
-

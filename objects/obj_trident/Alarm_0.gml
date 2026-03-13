@@ -1,5 +1,4 @@
-/// @description Вставьте описание здесь
-// Вы можете записать свой код в этом редакторе
+/// @description Вимикає режим невидимості після повернення тризубця
+// obj_trident Alarm 0 Event
 
 invisible_time = false;
-

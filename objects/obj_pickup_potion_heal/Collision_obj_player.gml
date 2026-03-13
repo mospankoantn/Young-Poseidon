@@ -1,12 +1,12 @@
-/// @description Підбір Зілля Здоров\'я
-// obj_pickup_potion_heal collision with obj_event Event
+/// @description Амфора з цілющим зіллям: додає у інвентар одне зілля здоров'я
+// obj_pickup_potion_heal — Collision with obj_player
 
 if (can_pickup)
 {
-	with (other) // other - це obj_player
-	{
-		potion_heal_count++; // Збільшуємо лічильник зілля
-	}
-	
-	instance_destroy();
+    with (other)
+    {
+        potion_heal_count++;
+    }
+    // audio_play_sound(snd_pickup, 1, false);
+    instance_destroy();
 }

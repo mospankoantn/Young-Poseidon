@@ -11,8 +11,8 @@
   "name":"obj_pickup",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Item",
+    "path":"folders/Объекты/Item.yy",
   },
   "parentObjectId":null,
   "persistent":false,

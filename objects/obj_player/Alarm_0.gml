@@ -1,4 +1,5 @@
-/// @description Скидання флагу отримання шкоди
-is_damage = false;
-// Можна також скинути візуальний ефект невразливості, якщо він є
-// image_alpha = 1;
+/// @description Скидання невразливості після отримання шкоди
+// obj_player Alarm 0 Event
+
+is_damage   = false;
+image_alpha = 1;

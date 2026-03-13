@@ -8,8 +8,8 @@
   "name":"obj_pickup_ambrosia",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Item",
+    "path":"folders/Объекты/Item.yy",
   },
   "parentObjectId":{
     "name":"obj_pickup",

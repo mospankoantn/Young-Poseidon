@@ -1,21 +1,21 @@
 /// @description Кнопка
 // obj_button  Create Event
 
-// Позиція та розмір
-x = 0;
-y = 0;
-width = 200;
+// ---- РОЗМІР ----
+width  = 200;
 height = 50;
-
-// Текст та колір
-text = "";
+ 
+// ---- ТЕКСТ ----
+text       = "";
 text_color = c_white;
-button_color = c_gray;
-button_color_hover = c_blue;
-
-// Стан
+ 
+// ---- КОЛЬОРИ ----
+col_normal = make_color_rgb(80, 80, 80);
+col_hover  = make_color_rgb(60, 100, 180);
+col_border = make_color_rgb(180, 180, 180);
+ 
+// ---- СТАН ----
 is_hovered = false;
-is_clicked = false;
-
-// Функція при натиску
+ 
+// ---- ФУНКЦІЯ НАТИСКУ (перевизначається ззовні) ----
 on_click = function() {};

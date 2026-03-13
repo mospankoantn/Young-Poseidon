@@ -1,13 +1,12 @@
-/// @description Підбір Сандаля
- // obj_pickup_sandal collision with obj_event Event
+/// @description Сандаль Гермеса: перманентно збільшує швидкість гравця
+ // obj_pickup_sandal — Collision with obj_player
 
 if (can_pickup)
 {
-	with (other) // other - це obj_player
-	{
-		perm_spd_bonus += 0.5; // Збільшення бонусу до швидкості (підберіть значення)
-		// Можна додати ефект
-	}
-	//audio_play_sound(pickup_sound, 1, false);
-	instance_destroy();
+    with (other)
+    {
+        perm_spd_bonus += 0.3;  // +30% до базової швидкості
+    }
+    // audio_play_sound(snd_pickup_sandal, 1, false);
+    instance_destroy();
 }

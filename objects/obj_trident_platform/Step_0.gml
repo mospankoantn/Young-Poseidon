@@ -1,27 +1,14 @@
-/// @description 
+/// @description Ця платформа існує поки тризубець застряг у стіні. 
+// obj_trident_platform Step Event
 
-var _interaction_button = ord("1");
+// Ця платформа існує поки тризубець застряг у стіні.
+// Логіку повернення (клавіша 1) обробляє obj_player.
+// Тут тільки перевірка: якщо тризубець вже не stuck — знищуємо себе.
 
-if (!instance_exists(obj_player)) exit;
 var _trident = instance_find(obj_trident, 0);
-if (!instance_exists(_trident)) exit;
-
-if (keyboard_check_pressed(_interaction_button))
+ 
+// Якщо тризубець вже повернувся — платформу теж знищуємо
+if (!instance_exists(_trident) || !_trident.stuck)
 {
-	// Просто активируем тризубец
-	_trident.invisible_time = true;
-	_trident.thrown = false;
-	_trident.stuck = false;
-	_trident.alarm[0] = 15;
-	_trident.image_angle = 0;
-	
-	obj_player.trident_instance = _trident;
-	
-	instance_destroy(self);	
+    instance_destroy();
 }
-
-
-
-
-
-
