@@ -5,7 +5,7 @@
 // Гравець стоїть на плоту якщо він зверху і падає на нього
 has_player = false;
  
-if (instance_exists(obj_player))
+if (instance_exists(obj_player) && !obj_player.is_dead && obj_player.hp > 0)
 {
     var _px = obj_player.x;
     var _py = obj_player.y;

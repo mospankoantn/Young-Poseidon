@@ -2,6 +2,12 @@
 /// obj_mine_cart — Step Event
 
 if (!instance_exists(obj_player)) exit;
+if (obj_player.is_dead || obj_player.hp <= 0)
+{
+    if (has_player) obj_player.is_frozen = false;
+    has_player = false;
+    exit;
+}
  
 // ---- ВХІД/ВИХІД ----
 var _dist = distance_to_object(obj_player);
@@ -80,4 +86,3 @@ if (has_player)
     obj_player.vspd = 0;
     obj_player.hspd = 0;
 }
- 

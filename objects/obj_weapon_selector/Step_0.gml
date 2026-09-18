@@ -1,6 +1,9 @@
 /// @description
 /// obj_weapon_selector — Step Event
 
+if (!instance_exists(obj_player)) { instance_destroy(); exit; }
+if (obj_player.is_dead || obj_player.hp <= 0) { instance_destroy(); exit; }
+
 // Анімація появи
 appear_scale = lerp(appear_scale, 1, 0.2);
 gui_cx = display_get_gui_width() / 2;

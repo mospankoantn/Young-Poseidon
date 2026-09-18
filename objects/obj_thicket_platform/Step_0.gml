@@ -19,6 +19,7 @@ if (is_cutting)
  
 // ---- ВЗАЄМОДІЯ З КОСОЮ ----
 var _dist = distance_to_object(obj_player);
+if (obj_player.is_dead || obj_player.hp <= 0) exit;
  
 // Спосіб 1: Натискання E з косою
 if (_dist <= interact_range

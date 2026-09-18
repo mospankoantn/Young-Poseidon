@@ -1,6 +1,13 @@
 /// @description 
 /// @description obj_player — Step Event
 
+if (hp <= 0 && !is_dead) _begin_player_death();
+if (is_dead)
+{
+    if (death_finished) _respawn_player();
+    exit;
+}
+
 // ════════════════════════════════════════
 // АНІМАЦІЙНІ ТАЙМЕРИ
 // ════════════════════════════════════════
@@ -206,21 +213,7 @@ if (current_weapon == 5 && _e_pressed)
 // ════════════════════════════════════════
 // БЛОК 7: СМЕРТЬ
 // ════════════════════════════════════════
-if (hp <= 0)
-{
-    hp = max_hp;
-    if (variable_global_exists("checkpoint_room") && global.checkpoint_room == room)
-    {
-        x = global.checkpoint_x;
-        y = global.checkpoint_y;
-        vspd = 0; hspd = 0;
-    }
-    else if (variable_global_exists("checkpoint_room"))
-        room_goto(global.checkpoint_room);
-    else
-        game_restart();
-    _reset_player_animation();
-}
+// Lethal collision damage is handled in End Step, before animation selection.
  
 // ════════════════════════════════════════
 // БЛОК 8: ТИМЧАСОВІ БАФИ
@@ -273,6 +266,11 @@ if (y > room_height + _margin
 {
     // Втрата 1 HP
     hp--;
+    if (hp <= 0)
+    {
+        _begin_player_death();
+        exit;
+    }
     // audio_play_sound(snd_fall, 1, false);
 
     // Телепорт на чекпоінт

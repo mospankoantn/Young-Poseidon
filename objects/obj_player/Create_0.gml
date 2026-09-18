@@ -50,6 +50,8 @@ anim_was_on_ground = false;
 anim_was_damage = false;
 anim_last_hp = hp;
 anim_last_x = x;
+is_dead = false;
+death_finished = false;
 
 _set_player_animation = function(_sprite, _speed, _restart = false)
 {
@@ -64,6 +66,7 @@ _set_player_animation = function(_sprite, _speed, _restart = false)
 
 _play_player_action = function(_sprite)
 {
+    if (is_dead) return;
     if (anim_action_sprite == spr_player_hurt && anim_action_timer > 0
         && _sprite != spr_player_hurt) return;
 
@@ -75,6 +78,8 @@ _play_player_action = function(_sprite)
 
 _reset_player_animation = function()
 {
+    is_dead = false;
+    death_finished = false;
     anim_action_sprite = -1;
     anim_action_timer = 0;
     anim_was_on_ground = place_meeting(x, y + 1, obj_platform);
@@ -83,6 +88,38 @@ _reset_player_animation = function()
     anim_last_x = x;
     image_xscale = l_right ? 1 : -1;
     _set_player_animation(spr_player_idle, 1, true);
+};
+
+_begin_player_death = function()
+{
+    if (is_dead) return;
+    is_dead = true;
+    death_finished = false;
+    anim_action_timer = 0;
+    anim_action_sprite = -1;
+    hspd = 0;
+    vspd = 0;
+    is_damage = true;
+    image_alpha = 1;
+    _set_player_animation(spr_player_death, 1, true);
+};
+
+_respawn_player = function()
+{
+    // Preserve the existing checkpoint and no-checkpoint branches.
+    hp = max_hp;
+    if (variable_global_exists("checkpoint_room") && global.checkpoint_room == room)
+    {
+        x = global.checkpoint_x;
+        y = global.checkpoint_y;
+        vspd = 0; hspd = 0;
+    }
+    else if (variable_global_exists("checkpoint_room"))
+        room_goto(global.checkpoint_room);
+    else
+        game_restart();
+    is_damage = alarm[0] > 0;
+    _reset_player_animation();
 };
  
 // ════ ЗБРОЯ ════

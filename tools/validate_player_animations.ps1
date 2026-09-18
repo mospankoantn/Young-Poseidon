@@ -23,7 +23,7 @@ foreach($dir in @('objects','sprites','scripts','rooms','sounds','fonts','tilese
     }
 }
 $frameTotal=0
-foreach($state in @('idle','run','jump','land','attack','hurt')) {
+foreach($state in @('idle','run','jump','land','attack','hurt','death')) {
     $name='spr_player_'+$state
     if(!$names.ContainsKey($name)) {throw "Unregistered sprite: $name"}
     $dir=Join-Path $ProjectRoot "sprites/$name"
@@ -31,6 +31,8 @@ foreach($state in @('idle','run','jump','land','attack','hurt')) {
     if($yy.resourceType -ne 'GMSprite' -or $yy.'$GMSprite' -ne 'v2') {throw "Wrong sprite schema: $name"}
     if($yy.width -ne 128 -or $yy.height -ne 96 -or $yy.sequence.xorigin -ne 64 -or $yy.sequence.yorigin -ne 88) {throw "Misaligned sprite: $name"}
     $seq=$yy.sequence
+    if($state -eq 'run' -and $yy.frames.Count -ne 8) {throw 'Reimport revised run/death sheet after the base sheet'}
+    if($state -eq 'death' -and $yy.frames.Count -ne 4) {throw 'Death must have four frames'}
     if($seq.resourceType -ne 'GMSequence' -or $seq.resourceVersion -ne '2.0' -or $seq.playbackSpeedType -ne 0 -or $seq.playbackSpeed -le 0) {throw "Invalid sequence: $name"}
     $keys=$seq.tracks[0].keyframes.Keyframes
     if($seq.length -ne $yy.frames.Count -or $keys.Count -ne $yy.frames.Count) {throw "Frame count mismatch: $name"}
@@ -63,5 +65,7 @@ if($endStep.Count -ne 1 -or !(Test-Path (Join-Path $ProjectRoot 'objects/obj_pla
 $create=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_player/Create_0.gml') -Raw
 if(!$create.Contains('mask_index = spr_player;')) {throw 'The original collision mask is not preserved'}
 Write-Output "PASS: $parsed YY files parse; $($project.resources.Count) unique project resources link."
-Write-Output "PASS: 6 gameplay sprites, $frameTotal nonempty transparent frames, origins, layers, timing and End Step registration."
+$deathEnd=@($player.eventList | Where-Object {$_.eventType -eq 7 -and $_.eventNum -eq 7})
+if($deathEnd.Count -ne 1 -or !(Test-Path (Join-Path $ProjectRoot 'objects/obj_player/Other_7.gml'))) {throw 'Missing/duplicate Animation End event'}
+Write-Output "PASS: 7 gameplay sprites, $frameTotal nonempty transparent frames, origins, layers, timing, End Step and Animation End registration."
 

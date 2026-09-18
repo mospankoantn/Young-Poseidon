@@ -1,4 +1,7 @@
 /// @description Choose the visual state after movement and collision damage.
+if (hp <= 0 && !is_dead) _begin_player_death();
+if (is_dead) exit;
+
 var _ground_now = vspd == 0 && drop_timer <= 0
     && place_meeting(x, y + 1, obj_platform);
 var _hurt_now = hp < anim_last_hp || (is_damage && !anim_was_damage);

@@ -53,6 +53,8 @@ switch (exit_direction)
 // Функція спроби переходу:
 _try_enter = function()
 {
+    if (!instance_exists(obj_player)) return;
+    if (obj_player.is_dead || obj_player.hp <= 0) return;
     // ---- Перевірка блокування ----
     if (is_locked)
     {

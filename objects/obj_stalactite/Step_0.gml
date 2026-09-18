@@ -9,6 +9,7 @@ if (!instance_exists(obj_player)) exit;
 var _dist = distance_to_object(obj_player);
  
 if (_dist <= interact_range && hit_cd <= 0
+    && !obj_player.is_dead && obj_player.hp > 0
     && obj_player.current_weapon == 2   // Кайло
     && (keyboard_check_pressed(ord("E")) || keyboard_check_pressed(ord("F"))))
 {
