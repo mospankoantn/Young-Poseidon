@@ -11,6 +11,9 @@ with (obj_olympus_door)
 {
     event_user(0);   // Відкрити двері
 }
- 
-// audio_play_sound(snd_key_get, 1, false);
+
+if (instance_exists(obj_ui_controller))
+    obj_ui_controller.show_hint(lc("reward_key"), 240);
+
+// audio_play_sound(snd_weapon_get, 1, false);
 instance_destroy();

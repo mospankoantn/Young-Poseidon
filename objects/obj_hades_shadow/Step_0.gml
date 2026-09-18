@@ -1,4 +1,4 @@
-/// @description Логіка поведінки Тіні Аїда
+ /// @description Логіка поведінки Тіні Аїда
 
 /// obj_hades_shadow — Step Event
 
@@ -39,6 +39,10 @@ switch (state)
         if (_dist <= sight_range)
         {
             state = 1;
+			with (obj_ui_controller)
+		    {
+		        show_npc_dialog("Ти не пройдеш через царство Аїда!", 210);
+		    }
             // audio_play_sound(snd_shadow_appear, 1, false);
         }
     break;

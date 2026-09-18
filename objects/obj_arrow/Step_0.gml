@@ -3,6 +3,7 @@
 
 // Рух стріли
 x += fly_speed * direction_x;
+y += fly_speed * (direction_y != 0 ? direction_y : 0);
  
 // Обертання спрайту в напрямку руху
 image_xscale = direction_x;

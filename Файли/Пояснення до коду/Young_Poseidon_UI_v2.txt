@@ -1,0 +1,1020 @@
+╔══════════════════════════════════════════════════════════════════╗
+║         YOUNG POSEIDON — ОНОВЛЕНИЙ ІНТЕРФЕЙС (UI)              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+LAYOUT (на основі малюнку + Game.png + Main_Menu.png):
+
+  ┌──────────────────┬────────────────────┬──────────────────┐
+  │ [?] Ви говорите  │   ЗОНАназва – №    │ Підказки/Ворог   │  ← рядок 1
+  │ ┌──────────────┐ │ ┌────────────────┐ │ ┌──────────────┐ │
+  │ │ текст гравця │ │ │ Підказка/завд. │ │ │ текст NPC    │ │  ← рядок 2
+  │ └──────────────┘ │ └────────────────┘ │ └──────────────┘ │
+  │ [E]              │                    │ [F]              │  ← рядок 3
+  ├──────────────────┴────────────────────┴──────────────────┤
+  │ ♥♥♥♥♥   [Амфора] ATK: 1 (Тризубець)  ШВ: 1             │  ← рядок 4
+  └──────────────────────────────────────────────────────────┘
+  ...гра...
+  ┌──────────────────────────────────────────────────────────┐
+  │ [Амфора]×N [Геракл]×N [Гермес]×N          [Зброя] НАЗВА │  ← рядок 5 (дно)
+  └──────────────────────────────────────────────────────────┘
+
+ЗМІСТ:
+  1.  obj_ui_controller — Create Event   (глобальні змінні UI)
+  2.  obj_ui_controller — Draw GUI Event (повний перемальований UI)
+  3.  obj_dialog_manager — система діалогів гравця та NPC
+  4.  obj_hud_hint       — центральна підказка/завдання
+  5.  obj_main_menu      — оновлене головне меню (відповідно до Main_Menu.png)
+
+
+═══════════════════════════════════════════════════════════════════
+  1. OBJ_UI_CONTROLLER — Create Event
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_ui_controller — Create Event
+─────────────────────────────────────────
+// ════ НАЗВА ЗОНИ (рядок вгорі по центру) ════
+// Встановлюється при зміні кімнати
+zone_name   = "Море";      // Назва зони
+zone_room   = 1;           // Номер кімнати в зоні
+
+// ════ ПІДКАЗКА / ЗАВДАННЯ (центр вгорі) ════
+hint_text   = "";          // Поточна підказка
+hint_timer  = 0;           // Скільки кадрів ще показувати
+hint_alpha  = 0;           // Прозорість (плавна поява/зникнення)
+
+// ════ ДІАЛОГ ГРАВЦЯ (ліво вгорі, E) ════
+player_dialog_text  = "";
+player_dialog_timer = 0;
+player_dialog_alpha = 0;
+
+// ════ ДІАЛОГ NPC/ВОРОГА (право вгорі, F) ════
+npc_dialog_text     = "";
+npc_dialog_timer    = 0;
+npc_dialog_alpha    = 0;
+
+// ════ ФУНКЦІЇ ВИКЛИКУ ДІАЛОГІВ ════
+// Виклик з будь-якого об'єкта:
+//   obj_ui_controller.show_player_dialog("Тут темно...", 180);
+//   obj_ui_controller.show_npc_dialog("Зупинись, смертний!", 240);
+//   obj_ui_controller.show_hint("Натисни E щоб кинути зброю", 300);
+
+show_player_dialog = function(_text, _duration)
+{
+    player_dialog_text  = _text;
+    player_dialog_timer = _duration;
+    player_dialog_alpha = 0;
+    // audio_play_sound(snd_dialog_open, 1, false);
+};
+
+show_npc_dialog = function(_text, _duration)
+{
+    npc_dialog_text     = _text;
+    npc_dialog_timer    = _duration;
+    npc_dialog_alpha    = 0;
+    // audio_play_sound(snd_dialog_npc, 1, false);
+};
+
+show_hint = function(_text, _duration)
+{
+    hint_text   = _text;
+    hint_timer  = _duration;
+    hint_alpha  = 0;
+};
+
+// ════ ПАУЗА ════
+game_paused = false;
+
+// ════ РОЗМІРИ GUI ════
+gw = display_get_gui_width();
+gh = display_get_gui_height();
+
+
+═══════════════════════════════════════════════════════════════════
+  1b. OBJ_UI_CONTROLLER — Step Event
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_ui_controller — Step Event
+─────────────────────────────────────────
+// ---- ДІАЛОГ ГРАВЦЯ ----
+if (player_dialog_timer > 0)
+{
+    player_dialog_timer--;
+    player_dialog_alpha = lerp(player_dialog_alpha, 1, 0.15);
+    // Q — закрити діалог гравця (з дизайн-документу)
+    if (keyboard_check_pressed(ord("Q")))
+        player_dialog_timer = 0;
+}
+else
+    player_dialog_alpha = lerp(player_dialog_alpha, 0, 0.12);
+
+// ---- ДІАЛОГ NPC ----
+if (npc_dialog_timer > 0)
+{
+    npc_dialog_timer--;
+    npc_dialog_alpha = lerp(npc_dialog_alpha, 1, 0.15);
+    if (keyboard_check_pressed(ord("Q")))
+        npc_dialog_timer = 0;
+}
+else
+    npc_dialog_alpha = lerp(npc_dialog_alpha, 0, 0.12);
+
+// ---- ПІДКАЗКА/ЗАВДАННЯ ----
+if (hint_timer > 0)
+{
+    hint_timer--;
+    hint_alpha = lerp(hint_alpha, 1, 0.15);
+}
+else
+    hint_alpha = lerp(hint_alpha, 0, 0.1);
+
+// ---- ESC = ПАУЗА ----
+if (keyboard_check_pressed(vk_escape))
+{
+    game_paused = !game_paused;
+    // audio_play_sound(snd_pause, 1, false);
+}
+
+// ---- ОНОВЛЕННЯ РОЗМІРІВ (якщо вікно змінилося) ----
+gw = display_get_gui_width();
+gh = display_get_gui_height();
+
+
+═══════════════════════════════════════════════════════════════════
+  2. OBJ_UI_CONTROLLER — Draw GUI Event (ПОВНИЙ НОВИЙ UI)
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_ui_controller — Draw GUI Event
+─────────────────────────────────────────
+if (!instance_exists(obj_player)) exit;
+var _p = obj_player;
+
+if (font_exists(fnt_main)) draw_set_font(fnt_main);
+
+var _pad = 10;   // Відступ від країв
+
+
+// ════════════════════════════════════════════════════════════════
+// РЯДОК 1–3: ВЕРХНЯ ПАНЕЛЬ (3 блоки: ліво, центр, право)
+// ════════════════════════════════════════════════════════════════
+var _top_h   = 80;    // Висота верхньої панелі
+var _blk_w   = 280;   // Ширина лівого і правого блоків
+
+// ── ЗАГАЛЬНЕ ТЛО ВЕРХНЬОЇ ПАНЕЛІ ──
+draw_set_alpha(0.82);
+draw_set_color(make_color_rgb(8, 15, 30));
+draw_rectangle(0, 0, gw, _top_h, false);
+draw_set_alpha(0.4);
+draw_set_color(make_color_rgb(60, 100, 180));
+draw_rectangle(0, _top_h - 2, gw, _top_h, false);
+draw_set_alpha(1);
+
+
+// ════════════════════════════════════════
+// БЛОК ЛІВИЙ: "Ви говорите" (діалог гравця, E)
+// ════════════════════════════════════════
+var _lx  = _pad;
+var _ly  = _pad / 2;
+var _lbw = _blk_w;
+
+// Іконка "?" зліва
+draw_set_alpha(1);
+draw_set_color(make_color_rgb(80, 140, 220));
+draw_rectangle(_lx, _ly + 2, _lx + 22, _ly + 22, false);
+draw_set_color(c_white);
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+draw_text(_lx + 11, _ly + 12, "?");
+
+// Заголовок "Ви говорите"
+draw_set_color(make_color_rgb(140, 180, 240));
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_text(_lx + 28, _ly + 3, "Ви говорите:");
+
+// Рамка діалогу
+var _dialog_box_y  = _ly + 22;
+var _dialog_box_h  = _top_h - _dialog_box_y - 14;
+
+draw_set_alpha(0.65);
+draw_set_color(make_color_rgb(15, 30, 55));
+draw_rectangle(_lx, _dialog_box_y, _lx + _lbw, _dialog_box_y + _dialog_box_h, false);
+draw_set_alpha(0.5);
+draw_set_color(make_color_rgb(60, 100, 180));
+draw_rectangle(_lx, _dialog_box_y, _lx + _lbw, _dialog_box_y + _dialog_box_h, true);
+draw_set_alpha(1);
+
+// Текст гравця
+if (player_dialog_alpha > 0.05)
+{
+    draw_set_alpha(player_dialog_alpha);
+    draw_set_color(c_white);
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_text_ext(_lx + 6, _dialog_box_y + 4,
+        player_dialog_text, _dialog_box_h - 6, _lbw - 12);
+    draw_set_alpha(1);
+}
+else
+{
+    // Підказка "натисни E"
+    draw_set_alpha(0.35);
+    draw_set_color(make_color_rgb(100, 130, 180));
+    draw_set_halign(fa_center);
+    draw_text(_lx + _lbw / 2, _dialog_box_y + _dialog_box_h / 2 - 6, "[E] — говорити");
+    draw_set_alpha(1);
+}
+
+
+// ════════════════════════════════════════
+// БЛОК ЦЕНТР: Назва зони + підказка/завдання
+// ════════════════════════════════════════
+var _cx  = gw / 2;
+var _czw = gw - _blk_w * 2 - _pad * 4;
+
+// Назва зони: "МОРЕ – 1"
+draw_set_halign(fa_center);
+draw_set_valign(fa_top);
+draw_set_color(make_color_rgb(180, 210, 255));
+draw_text(_cx, _ly + 3,
+    string_upper(zone_name) + " — " + string(zone_room));
+
+// Підказка/завдання (під назвою зони)
+if (hint_alpha > 0.05)
+{
+    draw_set_alpha(hint_alpha);
+
+    // Тло підказки
+    var _htw = _czw - 20;
+    var _htx = _cx - _htw / 2;
+    var _hty = _ly + 22;
+    var _hth = _top_h - _hty - 14;
+
+    draw_set_color(make_color_rgb(20, 40, 70));
+    draw_rectangle(_htx, _hty, _htx + _htw, _hty + _hth, false);
+    draw_set_color(make_color_rgb(100, 160, 255));
+    draw_rectangle(_htx, _hty, _htx + _htw, _hty + _hth, true);
+
+    draw_set_color(c_white);
+    draw_set_halign(fa_center);
+    draw_text_ext(_cx, _hty + 4, hint_text, _hth - 6, _htw - 12);
+    draw_set_alpha(1);
+}
+else
+{
+    // Порожній прямокутник-заглушка
+    draw_set_alpha(0.2);
+    var _htw = _czw - 20;
+    var _htx = _cx - _htw / 2;
+    var _hty = _ly + 22;
+    var _hth = _top_h - _hty - 14;
+    draw_set_color(make_color_rgb(30, 50, 90));
+    draw_rectangle(_htx, _hty, _htx + _htw, _hty + _hth, false);
+    draw_set_alpha(1);
+}
+
+
+// ════════════════════════════════════════
+// БЛОК ПРАВИЙ: "Підказки / Ворог говорить" (F)
+// ════════════════════════════════════════
+var _rx  = gw - _pad - _blk_w;
+var _ry  = _ly;
+
+// Іконка "?" справа
+draw_set_alpha(1);
+draw_set_color(make_color_rgb(220, 100, 80));
+draw_rectangle(_rx + _blk_w - 22, _ry + 2, _rx + _blk_w, _ry + 22, false);
+draw_set_color(c_white);
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+draw_text(_rx + _blk_w - 11, _ry + 12, "?");
+
+// Заголовок
+draw_set_color(make_color_rgb(240, 160, 120));
+draw_set_halign(fa_right);
+draw_set_valign(fa_top);
+draw_text(_rx + _blk_w - 28, _ry + 3, "Підказки / Ворог:");
+
+// Рамка діалогу NPC
+draw_set_alpha(0.65);
+draw_set_color(make_color_rgb(35, 15, 10));
+draw_rectangle(_rx, _dialog_box_y, _rx + _blk_w, _dialog_box_y + _dialog_box_h, false);
+draw_set_alpha(0.5);
+draw_set_color(make_color_rgb(180, 80, 60));
+draw_rectangle(_rx, _dialog_box_y, _rx + _blk_w, _dialog_box_y + _dialog_box_h, true);
+draw_set_alpha(1);
+
+if (npc_dialog_alpha > 0.05)
+{
+    draw_set_alpha(npc_dialog_alpha);
+    draw_set_color(make_color_rgb(255, 220, 180));
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_text_ext(_rx + 6, _dialog_box_y + 4,
+        npc_dialog_text, _dialog_box_h - 6, _blk_w - 12);
+    draw_set_alpha(1);
+}
+else
+{
+    draw_set_alpha(0.35);
+    draw_set_color(make_color_rgb(160, 100, 80));
+    draw_set_halign(fa_center);
+    draw_text(_rx + _blk_w / 2, _dialog_box_y + _dialog_box_h / 2 - 6,
+        "[F] — взаємодіяти");
+    draw_set_alpha(1);
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// РЯДОК 4: HP + АМФОРА + ATK / ШВ (під верхньою панеллю, зліва)
+// ════════════════════════════════════════════════════════════════
+var _hp_y = _top_h + 6;
+
+// Серця (HP)
+var _heart_size = 22;
+var _heart_gap  = 3;
+for (var _hi = 0; _hi < _p.max_hp; _hi++)
+{
+    var _hx = _pad + _hi * (_heart_size + _heart_gap);
+    var _hy = _hp_y;
+
+    if (_hi < _p.hp)
+    {
+        // Повне серце
+        draw_set_color(make_color_rgb(220, 50, 50));
+        // Малюємо серце як два кола + трикутник (без спрайту)
+        if (sprite_exists(spr_heart_full))
+            draw_sprite_ext(spr_heart_full, 0, _hx + _heart_size/2, _hy + _heart_size/2,
+                1, 1, 0, c_white, 1);
+        else
+        {
+            draw_set_color(make_color_rgb(220, 50, 50));
+            draw_ellipse(_hx + 2, _hy + 2, _hx + 10, _hy + 12, false);
+            draw_ellipse(_hx + 10, _hy + 2, _hx + 20, _hy + 12, false);
+            draw_triangle(_hx + 2, _hy + 10, _hx + 20, _hy + 10, _hx + 11, _hy + 22, false);
+        }
+    }
+    else
+    {
+        // Порожнє серце
+        if (sprite_exists(spr_heart_empty))
+            draw_sprite_ext(spr_heart_empty, 0, _hx + _heart_size/2, _hy + _heart_size/2,
+                1, 1, 0, c_white, 1);
+        else
+        {
+            draw_set_color(make_color_rgb(80, 30, 30));
+            draw_ellipse(_hx + 2, _hy + 2, _hx + 10, _hy + 12, true);
+            draw_ellipse(_hx + 10, _hy + 2, _hx + 20, _hy + 12, true);
+            draw_triangle(_hx + 2, _hy + 10, _hx + 20, _hy + 10, _hx + 11, _hy + 22, true);
+        }
+    }
+}
+
+// Амфора + ATK / ШВ (під серцями або праворуч)
+var _stats_x = _pad;
+var _stats_y = _hp_y + _heart_size + 4;
+
+// Іконка амфори
+if (sprite_exists(spr_amphora))
+    draw_sprite_ext(spr_amphora, 0, _stats_x + 10, _stats_y + 10, 0.7, 0.7, 0, c_white, 1);
+
+// ATK + Назва зброї
+var _atk_total = (_p.current_weapon >= 0)
+    ? (_p.weapon_atk[_p.current_weapon] + _p.temp_atk_buff)
+    : 0;
+var _weapon_label = (_p.current_weapon >= 0)
+    ? _p.weapon_names[_p.current_weapon]
+    : "Без зброї";
+
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_color(make_color_rgb(255, 200, 100));
+draw_text(_stats_x + 26, _stats_y,
+    "АТК: " + string(_atk_total) + "  (" + _weapon_label + ")");
+
+// ШВ (швидкість)
+var _spd_total = _p.spd + _p.perm_spd_bonus + _p.temp_spd_buff;
+var _spd_mult  = (_p.current_weapon >= 0) ? _p.weapon_spd_mult[_p.current_weapon] : 1.0;
+draw_set_color(make_color_rgb(100, 200, 255));
+draw_text(_stats_x + 26, _stats_y + 18,
+    "ШВ: " + string(_spd_total * _spd_mult));
+
+
+// ════════════════════════════════════════════════════════════════
+// РЯДОК 4 ПРАВО: Сандалі + Активний баф
+// ════════════════════════════════════════════════════════════════
+
+// Сандалі Гермеса (кількість зібраних, макс 2)
+var _sandal_x = gw - _pad - 80;
+var _sandal_y = _top_h + 6;
+
+for (var _si = 0; _si < 2; _si++)
+{
+    var _sx    = _sandal_x + _si * 36;
+    var _has_s = (_si < _p.perm_spd_bonus);   // є сандаль?
+
+    if (sprite_exists(spr_sandal))
+        draw_sprite_ext(spr_sandal, 0, _sx + 14, _sandal_y + 14,
+            1, 1, 0, c_white, _has_s ? 1.0 : 0.25);
+    else
+    {
+        draw_set_alpha(_has_s ? 1.0 : 0.25);
+        draw_set_color(make_color_rgb(200, 160, 80));
+        draw_rectangle(_sx, _sandal_y, _sx + 28, _sandal_y + 22, false);
+        draw_set_alpha(1);
+    }
+}
+
+// Активний баф (якщо є)
+if (_p.buff_duration > 0)
+{
+    var _secs   = ceil(_p.buff_duration / room_speed);
+    var _pulse  = 0.65 + 0.35 * sin(current_time / 150000);
+    var _bc     = (_p.temp_atk_buff > 0)
+                    ? make_color_rgb(255, 100, 60)   // Геракл — вогненний
+                    : make_color_rgb(60, 180, 255);  // Гермес — синій
+
+    draw_set_alpha(_pulse);
+    draw_set_color(_bc);
+    draw_set_halign(fa_right);
+    draw_set_valign(fa_top);
+    var _buff_str = (_p.temp_atk_buff > 0)
+        ? "⚡ Геракл +" + string(_p.temp_atk_buff) + " АТК  [" + string(_secs) + "с]"
+        : "💨 Гермес +" + string(_p.temp_spd_buff) + " ШВ  [" + string(_secs) + "с]";
+    draw_text(gw - _pad, _top_h + 6, _buff_str);
+    draw_set_alpha(1);
+    draw_set_halign(fa_left);
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// РЯДОК 5: НИЖНЯ ПАНЕЛЬ — Зілля + Зброя
+// ════════════════════════════════════════════════════════════════
+var _bot_h   = 60;
+var _bot_y   = gh - _bot_h;
+
+// Тло нижньої панелі
+draw_set_alpha(0.82);
+draw_set_color(make_color_rgb(8, 15, 30));
+draw_rectangle(0, _bot_y, gw, gh, false);
+draw_set_alpha(0.4);
+draw_set_color(make_color_rgb(60, 100, 180));
+draw_rectangle(0, _bot_y, gw, _bot_y + 2, false);
+draw_set_alpha(1);
+
+// ── ЗІЛЛЯ (3 слоти зліва) ──
+// Дані: тип, спрайт, лічильник, клавіша, колір
+var _potion_data = [
+    // [лічильник,   спрайт,              клавіша, колір_фону,             назва]
+    [_p.potion_heal_count,     spr_potion_heal,     "Z",
+        make_color_rgb(40, 100, 40), "Здоров'я"],
+    [_p.potion_strength_count, spr_potion_strength, "X",
+        make_color_rgb(100, 40, 20), "Геракл"],
+    [_p.potion_speed_count,    spr_potion_speed,    "C",
+        make_color_rgb(20, 60, 110), "Гермес"]
+];
+
+var _slot_w   = 52;
+var _slot_h   = 50;
+var _slot_gap = 6;
+var _slots_x  = _pad;
+var _slots_y  = _bot_y + (_bot_h - _slot_h) / 2;
+
+for (var _pi = 0; _pi < 3; _pi++)
+{
+    var _count  = _potion_data[_pi][0];
+    var _spr    = _potion_data[_pi][1];
+    var _key    = _potion_data[_pi][2];
+    var _col    = _potion_data[_pi][3];
+    var _sx     = _slots_x + _pi * (_slot_w + _slot_gap);
+    var _sy     = _slots_y;
+    var _empty  = (_count <= 0);
+
+    // Тло слота
+    draw_set_alpha(_empty ? 0.3 : 0.85);
+    draw_set_color(_col);
+    draw_rectangle(_sx, _sy, _sx + _slot_w, _sy + _slot_h, false);
+
+    // Контур
+    draw_set_alpha(_empty ? 0.2 : 0.7);
+    draw_set_color(_empty ? c_dkgray : c_white);
+    draw_rectangle(_sx, _sy, _sx + _slot_w, _sy + _slot_h, true);
+    draw_set_alpha(1);
+
+    // Спрайт амфори
+    if (sprite_exists(_spr) && !_empty)
+        draw_sprite_ext(_spr, 0, _sx + _slot_w/2, _sy + _slot_h/2 - 5,
+            1, 1, 0, c_white, 1);
+    else if (!_empty)
+    {
+        // Заглушка — кольоровий прямокутник
+        draw_set_color(c_white);
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_middle);
+        draw_text(_sx + _slot_w/2, _sy + _slot_h/2 - 5, "~");
+    }
+
+    // Лічильник (знизу справа в слоті)
+    draw_set_halign(fa_right);
+    draw_set_valign(fa_bottom);
+    draw_set_color(_empty ? c_dkgray : c_white);
+    draw_text(_sx + _slot_w - 3, _sy + _slot_h - 2, string(_count));
+
+    // Клавіша (знизу зліва в слоті)
+    draw_set_halign(fa_left);
+    draw_set_color(_empty ? c_dkgray : make_color_rgb(200, 220, 160));
+    draw_text(_sx + 3, _sy + _slot_h - 16, "[" + _key + "]");
+}
+
+// ── ПОТОЧНА ЗБРОЯ (справа в нижній панелі) ──
+var _wpn_slot_w  = 200;
+var _wpn_slot_x  = gw - _wpn_slot_w - _pad;
+var _wpn_slot_y  = _slots_y;
+var _wpn_slot_h  = _slot_h;
+
+if (_p.current_weapon >= 0)
+{
+    var _wspr    = _p.weapon_sprites[_p.current_weapon];
+    var _wname   = _p.weapon_names[_p.current_weapon];
+    var _watk    = _p.weapon_atk[_p.current_weapon] + _p.temp_atk_buff;
+    var _wspd    = _p.weapon_spd_mult[_p.current_weapon];
+
+    // Тло
+    var _pulse3 = 0.7 + 0.15 * sin(current_time / 400000);
+    draw_set_alpha(0.75 * _pulse3);
+    draw_set_color(make_color_rgb(30, 50, 90));
+    draw_rectangle(_wpn_slot_x, _wpn_slot_y,
+        _wpn_slot_x + _wpn_slot_w, _wpn_slot_y + _wpn_slot_h, false);
+    draw_set_alpha(0.9);
+    draw_set_color(make_color_rgb(100, 150, 255));
+    draw_rectangle(_wpn_slot_x, _wpn_slot_y,
+        _wpn_slot_x + _wpn_slot_w, _wpn_slot_y + _wpn_slot_h, true);
+    draw_set_alpha(1);
+
+    // Спрайт зброї
+    if (sprite_exists(_wspr))
+        draw_sprite_ext(_wspr, 0,
+            _wpn_slot_x + 26, _wpn_slot_y + _wpn_slot_h/2,
+            1.4, 1.4, 0, c_white, 1);
+    else
+    {
+        draw_set_color(make_color_rgb(180, 200, 255));
+        draw_set_halign(fa_center);
+        draw_text(_wpn_slot_x + 26, _wpn_slot_y + _wpn_slot_h/2 - 8, "⚔");
+    }
+
+    // Назва зброї
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_middle);
+    draw_set_color(c_white);
+    draw_text(_wpn_slot_x + 52, _wpn_slot_y + 12,
+        string_upper(_wname));
+
+    // АТК та ШВ
+    draw_set_color(make_color_rgb(255, 190, 80));
+    draw_text(_wpn_slot_x + 52, _wpn_slot_y + 28,
+        "АТК " + string(_watk) + "   ШВ " + string(_wspd));
+}
+else
+{
+    // Немає зброї
+    draw_set_alpha(0.4);
+    draw_set_color(make_color_rgb(60, 70, 90));
+    draw_rectangle(_wpn_slot_x, _wpn_slot_y,
+        _wpn_slot_x + _wpn_slot_w, _wpn_slot_y + _wpn_slot_h, false);
+    draw_set_alpha(0.5);
+    draw_set_color(c_dkgray);
+    draw_rectangle(_wpn_slot_x, _wpn_slot_y,
+        _wpn_slot_x + _wpn_slot_w, _wpn_slot_y + _wpn_slot_h, true);
+    draw_set_alpha(0.5);
+    draw_set_color(c_ltgray);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_text(_wpn_slot_x + _wpn_slot_w/2, _wpn_slot_y + _wpn_slot_h/2,
+        "Без зброї");
+    draw_set_alpha(1);
+}
+
+// ── КЛЮЧ ОЛІМПУ (якщо є, між зіллям і зброєю) ──
+if (_p.has_olympus_key)
+{
+    var _kx = _slots_x + 3 * (_slot_w + _slot_gap) + 10;
+    var _ky = _slots_y;
+
+    var _kpulse = 0.6 + 0.4 * sin(current_time / 250000);
+    draw_set_alpha(_kpulse);
+    draw_set_color(c_yellow);
+    draw_rectangle(_kx, _ky, _kx + 40, _ky + _slot_h, false);
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    if (sprite_exists(spr_olympus_key))
+        draw_sprite_ext(spr_olympus_key, 0, _kx + 20, _ky + _slot_h/2, 1, 1, 0, c_white, 1);
+    else
+        draw_text(_kx + 20, _ky + _slot_h/2, "🗝");
+}
+
+// ── КНОПКА ПАУЗИ (права середина) ──
+var _pause_x = gw - 36;
+var _pause_y = gh / 2 - 20;
+draw_set_alpha(0.5);
+draw_set_color(make_color_rgb(40, 60, 100));
+draw_rectangle(_pause_x, _pause_y, _pause_x + 30, _pause_y + 40, false);
+draw_set_alpha(0.7);
+draw_set_color(c_white);
+draw_rectangle(_pause_x, _pause_y, _pause_x + 30, _pause_y + 40, true);
+draw_set_alpha(0.9);
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+draw_text(_pause_x + 15, _pause_y + 20, "II");
+draw_set_alpha(1);
+
+// ════ СКИДАННЯ ════
+draw_set_color(c_white);
+draw_set_alpha(1);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_font(-1);
+
+
+// ════════════════════════════════════════════════════════════════
+// МЕНЮ ПАУЗИ (якщо game_paused == true)
+// ════════════════════════════════════════════════════════════════
+if (game_paused)
+{
+    // Затемнення
+    draw_set_alpha(0.7);
+    draw_set_color(c_black);
+    draw_rectangle(0, 0, gw, gh, false);
+    draw_set_alpha(1);
+
+    var _pw   = 320;
+    var _ph   = 360;
+    var _px   = gw/2 - _pw/2;
+    var _py   = gh/2 - _ph/2;
+
+    // Панель паузи
+    draw_set_alpha(0.95);
+    draw_set_color(make_color_rgb(10, 20, 45));
+    draw_rectangle(_px, _py, _px + _pw, _py + _ph, false);
+    draw_set_alpha(1);
+    draw_set_color(make_color_rgb(80, 130, 220));
+    draw_rectangle(_px, _py, _px + _pw, _py + _ph, true);
+
+    // Заголовок ПАУЗА
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
+    if (font_exists(fnt_title)) draw_set_font(fnt_title);
+    draw_text(gw/2, _py + 18, "ПАУЗА");
+
+    // Пункти меню
+    var _menu_items = [
+        "Продовжити",
+        "Завантажити гру",
+        "Налаштування",
+        "Головне меню",
+        "Вийти з гри"
+    ];
+    var _item_h = 44;
+    var _item_y = _py + 70;
+
+    if (font_exists(fnt_main)) draw_set_font(fnt_main);
+
+    for (var _mi = 0; _mi < array_length(_menu_items); _mi++)
+    {
+        var _iy    = _item_y + _mi * _item_h;
+        var _mx    = device_mouse_x_to_gui(0);
+        var _my    = device_mouse_y_to_gui(0);
+        var _hover = (_mx >= _px + 20 && _mx <= _px + _pw - 20
+                   && _my >= _iy      && _my <= _iy + _item_h - 6);
+
+        // Фон пункту при наведенні
+        if (_hover)
+        {
+            draw_set_alpha(0.3);
+            draw_set_color(make_color_rgb(80, 130, 220));
+            draw_rectangle(_px + 20, _iy, _px + _pw - 20, _iy + _item_h - 6, false);
+            draw_set_alpha(1);
+        }
+
+        draw_set_color(_hover ? c_yellow : c_white);
+        draw_text(gw/2, _iy + 14, _menu_items[_mi]);
+
+        // Клік
+        if (_hover && mouse_check_button_pressed(mb_left))
+        {
+            switch (_mi)
+            {
+                case 0: game_paused = false; break;               // Продовжити
+                case 1: /* load_game(); */ break;                 // Завантажити
+                case 2: /* show_settings(); */ break;             // Налаштування
+                case 3: room_goto(rm_main_menu); break;           // Головне меню
+                case 4: game_end(); break;                        // Вийти
+            }
+        }
+    }
+
+    // Прапорці мови (знизу меню паузи — з дизайн-документу)
+    var _flag_y = _py + _ph - 36;
+
+    // Прапор України
+    draw_set_alpha(0.9);
+    draw_set_color(make_color_rgb(0, 87, 183));   // Синя половина
+    draw_rectangle(_px + 30, _flag_y, _px + 62, _flag_y + 14, false);
+    draw_set_color(make_color_rgb(255, 215, 0));  // Жовта половина
+    draw_rectangle(_px + 30, _flag_y + 14, _px + 62, _flag_y + 28, false);
+
+    // Прапор Британії (спрощено)
+    draw_set_color(make_color_rgb(1, 33, 105));
+    draw_rectangle(_px + 72, _flag_y, _px + 104, _flag_y + 28, false);
+    draw_set_color(make_color_rgb(200, 16, 46));
+    draw_line(_px + 72, _flag_y, _px + 104, _flag_y + 28);
+    draw_line(_px + 104, _flag_y, _px + 72, _flag_y + 28);
+
+    draw_set_alpha(1);
+    draw_set_halign(fa_left);
+}
+
+draw_set_font(-1);
+draw_set_color(c_white);
+draw_set_alpha(1);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+
+
+═══════════════════════════════════════════════════════════════════
+  3. СИСТЕМА ДІАЛОГІВ — як викликати з кімнати або об'єкта
+═══════════════════════════════════════════════════════════════════
+
+// ---- З ЗОНИ КОМЕНТАРІВ (obj_comment_zone) ----
+// Коли гравець входить в зону:
+with (obj_ui_controller)
+{
+    show_player_dialog("Тут пахне сіллю і пригодами!", 180);
+}
+
+// ---- ВОРОГ ГОВОРИТЬ (перед атакою) ----
+// В obj_hades_shadow Step Event, при виявленні гравця:
+if (_dist <= sight_range && state == 0)
+{
+    state = 1;
+    with (obj_ui_controller)
+    {
+        show_npc_dialog("Ти не пройдеш через царство Аїда!", 210);
+    }
+}
+
+// ---- ПІДКАЗКА В КІМНАТІ (Room Creation Code) ----
+with (obj_ui_controller)
+{
+    zone_name  = "Шахти";
+    zone_room  = 2;
+    show_hint("Розбий кам'яну брилу кайлом [E]", 300);
+}
+
+// ---- БОС З'ЯВИВСЯ (в Step боса при першому запуску) ----
+// Наприклад в obj_boss_triton:
+if (!boss_intro_shown)
+{
+    boss_intro_shown = true;
+    with (obj_ui_controller)
+    {
+        show_npc_dialog("Ти думаєш що зможеш пройти?! Я — Тритон!", 270);
+    }
+}
+
+
+═══════════════════════════════════════════════════════════════════
+  4. OBJ_MAIN_MENU — Головне меню (відповідно до Main_Menu.png)
+     Темно-синій фон, "YOUNG POSEIDON" зліва, "EXIT" справа,
+     пункти меню по центру-ліво.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_main_menu — Create Event
+─────────────────────────────────────────
+// Пункти меню (з дизайн-документу)
+menu_items = [
+    "Почати гру",
+    "Завантажити гру",
+    "Налаштування",
+    "Про автора",
+    "Вихід"
+];
+selected    = 0;
+hover_item  = -1;
+
+// Анімація появи
+appear_t    = 0;
+
+// Мова (UA / EN)
+current_lang = "UA";   // "UA" або "EN"
+
+
+─────────────────────────────────────────
+/// @description obj_main_menu — Step Event
+─────────────────────────────────────────
+appear_t = min(appear_t + 1, 60);
+
+// Клавіатура
+if (keyboard_check_pressed(vk_down))
+    selected = (selected + 1) mod array_length(menu_items);
+if (keyboard_check_pressed(vk_up))
+    selected = (selected - 1 + array_length(menu_items)) mod array_length(menu_items);
+
+if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space))
+    _execute_menu(selected);
+
+
+─────────────────────────────────────────
+/// @description obj_main_menu — Draw GUI Event
+─────────────────────────────────────────
+var _gw = display_get_gui_width();
+var _gh = display_get_gui_height();
+var _t  = appear_t / 60;   // 0..1 — прогрес появи
+
+// ── ФОН (темно-синій як у Main_Menu.png) ──
+// Спрайт фону кімнати вже є — тут малюємо лише UI поверх.
+
+// ── НАЗВА ЗЛІВА: "YOUNG POSEIDON MAIN MENU" ──
+if (font_exists(fnt_title)) draw_set_font(fnt_title);
+draw_set_alpha(_t);
+draw_set_color(c_white);
+draw_set_halign(fa_left);
+draw_set_valign(fa_middle);
+
+var _title_x = 60;
+var _title_y = _gh / 2 - 40;
+draw_text_transformed(_title_x, _title_y,
+    "YOUNG\nPOSEIDON\nMAIN MENU", 1, 1, 0);
+
+// ── EXIT СПРАВА ──
+var _exit_x    = _gw - 80;
+var _exit_y    = _gh / 2;
+var _exit_hover = (point_distance(device_mouse_x_to_gui(0),
+                                  device_mouse_y_to_gui(0),
+                                  _exit_x, _exit_y) < 40);
+
+draw_set_color(_exit_hover ? c_yellow : c_white);
+draw_set_halign(fa_center);
+draw_text(_exit_x, _exit_y, "EXIT");
+
+if (_exit_hover && mouse_check_button_pressed(mb_left))
+    game_end();
+
+// ── ПУНКТИ МЕНЮ (під назвою, або вбудовані в фон) ──
+if (font_exists(fnt_main)) draw_set_font(fnt_main);
+
+var _mx     = device_mouse_x_to_gui(0);
+var _my     = device_mouse_y_to_gui(0);
+var _item_x = _gw / 2 - 80;
+var _item_y = _gh / 2 - 60;
+var _item_h = 48;
+
+for (var _i = 0; _i < array_length(menu_items); _i++)
+{
+    var _iy     = _item_y + _i * _item_h;
+    var _hover  = (_mx >= _item_x - 10 && _mx <= _item_x + 200
+                && _my >= _iy - 4    && _my <= _iy + _item_h - 8);
+    var _is_sel = (_i == selected);
+
+    // Підсвічування обраного
+    if (_is_sel || _hover)
+    {
+        draw_set_alpha(0.25 * _t);
+        draw_set_color(c_white);
+        draw_rectangle(_item_x - 14, _iy - 4,
+            _item_x + 200, _iy + _item_h - 10, false);
+        draw_set_alpha(_t);
+    }
+
+    draw_set_color((_is_sel || _hover) ? c_yellow : c_white);
+    draw_set_alpha(_t * (0.5 + 0.5 * (_i == selected ? 1 : (_hover ? 0.8 : 0))));
+    draw_set_halign(fa_left);
+    draw_text(_item_x, _iy, menu_items[_i]);
+
+    if (_hover && mouse_check_button_pressed(mb_left))
+        _execute_menu(_i);
+}
+
+// ── ПРАПОРЦІ МОВИ (знизу зліва) ──
+var _fy  = _gh - 50;
+var _fx  = 60;
+
+// Прапор України
+draw_set_alpha(_t * (current_lang == "UA" ? 1.0 : 0.5));
+draw_set_color(make_color_rgb(0, 87, 183));
+draw_rectangle(_fx, _fy, _fx + 38, _fy + 14, false);
+draw_set_color(make_color_rgb(255, 215, 0));
+draw_rectangle(_fx, _fy + 14, _fx + 38, _fy + 28, false);
+
+// Обрана рамка
+if (current_lang == "UA")
+{
+    draw_set_color(c_yellow);
+    draw_rectangle(_fx - 2, _fy - 2, _fx + 40, _fy + 30, true);
+}
+
+// Прапор Британії
+draw_set_alpha(_t * (current_lang == "EN" ? 1.0 : 0.5));
+draw_set_color(make_color_rgb(1, 33, 105));
+draw_rectangle(_fx + 48, _fy, _fx + 86, _fy + 28, false);
+draw_set_color(make_color_rgb(200, 16, 46));
+draw_line(_fx + 48, _fy, _fx + 86, _fy + 28);
+draw_line(_fx + 86, _fy, _fx + 48, _fy + 28);
+draw_set_color(c_white);
+draw_line_width(_fx + 67, _fy, _fx + 67, _fy + 28, 3);
+draw_line_width(_fx + 48, _fy + 14, _fx + 86, _fy + 14, 3);
+
+if (current_lang == "EN")
+{
+    draw_set_alpha(_t);
+    draw_set_color(c_yellow);
+    draw_rectangle(_fx + 46, _fy - 2, _fx + 88, _fy + 30, true);
+}
+draw_set_alpha(1);
+
+// Клік по прапорцях
+var _mxg = device_mouse_x_to_gui(0);
+var _myg = device_mouse_y_to_gui(0);
+if (mouse_check_button_pressed(mb_left))
+{
+    if (_mxg >= _fx && _mxg <= _fx + 38 && _myg >= _fy && _myg <= _fy + 30)
+        current_lang = "UA";
+    if (_mxg >= _fx + 48 && _mxg <= _fx + 88 && _myg >= _fy && _myg <= _fy + 30)
+        current_lang = "EN";
+}
+
+draw_set_alpha(1);
+draw_set_color(c_white);
+draw_set_halign(fa_left);
+draw_set_font(-1);
+
+
+─────────────────────────────────────────
+/// @description obj_main_menu — Create Event (додати функцію)
+─────────────────────────────────────────
+_execute_menu = function(_index)
+{
+    switch (_index)
+    {
+        case 0: room_goto(rm_sea_1);        break;   // Почати гру
+        case 1: /* load_game(); */           break;   // Завантажити
+        case 2: /* show_settings(); */       break;   // Налаштування
+        case 3: /* show_about(); */          break;   // Про автора
+        case 4: game_end();                  break;   // Вийти
+    }
+};
+
+
+═══════════════════════════════════════════════════════════════════
+  СПРАЙТИ ЩО ПОТРІБНІ ДЛЯ UI
+═══════════════════════════════════════════════════════════════════
+
+  spr_heart_full      22×22  — повне серце (червоне)
+  spr_heart_empty     22×22  — порожнє серце (темно-червоний контур)
+  spr_amphora         24×30  — амфора (іконка ліворуч від ATK/ШВ)
+  spr_sandal          28×22  — сандаль Гермеса (вгорі справа)
+  spr_potion_heal     40×46  — амфора-зілля здоров'я (зелена)
+  spr_potion_strength 40×46  — амфора-зілля Геракла (червона)
+  spr_potion_speed    40×46  — амфора-зілля Гермеса (синя)
+  spr_olympus_key     32×32  — ключ Олімпу (золотий)
+
+  Зброя (для слота зброї і колеса вибору):
+  spr_weapon_trident  48×48
+  spr_weapon_spear    48×48
+  spr_weapon_pickaxe  48×48
+  spr_weapon_scythe   48×48
+  spr_weapon_oar      48×48
+  spr_weapon_sword    48×48
+
+  Шрифти:
+  fnt_title  — великий заголовковий (для "YOUNG POSEIDON")
+  fnt_main   — основний ігровий (для всього іншого)
+
+
+═══════════════════════════════════════════════════════════════════
+  ЯК ОНОВИТИ НАЗВУ ЗОНИ ПРИ ЗМІНІ КІМНАТИ
+  Додати в Room Start Event кожної кімнати:
+═══════════════════════════════════════════════════════════════════
+
+// Наприклад в rm_sea_1 (Море, кімната 1):
+with (obj_ui_controller)
+{
+    zone_name = "Море";
+    zone_room = 1;
+    show_hint("Тут живуть Гіганські краби!", 180);
+}
+
+// rm_mine_boss (Шахти, кімната боса):
+with (obj_ui_controller)
+{
+    zone_name = "Шахти";
+    zone_room = 4;
+    show_hint("", 0);  // Прибираємо підказку перед босом
+    show_npc_dialog("Хто порушив мій спокій?! — Уран", 240);
+}

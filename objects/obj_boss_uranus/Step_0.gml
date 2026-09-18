@@ -2,11 +2,11 @@
 /// obj_boss_uranus — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
- 
-if (hp <= max_hp / 2 && phase == 1)
+if (obj_player.weapon_unlocked[2])
 {
-    phase = 2;
-    lightning_cd_max = room_speed * 1.5;   // Блискавки вдвічі частіше
+    with (obj_uranus_barrier) instance_destroy();
+    instance_destroy();
+    exit;
 }
  
 if (hp <= 0)
@@ -17,62 +17,127 @@ if (hp <= 0)
     exit;
 }
  
-if (lightning_cd > 0) lightning_cd--;
-if (field_cd     > 0) field_cd--;
- 
-// ---- РУХ МІЖ ТОЧКАМИ ----
-var _tx = point_x[current_point];
-var _ty = point_y[current_point];
-var _d  = point_distance(x, y, _tx, _ty);
- 
-if (_d > fly_speed)
+// Гравітація
+vspd += grv;
+if (place_meeting(x, y + vspd, obj_platform))
 {
-    var _dir = point_direction(x, y, _tx, _ty);
-    x += lengthdir_x(fly_speed, _dir);
-    y += lengthdir_y(fly_speed, _dir);
-    image_xscale = (obj_player.x > x) ? 1 : -1;
+    while (!place_meeting(x, y + sign(vspd), obj_platform)) y += sign(vspd);
+    vspd = 0;
 }
-else
-{
-    x = _tx; y = _ty;
-    current_point = (current_point + 1) mod point_count;
-}
+y += vspd;
  
-// ---- БЛИСКАВКА З НЕБА ----
-if (lightning_cd <= 0)
-{
-    // Попередження: створюємо об'єкт блискавки над гравцем
-    // obj_proj_lightning сам рахує затримку і б'є через 1.5 секунди
-    var _bolt        = instance_create_layer(obj_player.x, room_height * 0.1,
-                                             "Instances", obj_proj_lightning);
-    _bolt.target_x   = obj_player.x;
-    _bolt.target_y   = obj_player.y;
-    _bolt.damage     = atk;
-    _bolt.warn_time  = room_speed * 1.5;   // 1.5 секунди попередження
-    lightning_cd     = lightning_cd_max;
-    // audio_play_sound(snd_uranus_lightning_warn, 1, false);
-}
+if (action_cd > 0) action_cd--;
+if (swing_cd   > 0) swing_cd--;
  
-// ---- ФАЗА 2: ЕЛЕКТРИЧНЕ ПОЛЕ ----
-if (phase == 2 && field_cd <= 0)
-{
-    if (distance_to_object(obj_player) <= field_radius && !obj_player.is_damage)
-    {
-        obj_player.hp       -= atk / 3;     // Менша шкода але часто
-        obj_player.is_damage = true;
-        obj_player.alarm[0]  = room_speed * 0.3;
-    }
-    field_cd = field_cd_max;
-}
+// ---- ПОШУК ЗАВАЛІВ ----
+var _barriers = [];
+var _bn       = instance_number(obj_uranus_barrier);
+for (var _i = 0; _i < _bn; _i++)
+    array_push(_barriers, instance_find(obj_uranus_barrier, _i));
  
-// ---- КОНТАКТНА ШКОДА ----
-if (distance_to_object(obj_player) < 44 && !obj_player.is_damage)
+switch (state)
 {
-    obj_player.hp       -= atk;
-    var _kd              = point_direction(x, y, obj_player.x, obj_player.y);
-    obj_player.hspd     = lengthdir_x(10, _kd);
-    obj_player.vspd     = -7;
-    obj_player.is_damage = true;
-    obj_player.alarm[0]  = room_speed;
-}
+    // ------ 0: СТОЇТЬ — вибирає дію ------
+    case 0:
+        if (action_cd > 0) break;
+        image_xscale = (obj_player.x > x) ? 1 : -1;
  
+        var _dist = distance_to_object(obj_player);
+ 
+        // Якщо гравець на землі і немає завалів між ними — атакуємо
+        if (_dist <= swing_range && array_length(_barriers) == 0)
+        {
+            state     = 3;
+            action_cd = swing_cd_max;
+        }
+        // Інакше — б'ємо наступний завал
+        else if (array_length(_barriers) > 0)
+        {
+            state     = 1;
+            action_cd = room_speed * 0.5;
+        }
+    break;
+ 
+    // ------ 1: Б'Є ЗАВАЛ ------
+    case 1:
+        // Знаходимо найближчий завал до гравця
+        var _target_barrier = noone;
+        var _min_dist_to_player = infinity;
+ 
+        for (var _i = 0; _i < array_length(_barriers); _i++)
+        {
+            var _b = _barriers[_i];
+            if (!instance_exists(_b)) continue;
+            var _bd = abs(_b.x - obj_player.x);
+            if (_bd < _min_dist_to_player)
+            {
+                _min_dist_to_player = _bd;
+                _target_barrier     = _b;
+            }
+        }
+ 
+        if (!instance_exists(_target_barrier)) { state = 0; break; }
+ 
+        image_xscale = (_target_barrier.x > x) ? 1 : -1;
+ 
+        if (action_cd <= 0 && swing_cd <= 0)
+        {
+            // Завдаємо удар по завалу
+            _target_barrier.hp--;
+            swing_cd = swing_cd_max;
+            // audio_play_sound(snd_uranus_swing, 1, false);
+ 
+            // Шанс застрягнути (25% кожного удару)
+            if (irandom(3) == 0)
+            {
+                is_stuck  = true;
+                state     = 2;
+                action_cd = room_speed * 2;  // Застряг на 2 секунди
+                // audio_play_sound(snd_uranus_stuck, 1, false);
+                break;
+            }
+ 
+            // Якщо завал зруйновано
+            if (_target_barrier.hp <= 0)
+            {
+                instance_destroy(_target_barrier);
+                state = 0;
+                action_cd = room_speed;
+            }
+        }
+    break;
+ 
+    // ------ 2: ЗАСТРЯГ — ВРАЗЛИВИЙ! ------
+    case 2:
+        is_stuck = true;
+        // Бос нерухомий і не атакує
+        // Підсвічування (обробляється в Draw)
+        if (action_cd <= 0)
+        {
+            is_stuck = false;
+            state    = 0;
+            action_cd = room_speed * 0.5;
+        }
+    break;
+ 
+    // ------ 3: АТАКУЄ ГРАВЦЯ КАЙЛОМ ------
+    case 3:
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+ 
+        if (action_cd <= 0 && !obj_player.is_damage)
+        {
+            if (distance_to_object(obj_player) <= swing_range)
+            {
+                obj_player.hp       -= atk;
+                var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+                obj_player.hspd     = lengthdir_x(10, _kd);
+                obj_player.vspd     = -6;
+                obj_player.is_damage = true;
+                obj_player.alarm[0]  = room_speed;
+                // audio_play_sound(snd_uranus_attack, 1, false);
+            }
+            state = 0;
+            action_cd = room_speed * 1.5;
+        }
+    break;
+}

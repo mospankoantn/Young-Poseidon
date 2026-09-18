@@ -1,0 +1,1 @@
+with (obj_ui_controller) { zone_key = "zone_sea";         zone_room = 1; }

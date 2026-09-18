@@ -6,8 +6,8 @@
   "name":"obj_rail",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Interactive objects",
+    "path":"folders/Объекты/Interactive objects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

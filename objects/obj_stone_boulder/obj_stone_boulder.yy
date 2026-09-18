@@ -10,8 +10,8 @@
   "name":"obj_stone_boulder",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Interactive objects",
+    "path":"folders/Объекты/Interactive objects.yy",
   },
   "parentObjectId":{
     "name":"obj_platform",

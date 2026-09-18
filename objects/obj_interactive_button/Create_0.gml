@@ -9,8 +9,8 @@
 // Наприклад: target_id = obj_falling_rocks_group_1
 target_object = obj_falling_rocks;   // Що активується при натисканні
  
-// Чи можна натиснути лише один раз?
-one_time_use  = true;
+// Кожне натискання в арені Тритона кидає один камінь, тому кнопку можна повторювати.
+one_time_use  = false;
 is_pressed    = false;   // Вже натиснута?
  
 // Відстань від гравця для підказки "Натисни E"
@@ -22,4 +22,3 @@ interact_range = 60;
 // image_index = 1 → натиснута (внизу)
 image_index  = 0;
 image_speed  = 0;   // Керуємо кадрами вручну
- 

@@ -28,13 +28,14 @@ draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 draw_set_color(c_white);
 if (font_exists(fnt_main)) draw_set_font(fnt_main);
-draw_text(_gw / 2, _bar_y + _bar_h / 2, boss_name + "   " + string(hp) + " / " + string(max_hp));
+draw_text(_gw / 2, _bar_y + _bar_h / 2,
+    lc(boss_name_key) + "   " + string(hp) + " / " + string(max_hp));
  
 // Позначка фази (якщо є 2+ фази)
 if (variable_instance_exists(id, "phase") && phase >= 2)
 {
     draw_set_color(c_orange);
-    draw_text(_gw / 2, _bar_y - 18, "— ФАЗА " + string(phase) + " —");
+    draw_text(_gw / 2, _bar_y - 18, lc("boss_phase2"));
 }
  
 draw_set_halign(fa_left);

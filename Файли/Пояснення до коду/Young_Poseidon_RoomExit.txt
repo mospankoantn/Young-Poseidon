@@ -1,0 +1,618 @@
+╔══════════════════════════════════════════════════════════════════╗
+║         YOUNG POSEIDON — ПЕРЕХІД МІЖ КІМНАТАМИ                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+ЗМІСТ:
+  1.  obj_room_exit       — Об'єкт переходу (основний)
+  2.  obj_room_transition — Менеджер переходу (ефект затемнення)
+  3.  Як налаштувати в кімнаті (Instance Creation Code)
+  4.  Таблиця всіх переходів гри
+
+
+═══════════════════════════════════════════════════════════════════
+  1. OBJ_ROOM_EXIT — Об'єкт переходу між кімнатами
+     Розміщується в кімнаті. Можна ставити ДЕКІЛЬКА штук.
+     Кожен веде у свою кімнату + зберігає точку появи гравця.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_room_exit — Create Event
+─────────────────────────────────────────
+// ════ НАЛАШТУВАННЯ (встановлюються через Instance Creation Code) ════
+
+// Кімната призначення
+target_room      = rm_sea_1;    // Замінюється в кожному екземплярі
+
+// Де з'явиться гравець у кімнаті призначення (пікселі)
+// -1 = використати spawn_tag (знайти obj_room_exit з тим самим тегом)
+spawn_x          = -1;
+spawn_y          = -1;
+
+// Тег для спарювання входу/виходу
+// Наприклад: "sea_to_coast" — і тут і там однакий тег
+// Тоді гравець з'явиться біля відповідного виходу в новій кімнаті
+spawn_tag        = "";
+
+// Напрямок виходу (для анімації і підказки)
+// "right", "left", "up", "down"
+exit_direction   = "right";
+
+// Ширина/висота зони переходу
+exit_width       = 32;
+exit_height      = 96;
+
+// Потрібна зброя/ключ для проходження? ("" = вільний прохід)
+// Приклад: "pickaxe"  "key"  "scythe"  ""
+required_item    = "";
+
+// Чи заблокований (наприклад до перемоги над босом)
+is_locked        = false;
+lock_reason      = "";        // Текст пояснення чому заблокований
+
+// Показувати підказку [F]?
+show_prompt      = true;
+
+// ════ ВНУТРІШНІ ЗМІННІ ════
+player_in_range  = false;
+prompt_alpha     = 0;
+lock_shake       = 0;         // Анімація "затрусити" при спробі пройти заблокований
+
+// ════ КОЛЬОРИ ПО НАПРЯМКУ ════
+_dir_color = make_color_rgb(80, 140, 220);
+switch (exit_direction)
+{
+    case "right": _dir_color = make_color_rgb(80,  180, 120); break;
+    case "left":  _dir_color = make_color_rgb(80,  130, 220); break;
+    case "up":    _dir_color = make_color_rgb(200, 160, 60);  break;
+    case "down":  _dir_color = make_color_rgb(160, 80,  200); break;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_room_exit — Step Event
+─────────────────────────────────────────
+if (!instance_exists(obj_player)) exit;
+
+// ---- ПЕРЕВІРКА ЧИ ГРАВЕЦЬ У ЗОНІ ПЕРЕХОДУ ----
+var _px = obj_player.x;
+var _py = obj_player.y;
+
+player_in_range = (_px > x - exit_width  / 2
+               && _px < x + exit_width  / 2
+               && _py > y - exit_height / 2
+               && _py < y + exit_height / 2);
+
+// Плавна поява підказки
+var _target_alpha = (player_in_range && show_prompt) ? 1 : 0;
+prompt_alpha      = lerp(prompt_alpha, _target_alpha, 0.14);
+
+// ---- ЗАТРЯСІННЯ (якщо заблокований і намагаються пройти) ----
+if (lock_shake > 0)
+    lock_shake = max(0, lock_shake - 1);
+
+// ---- F — АКТИВУВАТИ ПЕРЕХІД ----
+if (player_in_range && keyboard_check_pressed(ord("F")))
+{
+    _try_enter();
+}
+
+// ---- АВТО-ПЕРЕХІД (якщо гравець заходить в зону без F) ----
+// Розкоментуй якщо хочеш автоматичний перехід без кнопки:
+/*
+if (player_in_range && !is_locked && required_item == "")
+{
+    _try_enter();
+}
+*/
+
+
+─────────────────────────────────────────
+// Функція спроби переходу (у Create Event):
+─────────────────────────────────────────
+_try_enter = function()
+{
+    // ---- Перевірка блокування ----
+    if (is_locked)
+    {
+        lock_shake = 20;
+        if (instance_exists(obj_ui_controller) && lock_reason != "")
+            obj_ui_controller.show_hint(lock_reason, 180);
+        // audio_play_sound(snd_door_locked, 1, false);
+        return;
+    }
+
+    // ---- Перевірка потрібного предмета ----
+    if (required_item != "" && instance_exists(obj_player))
+    {
+        var _has = false;
+        switch (required_item)
+        {
+            case "pickaxe": _has = obj_player.weapon_unlocked[2]; break;
+            case "scythe":  _has = obj_player.weapon_unlocked[3]; break;
+            case "oar":     _has = obj_player.weapon_unlocked[4]; break;
+            case "key":     _has = obj_player.has_olympus_key;    break;
+            case "sword":   _has = obj_player.weapon_unlocked[5]; break;
+            case "spear":   _has = obj_player.weapon_unlocked[1]; break;
+            case "trident": _has = obj_player.weapon_unlocked[0]; break;
+        }
+
+        if (!_has)
+        {
+            lock_shake = 20;
+            var _hint_text = "Потрібно: ";
+            switch (required_item)
+            {
+                case "pickaxe": _hint_text += "Кайло (перемагай Урана)";  break;
+                case "scythe":  _hint_text += "Коса (перемагай Харона)";  break;
+                case "oar":     _hint_text += "Весло (перемагай Мінотавра)"; break;
+                case "key":     _hint_text += "Ключ Олімпу (перемагай Мойрів)"; break;
+                case "sword":   _hint_text += "Меч (перемагай Привида)";  break;
+                case "spear":   _hint_text += "Спис (перемагай Німфу)";   break;
+                case "trident": _hint_text += "Тризубець (перемагай Тритона)"; break;
+            }
+            if (instance_exists(obj_ui_controller))
+                obj_ui_controller.show_hint(_hint_text, 210);
+            // audio_play_sound(snd_door_locked, 1, false);
+            return;
+        }
+    }
+
+    // ---- Все перевірено — переходимо ----
+    // Зберігаємо тег виходу щоб знайти точку появи в новій кімнаті
+    global.spawn_from_tag = spawn_tag;
+    global.spawn_x_manual = spawn_x;
+    global.spawn_y_manual = spawn_y;
+    global.came_from_room = room;
+
+    // Запускаємо менеджер переходу (затемнення)
+    if (!instance_exists(obj_room_transition))
+    {
+        var _trans = instance_create_layer(0, 0, "Instances", obj_room_transition);
+        _trans.target_room = target_room;
+    }
+    // audio_play_sound(snd_room_exit, 1, false);
+};
+
+
+─────────────────────────────────────────
+/// @description obj_room_exit — Draw Event
+─────────────────────────────────────────
+// Зона переходу (видима лише в редакторі — можна вимкнути в грі)
+// Якщо хочеш бачити зону під час гри — розкоментуй:
+/*
+draw_set_alpha(0.15);
+draw_set_color(_dir_color);
+draw_rectangle(x - exit_width/2, y - exit_height/2,
+               x + exit_width/2, y + exit_height/2, false);
+draw_set_alpha(0.4);
+draw_set_color(_dir_color);
+draw_rectangle(x - exit_width/2, y - exit_height/2,
+               x + exit_width/2, y + exit_height/2, true);
+draw_set_alpha(1);
+*/
+
+// Стрілка напрямку (завжди видна)
+var _arrow_alpha = 0.4 + 0.3 * sin(current_time / 300000);
+draw_set_alpha(_arrow_alpha);
+draw_set_color(_dir_color);
+var _ax = x;
+var _ay = y;
+var _as = 12;   // Розмір стрілки
+
+switch (exit_direction)
+{
+    case "right":
+        draw_triangle(_ax + _as, _ay, _ax - _as, _ay - _as, _ax - _as, _ay + _as, false);
+        break;
+    case "left":
+        draw_triangle(_ax - _as, _ay, _ax + _as, _ay - _as, _ax + _as, _ay + _as, false);
+        break;
+    case "up":
+        draw_triangle(_ax, _ay - _as, _ax - _as, _ay + _as, _ax + _as, _ay + _as, false);
+        break;
+    case "down":
+        draw_triangle(_ax, _ay + _as, _ax - _as, _ay - _as, _ax + _as, _ay - _as, false);
+        break;
+}
+draw_set_alpha(1);
+
+// Анімація "затрусіння" якщо заблокований
+var _shake_x = (lock_shake > 0) ? irandom_range(-3, 3) : 0;
+
+// Іконка замка (якщо заблокований)
+if (is_locked || required_item != "")
+{
+    var _lx = x + _shake_x;
+    var _ly = y - exit_height / 2 - 20;
+
+    draw_set_color(make_color_rgb(180, 140, 60));
+    draw_set_alpha(0.9);
+    // Тіло замка
+    draw_rectangle(_lx - 8, _ly, _lx + 8, _ly + 12, false);
+    // Дужка замка
+    draw_set_color(make_color_rgb(140, 100, 40));
+    draw_ellipse(_lx - 6, _ly - 8, _lx + 6, _ly + 2, true);
+    draw_set_alpha(1);
+}
+
+
+─────────────────────────────────────────
+/// @description obj_room_exit — Draw GUI Event
+─────────────────────────────────────────
+// Підказка "[F] Перейти → Узбережжя" коли гравець поруч
+if (prompt_alpha < 0.05) exit;
+if (!instance_exists(obj_player)) exit;
+
+var _gw    = display_get_gui_width();
+var _gh    = display_get_gui_height();
+
+// Конвертуємо координати об'єкта в GUI-простір
+var _gui_x = (x - camera_get_view_x(view_camera[0]))
+             * (_gw / camera_get_view_width(view_camera[0]));
+var _gui_y = (y - camera_get_view_y(view_camera[0]))
+             * (_gh / camera_get_view_height(view_camera[0]));
+
+// Назва кімнати призначення
+var _room_name = "";
+if (variable_global_exists("room_names")
+    && ds_map_exists(global.room_names, target_room))
+    _room_name = global.room_names[? target_room];
+
+// Підказка
+var _prompt_str = "[F] Перейти";
+if (_room_name != "") _prompt_str += " → " + _room_name;
+
+var _pw = string_width(_prompt_str) + 20;
+var _ph = 26;
+var _px = clamp(_gui_x - _pw / 2, 10, _gw - _pw - 10);
+var _py = _gui_y - 70;
+
+// Тло підказки
+draw_set_alpha(prompt_alpha * 0.85);
+draw_set_color(make_color_rgb(10, 20, 40));
+draw_rectangle(_px, _py, _px + _pw, _py + _ph, false);
+draw_set_alpha(prompt_alpha);
+draw_set_color(_dir_color);
+draw_rectangle(_px, _py, _px + _pw, _py + _ph, true);
+
+// Текст
+draw_set_alpha(prompt_alpha);
+draw_set_color(c_white);
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+if (font_exists(fnt_main)) draw_set_font(fnt_main);
+draw_text(_px + _pw / 2, _py + _ph / 2, _prompt_str);
+
+draw_set_alpha(1);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_color(c_white);
+draw_set_font(-1);
+
+
+═══════════════════════════════════════════════════════════════════
+  2. OBJ_ROOM_TRANSITION — Менеджер переходу (затемнення)
+     Створюється автоматично при переході. Сам себе знищує.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_room_transition — Create Event
+─────────────────────────────────────────
+target_room  = rm_sea_1;   // Встановлюється при створенні
+fade_alpha   = 0;          // Поточна прозорість затемнення
+state        = 0;          // 0=затемнення, 1=зміна кімнати, 2=освітлення
+fade_speed   = 0.06;
+depth        = -9999;      // Поверх всього
+
+
+─────────────────────────────────────────
+/// @description obj_room_transition — Step Event
+─────────────────────────────────────────
+switch (state)
+{
+    // ------ 0: ЗАТЕМНЕННЯ ------
+    case 0:
+        fade_alpha += fade_speed;
+        if (fade_alpha >= 1)
+        {
+            fade_alpha = 1;
+            state      = 1;
+        }
+    break;
+
+    // ------ 1: ЗМІНА КІМНАТИ ------
+    case 1:
+        // Переміщаємо гравця persistent=true або зберігаємо дані
+        if (instance_exists(obj_player))
+        {
+            // Перевіряємо де з'явитися в новій кімнаті
+            // Буде оброблено в Room Start Event (дивись нижче)
+        }
+        room_goto(target_room);
+        // Після room_goto цей об'єкт якщо persistent — продовжить роботу
+    break;
+
+    // ------ 2: ОСВІТЛЕННЯ (після зміни кімнати) ------
+    case 2:
+        fade_alpha -= fade_speed * 0.7;   // Трохи повільніше освітлення
+        if (fade_alpha <= 0)
+        {
+            fade_alpha = 0;
+            instance_destroy();
+        }
+    break;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_room_transition — Room Start Event
+// Викликається коли нова кімната завантажена
+─────────────────────────────────────────
+// Тепер ми в новій кімнаті — розміщуємо гравця
+if (state == 1)
+{
+    state = 2;  // Починаємо освітлення
+
+    if (!instance_exists(obj_player)) exit;
+
+    // ---- Варіант A: spawn_tag — знаходимо відповідний вихід ----
+    if (global.spawn_from_tag != "")
+    {
+        var _found = false;
+        var _en    = instance_number(obj_room_exit);
+        for (var _i = 0; _i < _en; _i++)
+        {
+            var _exit = instance_find(obj_room_exit, _i);
+            if (instance_exists(_exit) && _exit.spawn_tag == global.spawn_from_tag)
+            {
+                // Ставимо гравця поруч з відповідним виходом
+                var _offset_x = 0;
+                var _offset_y = 0;
+                switch (_exit.exit_direction)
+                {
+                    case "right": _offset_x = -60;  break;
+                    case "left":  _offset_x =  60;  break;
+                    case "up":    _offset_y =  80;  break;
+                    case "down":  _offset_y = -80;  break;
+                }
+                obj_player.x    = _exit.x + _offset_x;
+                obj_player.y    = _exit.y + _offset_y;
+                obj_player.hspd = 0;
+                obj_player.vspd = 0;
+                _found          = true;
+                break;
+            }
+        }
+
+        if (!_found && global.spawn_x_manual >= 0)
+        {
+            // Тег не знайдено — використовуємо ручні координати
+            obj_player.x = global.spawn_x_manual;
+            obj_player.y = global.spawn_y_manual;
+        }
+    }
+    // ---- Варіант B: ручні координати ----
+    else if (global.spawn_x_manual >= 0)
+    {
+        obj_player.x = global.spawn_x_manual;
+        obj_player.y = global.spawn_y_manual;
+    }
+
+    // Оновлюємо UI
+    if (instance_exists(obj_ui_controller))
+    {
+        // Назва зони встановлюється в Room Start кімнати
+    }
+}
+
+
+─────────────────────────────────────────
+/// @description obj_room_transition — Draw GUI Event
+─────────────────────────────────────────
+if (fade_alpha <= 0) exit;
+
+draw_set_alpha(fade_alpha);
+draw_set_color(c_black);
+draw_rectangle(0, 0,
+    display_get_gui_width(),
+    display_get_gui_height(), false);
+draw_set_alpha(1);
+
+
+─────────────────────────────────────────
+// Налаштування persistent (в редакторі GameMaker):
+// obj_room_transition → Persistent = TRUE
+// obj_player          → Persistent = TRUE
+─────────────────────────────────────────
+
+
+═══════════════════════════════════════════════════════════════════
+  3. OBJ_MASTER — Create Event (додати глобальні змінні)
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_master — Create Event (доповнення)
+─────────────────────────────────────────
+// Додати до вже існуючого Create Event:
+
+// Spawn-дані для переходів між кімнатами
+global.spawn_from_tag  = "";
+global.spawn_x_manual  = -1;
+global.spawn_y_manual  = -1;
+global.came_from_room  = -1;
+
+// Назви кімнат для підказок переходу
+global.room_names      = ds_map_create();
+ds_map_add(global.room_names, rm_sea_1,        "Море — 1");
+ds_map_add(global.room_names, rm_sea_2,        "Море — 2");
+ds_map_add(global.room_names, rm_sea_3,        "Море — 3 (Бос)");
+ds_map_add(global.room_names, rm_sea_4,        "Море — 4");
+ds_map_add(global.room_names, rm_sea_5,        "Море — 5");
+ds_map_add(global.room_names, rm_coast_1,      "Узбережжя — 1");
+ds_map_add(global.room_names, rm_coast_2,      "Узбережжя — 2");
+ds_map_add(global.room_names, rm_coast_3,      "Узбережжя — 3");
+ds_map_add(global.room_names, rm_coast_4,      "Узбережжя — 4");
+ds_map_add(global.room_names, rm_coast_5,      "Узбережжя — 5 (Бос)");
+ds_map_add(global.room_names, rm_mines_1,      "Шахти — 1");
+ds_map_add(global.room_names, rm_mines_2,      "Шахти — 2");
+ds_map_add(global.room_names, rm_mines_3,      "Шахти — 3");
+ds_map_add(global.room_names, rm_mines_4,      "Шахти — 4 (Бос)");
+ds_map_add(global.room_names, rm_mines_5,      "Шахти — 5");
+ds_map_add(global.room_names, rm_hades_1,      "Аїд — 1");
+ds_map_add(global.room_names, rm_hades_2,      "Аїд — 2");
+ds_map_add(global.room_names, rm_hades_3,      "Аїд — 3");
+ds_map_add(global.room_names, rm_hades_4,      "Аїд — 4");
+ds_map_add(global.room_names, rm_hades_5,      "Аїд — 5 (Бос)");
+ds_map_add(global.room_names, rm_greece_1,     "Греція — 1");
+ds_map_add(global.room_names, rm_greece_2,     "Греція — 2");
+ds_map_add(global.room_names, rm_greece_3,     "Греція — 3");
+ds_map_add(global.room_names, rm_greece_4,     "Греція — 4 (Бос)");
+ds_map_add(global.room_names, rm_greece_5,     "Греція — 5");
+ds_map_add(global.room_names, rm_battlefield_1,"Поле Битви — 1");
+ds_map_add(global.room_names, rm_battlefield_2,"Поле Битви — 2");
+ds_map_add(global.room_names, rm_battlefield_3,"Поле Битви — 3");
+ds_map_add(global.room_names, rm_battlefield_4,"Поле Битви — 4");
+ds_map_add(global.room_names, rm_battlefield_5,"Поле Битви — 5 (Бос)");
+ds_map_add(global.room_names, rm_olympus_1,    "Олімп — 1");
+ds_map_add(global.room_names, rm_olympus_2,    "Олімп — 2");
+ds_map_add(global.room_names, rm_olympus_3,    "Олімп — 3");
+ds_map_add(global.room_names, rm_olympus_4,    "Олімп — 4");
+ds_map_add(global.room_names, rm_olympus_5,    "Олімп — 5 (Фінал)");
+
+
+═══════════════════════════════════════════════════════════════════
+  4. ЯК РОЗМІСТИТИ В КІМНАТІ — Instance Creation Code
+     Для КОЖНОГО екземпляра obj_room_exit пишеш окремий код.
+═══════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────
+  ПРИКЛАД 1: Море-1 → Море-2 (вихід праворуч, вільний)
+──────────────────────────────────────────────────────────────────
+// Instance Creation Code для obj_room_exit в rm_sea_1:
+
+event_inherited();                   // Виконуємо базовий Create
+target_room     = rm_sea_2;
+spawn_tag       = "sea1_to_sea2";    // Унікальний тег цього переходу
+exit_direction  = "right";
+required_item   = "";                // Вільний прохід
+exit_width      = 32;
+exit_height     = 80;
+
+// У rm_sea_2 розміщуємо інший obj_room_exit з:
+// spawn_tag      = "sea1_to_sea2";   ← ТАКИЙ САМИЙ тег
+// target_room    = rm_sea_1;         ← веде назад
+// exit_direction = "left";
+
+
+──────────────────────────────────────────────────────────────────
+  ПРИКЛАД 2: Шахти → Аїд (потрібна: вільний) і Шахти → Греція
+  (метроїдванія — два виходи з однієї кімнати!)
+──────────────────────────────────────────────────────────────────
+// Перший obj_room_exit в rm_mines_5 (вниз → Аїд):
+event_inherited();
+target_room     = rm_hades_1;
+spawn_tag       = "mines5_to_hades1";
+exit_direction  = "down";
+required_item   = "";
+exit_width      = 60;
+exit_height     = 32;
+
+// Другий obj_room_exit в rm_mines_5 (вправо → Греція):
+event_inherited();
+target_room     = rm_greece_1;
+spawn_tag       = "mines5_to_greece1";
+exit_direction  = "right";
+required_item   = "";
+exit_width      = 32;
+exit_height     = 80;
+
+
+──────────────────────────────────────────────────────────────────
+  ПРИКЛАД 3: Олімп-4 → Олімп-5 (потрібен Ключ Олімпу!)
+──────────────────────────────────────────────────────────────────
+event_inherited();
+target_room     = rm_olympus_5;
+spawn_tag       = "olympus4_to_olympus5";
+exit_direction  = "up";
+required_item   = "key";              // Блокується без ключа
+exit_width      = 48;
+exit_height     = 32;
+lock_reason     = "Потрібен Ключ Олімпу!";
+
+
+──────────────────────────────────────────────────────────────────
+  ПРИКЛАД 4: Заблокований до перемоги над босом
+──────────────────────────────────────────────────────────────────
+// Розміщуємо в кімнаті боса — вихід закритий до перемоги
+event_inherited();
+target_room     = rm_coast_1;
+spawn_tag       = "sea_boss_to_coast1";
+exit_direction  = "right";
+is_locked       = true;              // Вручну заблокований
+lock_reason     = "Переможи Тритона щоб пройти далі!";
+
+// В obj_boss_triton після смерті (is_dead = true):
+// with (obj_room_exit) {
+//     if (spawn_tag == "sea_boss_to_coast1") is_locked = false;
+// }
+
+
+═══════════════════════════════════════════════════════════════════
+  5. ТАБЛИЦЯ ВСІХ ПЕРЕХОДІВ ГРИ (з дизайн-документу)
+═══════════════════════════════════════════════════════════════════
+
+  ЗОНА            КІМНАТА  →  КУДИ              УМОВА
+  ────────────────────────────────────────────────────────────────
+  Море            1-2-3        між собою         вільно
+  Море 3          → Узбережжя 1                 після Тритона (is_locked)
+  Море 5          → Узбережжя 1                 вільно (запасний)
+
+  Узбережжя       1-2-3-4-5    між собою         вільно
+  Узбережжя 5     → Шахти 1                     після Німфи (is_locked)
+  Узбережжя 1     → Море 5                      вільно (назад)
+
+  Шахти           1-2-3-4-5    між собою         вільно
+  Шахти 4         → Греція 1                    після Урана (is_locked)
+  Шахти 4         → Аїд 1                       після Урана (is_locked)
+  Шахти 1         → Узбережжя 5                 вільно (назад)
+
+  Аїд             1-2-3-4-5    між собою         вільно
+  Аїд 5           → Шахти                       вільно (назад, тупик)
+
+  Греція          1-2-3-4-5    між собою         вільно
+  Греція 4        → Поле Битви 1                після Мінотавра (is_locked)
+  Греція 1        → Шахти                       вільно (назад)
+
+  Поле Битви      1-2-3-4-5    між собою         вільно
+  Поле Битви 5    → Олімп 1                     після Привида (is_locked)
+  Поле Битви 1    → Греція                      вільно (назад)
+
+  Олімп           1-2-3-4-5    між собою         вільно
+  Олімп 4-5       ← двері                       required_item = "key"
+  Олімп 5         → КІНЕЦЬ ГРИ                  після Мойрів
+
+
+═══════════════════════════════════════════════════════════════════
+  РОЗБЛОКУВАННЯ ПЕРЕХОДУ ПІСЛЯ БОСА
+  Додати в Step Event КОЖНОГО боса (після смерті):
+═══════════════════════════════════════════════════════════════════
+
+// В obj_boss_triton Step Event (замінює стару логіку):
+if (hp <= 0 && !is_dead)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_trident_reward);
+
+    // Розблокуємо вихід з кімнати
+    with (obj_room_exit)
+    {
+        if (is_locked) is_locked = false;
+    }
+    // audio_play_sound(snd_boss_die, 1, false);
+    instance_destroy();
+    exit;
+}
+
+// Те саме для КОЖНОГО боса — розблокує ВСІ is_locked виходи в кімнаті.
+// Якщо в кімнаті кілька виходів і тільки один заблокований —
+// розблокується лише він, бо інші вже is_locked = false.

@@ -17,14 +17,14 @@ if (!is_open
         draw_set_alpha(_a);
         draw_set_color(c_yellow);
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "[E] Відкрити");
+        draw_text(x, y - sprite_height / 2 - 8, lc("interact_open"));
     }
     else
     {
         draw_set_alpha(0.8);
         draw_set_color(c_red);
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "Потрібен Ключ Олімпу");
+        draw_text(x, y - sprite_height / 2 - 8, lc("need_key"));
     }
  
     draw_set_alpha(1);

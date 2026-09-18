@@ -23,7 +23,7 @@
   ],
   "name":"spr_potion_speed",
   "nineSlice":null,
-  "origin":8,
+  "origin":4,
   "parent":{
     "name":"Спрайты",
     "path":"folders/Спрайты.yy",
@@ -68,13 +68,15 @@
     "timeUnits":1,
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{"0":{"$SpriteFrameKeyframe":"","Id":{"name":"716b0c5b-c294-4117-b141-165f30a4af0a","path":"sprites/spr_potion_speed/spr_potion_speed.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},},"Disabled":false,"id":"811f3753-5f09-4fe8-b99a-c0b13cf02ff8","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"716b0c5b-c294-4117-b141-165f30a4af0a","path":"sprites/spr_potion_speed/spr_potion_speed.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"811f3753-5f09-4fe8-b99a-c0b13cf02ff8","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":32,
-    "yorigin":42,
+    "xorigin":16,
+    "yorigin":21,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

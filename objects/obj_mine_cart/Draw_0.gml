@@ -14,7 +14,7 @@ if (!has_player
     draw_set_alpha(_alpha);
     draw_set_color(c_yellow);
     if (font_exists(fnt_main)) draw_set_font(fnt_main);
-    draw_text(x, y - sprite_height / 2 - 8, "[E] Сісти");
+    draw_text(x, y - sprite_height / 2 - 8, lc("interact_sit"));
     draw_set_alpha(1);
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);

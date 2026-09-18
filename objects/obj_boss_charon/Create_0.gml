@@ -1,33 +1,33 @@
 /// @description 
 /// obj_boss_charon — Create Event
 
-boss_name = "ХАРОН";
-max_hp    = 50;
+boss_name_key = "boss_charon";
+max_hp    = 100;
 hp        = max_hp;
-atk       = 10;
+atk       = 3;
 phase     = 1;
  
-// ---- ТОЧКИ ПАТРУЛЯ ----
-var _cx = x; var _cy = y;
-point_count = 4;
-point_x[0] = _cx - 260;  point_y[0] = _cy - 110;
-point_x[1] = _cx + 260;  point_y[1] = _cy - 110;
-point_x[2] = _cx + 260;  point_y[2] = _cy + 70;
-point_x[3] = _cx - 260;  point_y[3] = _cy + 70;
-current_point = 0;
-fly_speed     = 2.8;
+// ---- РУХ ЧОВНОМ ----
+// Харон плаває ліво-право по воді
+water_left  = x - 350;
+water_right = x + 350;
+boat_speed  = 3;
+move_dir    = 1;
  
-// ---- АТАКИ ----
-coin_cd      = 0;
-coin_cd_max  = room_speed * 2.5;
+// ---- КОСА-БУМЕРАНГ ----
+scythe_instance  = noone;  // ID кинутої коси
+scythe_cd        = 0;
+scythe_cd_max    = room_speed * 3;   // Кидає кожні 3 секунди
+scythe_fly_speed = 7;
+scythe_damage    = atk;
  
-// Монетний дощ (фаза 2) — кидає 8 монет по колу
-rain_cd      = 0;
-rain_cd_max  = room_speed * 5;
+// ---- СТАЛАКТИТИ ----
+// obj_stalactite розміщені в кімнаті. У кожного є 4 каміння.
+// Гравець б'є кайлом → падає 1 камінь → шкода 10 і боссу і гравцю
+// Після 4 каменів сталактит зникає.
  
-// Виклик духів (фаза 2)
-summon_cd     = 0;
-summon_cd_max = room_speed * 10;
+// ---- ФІЗИКА (човен ковзає по воді) ----
+// Вертикального руху немає — човен на рівні води
  
 is_dead = false;
 image_speed = 0.08;

@@ -1,0 +1,711 @@
+╔══════════════════════════════════════════════════════════════════╗
+║         YOUNG POSEIDON — СИСТЕМА ЗМІНИ МОВИ (UA / EN)           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+ЗМІСТ:
+  1.  obj_lang_manager   — менеджер мови (persistent, один на гру)
+  2.  Функція lc()       — головна функція перекладу
+  3.  Всі рядки UA / EN  — повний словник гри
+  4.  Оновлення UI       — як використовувати lc() скрізь
+  5.  Оновлення меню     — головне меню + пауза
+  6.  Збереження мови    — через ini файл
+
+
+═══════════════════════════════════════════════════════════════════
+  1. OBJ_LANG_MANAGER — Create Event
+     Persistent = TRUE. Один екземпляр на всю гру.
+     Зберігається між кімнатами.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_lang_manager — Create Event
+─────────────────────────────────────────
+// Захист від дублювання (persistent об'єкт)
+if (instance_number(obj_lang_manager) > 1)
+{
+    instance_destroy();
+    exit;
+}
+
+// ════ ПОТОЧНА МОВА ════
+// Завантажуємо з ini або ставимо UA за замовчуванням
+ini_open("young_poseidon_save.ini");
+global.lang = ini_read_string("settings", "language", "UA");
+ini_close();
+
+// ════ СЛОВНИК ════
+// ds_map: ключ → [UA_текст, EN_текст]
+// Доступ: lc("ключ") повертає рядок поточної мови
+global.lang_db = ds_map_create();
+
+// ─────────────────────────────────────
+// HUD / UI
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "hud_atk",         ["АТК",              "ATK"]);
+ds_map_add(global.lang_db, "hud_spd",         ["ШВ",               "SPD"]);
+ds_map_add(global.lang_db, "hud_hp",          ["HP",               "HP"]);
+ds_map_add(global.lang_db, "hud_no_weapon",   ["Без зброї",        "No weapon"]);
+ds_map_add(global.lang_db, "hud_key",         ["Ключ Олімпу",      "Olympus Key"]);
+
+ds_map_add(global.lang_db, "dialog_player",   ["Ви говорите:",     "You say:"]);
+ds_map_add(global.lang_db, "dialog_npc",      ["Підказки / Ворог:","Hints / Enemy:"]);
+ds_map_add(global.lang_db, "dialog_e",        ["[E] — говорити",   "[E] — speak"]);
+ds_map_add(global.lang_db, "dialog_f",        ["[F] — взаємодіяти","[F] — interact"]);
+ds_map_add(global.lang_db, "dialog_next",     ["[Q] Далі ▶",       "[Q] Next ▶"]);
+ds_map_add(global.lang_db, "dialog_close",    ["[Q] Закрити ✕",    "[Q] Close ✕"]);
+
+// ─────────────────────────────────────
+// ГОЛОВНЕ МЕНЮ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "menu_title",      ["YOUNG POSEIDON\nГОЛОВНЕ МЕНЮ",
+                                                "YOUNG POSEIDON\nMAIN MENU"]);
+ds_map_add(global.lang_db, "menu_start",      ["Почати гру",       "New Game"]);
+ds_map_add(global.lang_db, "menu_load",       ["Завантажити гру",  "Load Game"]);
+ds_map_add(global.lang_db, "menu_settings",   ["Налаштування",     "Settings"]);
+ds_map_add(global.lang_db, "menu_about",      ["Про автора",       "About"]);
+ds_map_add(global.lang_db, "menu_exit",       ["Вихід",            "Exit"]);
+
+// ─────────────────────────────────────
+// МЕНЮ ПАУЗИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "pause_title",     ["ПАУЗА",            "PAUSED"]);
+ds_map_add(global.lang_db, "pause_resume",    ["Продовжити",       "Resume"]);
+ds_map_add(global.lang_db, "pause_load",      ["Завантажити гру",  "Load Game"]);
+ds_map_add(global.lang_db, "pause_settings",  ["Налаштування",     "Settings"]);
+ds_map_add(global.lang_db, "pause_mainmenu",  ["Головне меню",     "Main Menu"]);
+ds_map_add(global.lang_db, "pause_quit",      ["Вийти з гри",      "Quit Game"]);
+
+// ─────────────────────────────────────
+// НАЗВИ ЗОН
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "zone_sea",        ["Море",             "Sea"]);
+ds_map_add(global.lang_db, "zone_coast",      ["Узбережжя",        "Coast"]);
+ds_map_add(global.lang_db, "zone_mines",      ["Шахти",            "Mines"]);
+ds_map_add(global.lang_db, "zone_hades",      ["Аїд",              "Hades"]);
+ds_map_add(global.lang_db, "zone_greece",     ["Греція",           "Greece"]);
+ds_map_add(global.lang_db, "zone_battlefield",["Поле Битви",       "Battlefield"]);
+ds_map_add(global.lang_db, "zone_olympus",    ["Олімп",            "Olympus"]);
+ds_map_add(global.lang_db, "zone_boss",       ["(Бос)",            "(Boss)"]);
+
+// ─────────────────────────────────────
+// НАЗВИ ЗБРОЇ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "weapon_trident",  ["Тризубець",        "Trident"]);
+ds_map_add(global.lang_db, "weapon_spear",    ["Спис",             "Spear"]);
+ds_map_add(global.lang_db, "weapon_pickaxe",  ["Кайло",            "Pickaxe"]);
+ds_map_add(global.lang_db, "weapon_scythe",   ["Коса",             "Scythe"]);
+ds_map_add(global.lang_db, "weapon_oar",      ["Весло",            "Oar"]);
+ds_map_add(global.lang_db, "weapon_sword",    ["Меч",              "Sword"]);
+
+// ─────────────────────────────────────
+// НАЗВИ БОСІВ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "boss_triton",     ["ТРИТОН",           "TRITON"]);
+ds_map_add(global.lang_db, "boss_nymph",      ["НІМФА",            "NYMPH"]);
+ds_map_add(global.lang_db, "boss_uranus",     ["УРАН",             "URANUS"]);
+ds_map_add(global.lang_db, "boss_charon",     ["ХАРОН",            "CHARON"]);
+ds_map_add(global.lang_db, "boss_minotaur",   ["МІНОТАВР",         "MINOTAUR"]);
+ds_map_add(global.lang_db, "boss_war_ghost",  ["ПРИВИД ВІЙНИ",     "WAR GHOST"]);
+ds_map_add(global.lang_db, "boss_moirai",     ["МОЙРИ",            "THE FATES"]);
+ds_map_add(global.lang_db, "boss_phase2",     ["— ФАЗА 2 —",       "— PHASE 2 —"]);
+
+// ─────────────────────────────────────
+// НАЗВИ ВОРОГІВ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "enemy_crab",      ["Гіганський Краб",  "Giant Crab"]);
+ds_map_add(global.lang_db, "enemy_harpy",     ["Гарпія-Чайка",     "Harpy Seagull"]);
+ds_map_add(global.lang_db, "enemy_miner",     ["Дух Шахтаря",      "Miner Spirit"]);
+ds_map_add(global.lang_db, "enemy_shadow",    ["Тінь Аїда",        "Shadow of Hades"]);
+ds_map_add(global.lang_db, "enemy_warrior",   ["Грецький Воїн",    "Greek Warrior"]);
+ds_map_add(global.lang_db, "enemy_fallen",    ["Дух Полеглого",    "Fallen Spirit"]);
+ds_map_add(global.lang_db, "enemy_fire",      ["Вогонь Олімпу",    "Olympus Fire"]);
+
+// ─────────────────────────────────────
+// ПРЕДМЕТИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "item_potion_heal",["Зілля Здоров'я",   "Health Potion"]);
+ds_map_add(global.lang_db, "item_potion_str", ["Зілля Геракла",    "Hercules Potion"]);
+ds_map_add(global.lang_db, "item_potion_spd", ["Зілля Гермеса",    "Hermes Potion"]);
+ds_map_add(global.lang_db, "item_ambrosia",   ["Амброзія",         "Ambrosia"]);
+ds_map_add(global.lang_db, "item_sandal",     ["Сандаль Гермеса",  "Hermes' Sandal"]);
+ds_map_add(global.lang_db, "item_key",        ["Ключ Олімпу",      "Olympus Key"]);
+
+// ─────────────────────────────────────
+// ПІДКАЗКИ КЕРУВАННЯ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "ctrl_hint",
+    ["ESC-Меню | WASD-Рух | S↓-Вниз | E-Кидок | F-Взаємодія | Q-Діалог | Z/X/C-Зілля | 1-6-Зброя",
+     "ESC-Menu | WASD-Move | S↓-Drop | E-Throw | F-Interact | Q-Dialog | Z/X/C-Potions | 1-6-Weapon"]);
+
+ds_map_add(global.lang_db, "ctrl_tab",
+    ["Tab — закрити  |  Enter — обрати",
+     "Tab — close  |  Enter — select"]);
+
+// ─────────────────────────────────────
+// ПЕРЕХОДИ МІЖ КІМНАТАМИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "exit_go",         ["[F] Перейти",      "[F] Enter"]);
+ds_map_add(global.lang_db, "exit_locked",     ["Заблоковано",      "Locked"]);
+ds_map_add(global.lang_db, "exit_need",       ["Потрібно: ",       "Required: "]);
+
+// Підказки потрібних предметів для виходів
+ds_map_add(global.lang_db, "exit_need_pickaxe",
+    ["Потрібно: Кайло (перемагай Урана)",
+     "Required: Pickaxe (defeat Uranus)"]);
+ds_map_add(global.lang_db, "exit_need_scythe",
+    ["Потрібно: Коса (перемагай Харона)",
+     "Required: Scythe (defeat Charon)"]);
+ds_map_add(global.lang_db, "exit_need_oar",
+    ["Потрібно: Весло (перемагай Мінотавра)",
+     "Required: Oar (defeat Minotaur)"]);
+ds_map_add(global.lang_db, "exit_need_key",
+    ["Потрібно: Ключ Олімпу (перемагай Мойрів)",
+     "Required: Olympus Key (defeat The Fates)"]);
+ds_map_add(global.lang_db, "exit_need_sword",
+    ["Потрібно: Меч (перемагай Привида)",
+     "Required: Sword (defeat War Ghost)"]);
+ds_map_add(global.lang_db, "exit_need_spear",
+    ["Потрібно: Спис (перемагай Німфу)",
+     "Required: Spear (defeat Nymph)"]);
+ds_map_add(global.lang_db, "exit_need_trident",
+    ["Потрібно: Тризубець (перемагай Тритона)",
+     "Required: Trident (defeat Triton)"]);
+
+// ─────────────────────────────────────
+// ІНТЕРАКТИВНІ ЕЛЕМЕНТИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "interact_e",      ["[E]",              "[E]"]);
+ds_map_add(global.lang_db, "interact_f",      ["[F]",              "[F]"]);
+ds_map_add(global.lang_db, "interact_break",  ["[E] Розбити",      "[E] Break"]);
+ds_map_add(global.lang_db, "interact_cut",    ["[E] Скосити",      "[E] Cut"]);
+ds_map_add(global.lang_db, "interact_sit",    ["[E] Сісти",        "[E] Board"]);
+ds_map_add(global.lang_db, "interact_open",   ["[E] Відкрити",     "[E] Open"]);
+ds_map_add(global.lang_db, "need_pickaxe",    ["Потрібне кайло",   "Need pickaxe"]);
+ds_map_add(global.lang_db, "need_scythe",     ["Потрібна коса",    "Need scythe"]);
+ds_map_add(global.lang_db, "need_oar",        ["Потрібне весло",   "Need oar"]);
+ds_map_add(global.lang_db, "need_key",        ["Потрібен Ключ Олімпу", "Need Olympus Key"]);
+
+// ─────────────────────────────────────
+// БАФИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "buff_atk",
+    ["⚡ Геракл +",  "⚡ Hercules +"]);
+ds_map_add(global.lang_db, "buff_spd",
+    ["💨 Гермес +",  "💨 Hermes +"]);
+ds_map_add(global.lang_db, "buff_atk_label",  ["АТК  [",           "ATK  ["]);
+ds_map_add(global.lang_db, "buff_spd_label",  ["ШВ  [",            "SPD  ["]);
+ds_map_add(global.lang_db, "buff_sec",        ["с]",               "s]"]);
+
+// ─────────────────────────────────────
+// ДІАЛОГИ ПОСЕЙДОНА (зони коментарів)
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "comment_sea_1",
+    ["Мій океан... Але попереду чекає Олімп.",
+     "My ocean... But Olympus awaits ahead."]);
+ds_map_add(global.lang_db, "comment_sea_boss",
+    ["Тритоне! Віддай мій тризубець!",
+     "Triton! Return my trident!"]);
+ds_map_add(global.lang_db, "comment_coast_1",
+    ["Суходіл... незвично для бога моря.",
+     "Dry land... unusual for a sea god."]);
+ds_map_add(global.lang_db, "comment_mines_1",
+    ["Тут темно. І пахне старим камінням.",
+     "Dark here. Smells of old stone."]);
+ds_map_add(global.lang_db, "comment_hades_1",
+    ["Царство мертвих... Треба бути обережним.",
+     "The realm of the dead... I must be careful."]);
+ds_map_add(global.lang_db, "comment_greece_1",
+    ["Греція. Вже близько до Олімпу.",
+     "Greece. Getting closer to Olympus."]);
+ds_map_add(global.lang_db, "comment_battlefield",
+    ["Поле битви. Скрізь кістки полеглих.",
+     "A battlefield. Bones of the fallen everywhere."]);
+ds_map_add(global.lang_db, "comment_olympus_1",
+    ["Ось він — Олімп! Я майже дістався!",
+     "There it is — Olympus! I'm almost there!"]);
+
+// ─────────────────────────────────────
+// ДІАЛОГИ БОСІВ (NPC)
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "npc_triton",
+    ["Ти думаєш що зможеш пройти?! Я — Тритон!",
+     "You think you can pass?! I am Triton!"]);
+ds_map_add(global.lang_db, "npc_nymph",
+    ["Смертний не пройде через мої землі!",
+     "No mortal passes through my lands!"]);
+ds_map_add(global.lang_db, "npc_uranus",
+    ["Хто порушив мій спокій?!",
+     "Who dares disturb my rest?!"]);
+ds_map_add(global.lang_db, "npc_charon",
+    ["Монета за переправу... або смерть.",
+     "A coin for the crossing... or death."]);
+ds_map_add(global.lang_db, "npc_minotaur",
+    ["БУГААА!!!",
+     "GRAAAH!!!"]);
+ds_map_add(global.lang_db, "npc_war_ghost",
+    ["Ця битва ніколи не скінчиться!",
+     "This battle will never end!"]);
+ds_map_add(global.lang_db, "npc_moirai",
+    ["Твоя нитка долі — в наших руках.",
+     "The thread of your fate is in our hands."]);
+
+// ─────────────────────────────────────
+// НАГОРОДИ (текст отримання зброї)
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "reward_trident",
+    ["Отримано: Тризубець!",      "Obtained: Trident!"]);
+ds_map_add(global.lang_db, "reward_spear",
+    ["Отримано: Спис!",           "Obtained: Spear!"]);
+ds_map_add(global.lang_db, "reward_pickaxe",
+    ["Отримано: Кайло!",          "Obtained: Pickaxe!"]);
+ds_map_add(global.lang_db, "reward_scythe",
+    ["Отримано: Коса!",           "Obtained: Scythe!"]);
+ds_map_add(global.lang_db, "reward_oar",
+    ["Отримано: Весло!",          "Obtained: Oar!"]);
+ds_map_add(global.lang_db, "reward_sword",
+    ["Отримано: Меч!",            "Obtained: Sword!"]);
+ds_map_add(global.lang_db, "reward_key",
+    ["Отримано: Ключ Олімпу!",    "Obtained: Olympus Key!"]);
+
+// ─────────────────────────────────────
+// FROZEN / СТАТУСИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "status_frozen",
+    ["Заморожено!",   "Frozen!"]);
+ds_map_add(global.lang_db, "status_vulnerable",
+    ["ВРАЗЛИВИЙ!",    "VULNERABLE!"]);
+
+// ─────────────────────────────────────
+// ФІНАЛ ГРИ
+// ─────────────────────────────────────
+ds_map_add(global.lang_db, "ending_title",
+    ["Посейдон довів своє право бути богом.",
+     "Poseidon proved his right to be a god."]);
+ds_map_add(global.lang_db, "ending_subtitle",
+    ["Кінець",        "The End"]);
+
+
+═══════════════════════════════════════════════════════════════════
+  2. ФУНКЦІЯ LC() — ГЛОБАЛЬНИЙ ПЕРЕКЛАД
+     Додай як Script Asset з назвою: lc
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description Script: lc(key)
+/// @param {string} key  Ключ зі словника
+/// @returns {string}    Рядок поточної мови
+─────────────────────────────────────────
+function lc(_key)
+{
+    // Якщо словник не існує — повертаємо ключ як заглушку
+    if (!variable_global_exists("lang_db")
+        || !ds_exists(global.lang_db, ds_type_map))
+        return _key;
+
+    if (!ds_map_exists(global.lang_db, _key))
+    {
+        // Ключ не знайдено — попередження і повернення ключа
+        show_debug_message("lc(): KEY NOT FOUND — " + _key);
+        return "[" + _key + "]";
+    }
+
+    var _arr   = global.lang_db[? _key];
+    var _index = (global.lang == "UA") ? 0 : 1;
+
+    return _arr[_index];
+}
+
+
+// Додаткова версія з підстановкою змінних:
+// lc_format("buff_atk") + string(value) + lc("buff_atk_label") + ...
+// Використання: draw_text(x, y, lc("hud_atk") + ": " + string(_atk));
+
+
+═══════════════════════════════════════════════════════════════════
+  3. OBJ_LANG_MANAGER — зміна мови і збереження
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_lang_manager — Step Event
+─────────────────────────────────────────
+// Нічого не робимо — менеджер пасивний.
+// Мова змінюється через set_language() нижче.
+
+
+─────────────────────────────────────────
+/// @description obj_lang_manager — Cleanup Event
+// Викликається при знищенні або виході з гри
+─────────────────────────────────────────
+// Очищаємо словник з пам'яті
+if (ds_exists(global.lang_db, ds_type_map))
+    ds_map_destroy(global.lang_db);
+
+
+─────────────────────────────────────────
+/// @description Script: set_language(lang)
+/// @param {string} lang  "UA" або "EN"
+─────────────────────────────────────────
+function set_language(_lang)
+{
+    global.lang = _lang;
+
+    // Зберігаємо вибір у файлі
+    ini_open("young_poseidon_save.ini");
+    ini_write_string("settings", "language", _lang);
+    ini_close();
+
+    // Оновлюємо масиви зброї у гравця якщо він існує
+    if (instance_exists(obj_player))
+        _update_player_weapon_names();
+
+    // Оновлюємо назви кімнат у obj_ui_controller
+    if (instance_exists(obj_ui_controller))
+        obj_ui_controller._refresh_zone_name();
+}
+
+
+─────────────────────────────────────────
+/// @description Script: _update_player_weapon_names()
+// Оновлює масив weapon_names у гравця після зміни мови
+─────────────────────────────────────────
+function _update_player_weapon_names()
+{
+    if (!instance_exists(obj_player)) exit;
+    with (obj_player)
+    {
+        weapon_names = [
+            lc("weapon_trident"),
+            lc("weapon_spear"),
+            lc("weapon_pickaxe"),
+            lc("weapon_scythe"),
+            lc("weapon_oar"),
+            lc("weapon_sword")
+        ];
+    }
+}
+
+
+═══════════════════════════════════════════════════════════════════
+  4. OBJ_PLAYER — Create Event (оновлення weapon_names)
+     Замінити статичний масив на динамічний через lc()
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// ЗНАЙДИ ЦЕЙ РЯДОК у obj_player Create Event:
+// weapon_names = ["Тризубець","Спис","Кайло","Коса","Весло","Меч"];
+//
+// ЗАМІНИ НА:
+─────────────────────────────────────────
+weapon_names = [
+    lc("weapon_trident"),
+    lc("weapon_spear"),
+    lc("weapon_pickaxe"),
+    lc("weapon_scythe"),
+    lc("weapon_oar"),
+    lc("weapon_sword")
+];
+
+
+═══════════════════════════════════════════════════════════════════
+  5. OBJ_UI_CONTROLLER — Draw GUI Event (оновлення з lc())
+     Замінити всі захардкоджені рядки на виклики lc()
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// ЗАМІНИ у Draw GUI Event:
+─────────────────────────────────────────
+
+// ── Заголовки блоків вгорі ──
+// БУЛО:   draw_text(..., "Ви говорите:");
+// СТАЛО:
+draw_text(_lx + 28, _ly + 3, lc("dialog_player"));
+
+// БУЛО:   draw_text(..., "[E] — говорити");
+// СТАЛО:
+draw_text(_lx + _lbw / 2, _dialog_box_y + _dialog_box_h / 2 - 6, lc("dialog_e"));
+
+// БУЛО:   draw_text(..., "Підказки / Ворог:");
+// СТАЛО:
+draw_text(_rx + _blk_w - 28, _ry + 3, lc("dialog_npc"));
+
+// БУЛО:   draw_text(..., "[F] — взаємодіяти");
+// СТАЛО:
+draw_text(_rx + _blk_w / 2, _dialog_box_y + _dialog_box_h / 2 - 6, lc("dialog_f"));
+
+// ── ATK / ШВ ──
+// БУЛО:   "АТК: " + string(_atk_total) + "  (" + _weapon_label + ")"
+// СТАЛО:
+draw_text(_stats_x + 26, _stats_y,
+    lc("hud_atk") + ": " + string(_atk_total) + "  (" + _weapon_label + ")");
+
+// БУЛО:   "ШВ: " + string(...)
+// СТАЛО:
+draw_text(_stats_x + 26, _stats_y + 18,
+    lc("hud_spd") + ": " + string(_spd_total * _spd_mult));
+
+// ── Ключ Олімпу ──
+// БУЛО:   "🗝 Ключ Олімпу"
+// СТАЛО:
+draw_text(gw - _pad, _top_h + 6, "🗝 " + lc("item_key"));
+
+// ── Зброя в нижньому слоті ──
+// БУЛО:   "АТК " + string(_watk) + "   ШВ " + string(_wspd)
+// СТАЛО:
+draw_text(_wpn_slot_x + 52, _wpn_slot_y + 28,
+    lc("hud_atk") + " " + string(_watk) + "   " + lc("hud_spd") + " " + string(_wspd));
+
+// БУЛО:   "Без зброї"
+// СТАЛО:
+draw_text(_wpn_slot_x + _wpn_slot_w/2, _wpn_slot_y + _wpn_slot_h/2, lc("hud_no_weapon"));
+
+// ── Баф ──
+// БУЛО:   "⚡ Геракл +" + string(...) + " АТК  [" + string(_secs) + "с]"
+// СТАЛО:
+var _buff_str = (_p.temp_atk_buff > 0)
+    ? lc("buff_atk") + string(_p.temp_atk_buff) + " "
+      + lc("buff_atk_label") + string(_secs) + lc("buff_sec")
+    : lc("buff_spd") + string(_p.temp_spd_buff) + " "
+      + lc("buff_spd_label") + string(_secs) + lc("buff_sec");
+draw_text(gw - _pad, _top_h + 6, _buff_str);
+
+// ── Підказка керування ──
+// БУЛО:   "ESC-Меню | WASD-Рух | ..."
+// СТАЛО:
+draw_text(gw - _m, gh - _m, lc("ctrl_hint"));
+
+// ── Додати функцію оновлення зони (для set_language) ──
+_refresh_zone_name = function()
+{
+    // Зона вже встановлена як zone_key — оновити відображення
+    // (нічого не треба якщо zone_name оновлюється через lc() нижче)
+};
+
+
+═══════════════════════════════════════════════════════════════════
+  6. OBJ_UI_CONTROLLER — Оновлення Room Start Event
+     Тепер zone_name береться через lc()
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// ЗАМІСТЬ:  zone_name = "Море";
+// ТЕПЕР у кімнаті зберігається ключ, а назва береться через lc():
+─────────────────────────────────────────
+
+// У obj_ui_controller Create Event додати:
+zone_key  = "zone_sea";   // Ключ для lc()
+zone_room = 1;
+
+// У Draw GUI Event замінити:
+// БУЛО:   string_upper(zone_name) + " — " + string(zone_room)
+// СТАЛО:
+draw_text(_cx, _ly + 3,
+    string_upper(lc(zone_key)) + " — " + string(zone_room));
+
+// У Room Start Event кожної кімнати:
+// rm_sea_1:
+with (obj_ui_controller) { zone_key = "zone_sea";         zone_room = 1; }
+// rm_coast_boss:
+with (obj_ui_controller) { zone_key = "zone_coast";       zone_room = 5; }
+// rm_mines_boss:
+with (obj_ui_controller) { zone_key = "zone_mines";       zone_room = 4; }
+// і т.д.
+
+
+═══════════════════════════════════════════════════════════════════
+  7. OBJ_MAIN_MENU — Draw GUI Event (оновлення з lc())
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// ЗНАЙДИ menu_items у Create Event і ЗАМІНИ на:
+─────────────────────────────────────────
+
+// У obj_main_menu Step Event — оновлюємо масив кожен кадр
+// (так меню миттєво змінюється при перемиканні мови)
+menu_items = [
+    lc("menu_start"),
+    lc("menu_load"),
+    lc("menu_settings"),
+    lc("menu_about"),
+    lc("menu_exit")
+];
+
+// Назва у Draw GUI:
+// БУЛО:   "YOUNG\nPOSEIDON\nMAIN MENU"
+// СТАЛО:
+draw_text_transformed(_title_x, _title_y, lc("menu_title"), 1, 1, 0);
+
+// EXIT кнопка:
+draw_text(_exit_x, _exit_y, lc("menu_exit"));
+
+// ── Клік по прапорцях — виклик set_language() ──
+// БУЛО:   current_lang = "UA";
+// СТАЛО:
+if (_mxg >= _fx && _mxg <= _fx + 38 && _myg >= _fy && _myg <= _fy + 30)
+    set_language("UA");
+
+if (_mxg >= _fx + 48 && _mxg <= _fx + 88 && _myg >= _fy && _myg <= _fy + 30)
+    set_language("EN");
+
+
+═══════════════════════════════════════════════════════════════════
+  8. МЕНЮ ПАУЗИ (у obj_ui_controller Draw GUI) — оновлення
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// ЗНАЙДИ _menu_items у Draw GUI (блок паузи) і ЗАМІНИ на:
+─────────────────────────────────────────
+var _menu_items = [
+    lc("pause_resume"),
+    lc("pause_load"),
+    lc("pause_settings"),
+    lc("pause_mainmenu"),
+    lc("pause_quit")
+];
+
+// Заголовок паузи:
+// БУЛО:   "ПАУЗА"
+// СТАЛО:
+draw_text(gw/2, _py + 18, lc("pause_title"));
+
+
+═══════════════════════════════════════════════════════════════════
+  9. БОСИ — boss_name через lc()
+     Замінити рядки у Create Event кожного боса
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// obj_boss_triton Create Event:
+// БУЛО:   boss_name = "ТРИТОН";
+// СТАЛО:
+boss_name_key = "boss_triton";   // Ключ для lc()
+
+// obj_boss_nymph:     boss_name_key = "boss_nymph";
+// obj_boss_uranus:    boss_name_key = "boss_uranus";
+// obj_boss_charon:    boss_name_key = "boss_charon";
+// obj_boss_minotaur:  boss_name_key = "boss_minotaur";
+// obj_boss_war_ghost: boss_name_key = "boss_war_ghost";
+// obj_boss_moirai:    boss_name_key = "boss_moirai";
+─────────────────────────────────────────
+
+// У obj_boss Draw GUI Event (смуга HP) ЗАМІНИТИ:
+// БУЛО:   boss_name + "   " + string(hp) + " / " + string(max_hp)
+// СТАЛО:
+draw_text(_gw / 2, _bar_y + _bar_h / 2,
+    lc(boss_name_key) + "   " + string(hp) + " / " + string(max_hp));
+
+// Фаза 2:
+// БУЛО:   "— ФАЗА " + string(phase) + " —"
+// СТАЛО:
+draw_text(_gw / 2, _bar_y - 18, lc("boss_phase2"));
+
+
+═══════════════════════════════════════════════════════════════════
+  10. ІНТЕРАКТИВНІ ОБ'ЄКТИ — підказки через lc()
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// obj_stone_boulder Draw Event:
+─────────────────────────────────────────
+// БУЛО:   "[E] Розбити"    → СТАЛО:  lc("interact_break")
+// БУЛО:   "Потрібне кайло" → СТАЛО:  lc("need_pickaxe")
+
+// obj_thicket_platform Draw Event:
+// БУЛО:   "[E] Скосити"    → СТАЛО:  lc("interact_cut")
+// БУЛО:   "Потрібна коса"  → СТАЛО:  lc("need_scythe")
+
+// obj_mine_cart Draw Event:
+// БУЛО:   "[E] Сісти"      → СТАЛО:  lc("interact_sit")
+
+// obj_olympus_door Draw Event:
+// БУЛО:   "[E] Відкрити"   → СТАЛО:  lc("interact_open")
+// БУЛО:   "Потрібен Ключ Олімпу" → СТАЛО: lc("need_key")
+
+// obj_room_exit Draw GUI Event:
+// БУЛО:   "[F] Перейти"    → СТАЛО:  lc("exit_go")
+
+// obj_room_exit _try_enter() — підказки потрібних предметів:
+// ЗАМІНИТИ весь switch на:
+var _hint_text = lc("exit_need_" + required_item);
+if (instance_exists(obj_ui_controller))
+    obj_ui_controller.show_hint(_hint_text, 210);
+
+
+═══════════════════════════════════════════════════════════════════
+  11. НАГОРОДИ — повідомлення через lc()
+      У кожному obj_pickup_*_reward — User Event 0
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// Після розблокування зброї показувати повідомлення:
+─────────────────────────────────────────
+
+// obj_pickup_trident_reward User Event 0:
+with (obj_player) { _unlock_weapon(0); }
+if (instance_exists(obj_ui_controller))
+    obj_ui_controller.show_hint(lc("reward_trident"), 240);
+instance_destroy();
+
+// obj_pickup_spear_reward:    lc("reward_spear")
+// obj_pickup_pickaxe_reward:  lc("reward_pickaxe")
+// obj_pickup_scythe_reward:   lc("reward_scythe")
+// obj_pickup_oar_reward:      lc("reward_oar")
+// obj_pickup_sword_reward:    lc("reward_sword")
+// obj_pickup_olympus_key:     lc("reward_key")
+
+
+═══════════════════════════════════════════════════════════════════
+  12. OBJ_COMMENT_ZONE — діалоги через lc()
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+// У obj_comment_zone Create Event замінити comment_text
+// на comment_key і обчислювати текст через lc() динамічно:
+─────────────────────────────────────────
+
+// БУЛО:
+// comment_text  = "Мій океан...";
+// comment_lines = string_split(comment_text, "|");
+
+// СТАЛО:
+comment_key   = "comment_sea_1";  // Встановлюється в кімнаті
+
+// У Step Event — оновлюємо рядки кожен раз коли запускається:
+// (в блоці if (_in_zone && !has_triggered))
+has_triggered = true;
+is_showing    = true;
+current_line  = 0;
+// Беремо текст з lc() і розбиваємо по "|"
+comment_lines = string_split(lc(comment_key), "|");
+box_alpha_target = 1;
+
+// У Instance Creation Code кімнати:
+// event_inherited();
+// comment_key = "comment_mines_1";
+
+
+═══════════════════════════════════════════════════════════════════
+  13. НАЛАШТУВАННЯ obj_lang_manager В РЕДАКТОРІ
+═══════════════════════════════════════════════════════════════════
+
+  1. Створи об'єкт obj_lang_manager
+     → Persistent = TRUE
+     → Розміщуй ОДИН РАЗ у стартовій кімнаті (rm_main_menu)
+     → Events: Create, Step (порожній), Cleanup
+
+  2. Створи Script Asset з назвою "lc"
+     → Вміст: функція lc(_key) з розділу 2
+
+  3. Створи Script Asset "set_language"
+     → Вміст: функція set_language(_lang) з розділу 3
+
+  4. Створи Script Asset "_update_player_weapon_names"
+     → Вміст: однойменна функція з розділу 3
+
+  5. У obj_master Create Event переконайся що obj_lang_manager
+     вже існує ДО того як створюються інші об'єкти.
+     Якщо ні — створи його першим:
+     if (!instance_exists(obj_lang_manager))
+         instance_create_layer(0, 0, "Instances", obj_lang_manager);
+
+  6. ПОРЯДОК ініціалізації при старті гри:
+     obj_lang_manager → lc() доступна → obj_player (weapon_names) → UI

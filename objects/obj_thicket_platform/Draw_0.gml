@@ -17,14 +17,14 @@ if (!is_cutting
         draw_set_alpha(_alpha);
         draw_set_color(c_yellow);
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "[E] Скосити");
+        draw_text(x, y - sprite_height / 2 - 8, lc("interact_cut"));
     }
     else
     {
         draw_set_alpha(0.6);
         draw_set_color(make_color_rgb(100, 200, 100));
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "Потрібна коса");
+        draw_text(x, y - sprite_height / 2 - 8, lc("need_scythe"));
     }
  
     draw_set_alpha(1);

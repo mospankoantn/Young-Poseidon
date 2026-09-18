@@ -1,35 +1,35 @@
 /// @description 
 /// obj_boss_nymph — Create Event
 
-boss_name = "НІМФА";
-max_hp    = 50;
+boss_name_key = "boss_nymph";
+max_hp    = 10;
 hp        = max_hp;
-atk       = 6;
+atk       = 2;
 phase     = 1;
  
-// ---- ТОЧКИ ПАТРУЛЯ ----
-var _cx = x; var _cy = y;
-point_count = 4;
-point_x[0] = _cx - 240;  point_y[0] = _cy - 100;
-point_x[1] = _cx + 240;  point_y[1] = _cy - 100;
-point_x[2] = _cx + 240;  point_y[2] = _cy + 60;
-point_x[3] = _cx - 240;  point_y[3] = _cy + 60;
-current_point = 0;
-fly_speed     = 2.5;
+// ---- ДВІ ТОЧКИ БІГУ ----
+left_x    = x - 280;
+right_x   = x + 280;
+ground_y  = y;         // Висота землі (встановлюється в кімнаті)
+move_dir  = 1;         // 1=вправо, -1=вліво
+run_speed = 4;
  
-// ---- АТАКИ ----
-// Чари уповільнення
-charm_cd     = 0;
-charm_cd_max = room_speed * 5;
+// ---- СТАНИ ----
+// 0=біжить, 1=зупинилась+заряджає стріли, 2=стріляє, 3=пауза
+state      = 0;
+stop_timer = 0;        // Таймер зупинки
+shoot_cd   = 0;
+barrage_count = 0;     // Скільки разів уже вистрілила в поточному залпі
  
-// Самолікування (фаза 2)
-heal_cd     = 0;
-heal_cd_max = room_speed * 6;
-heal_amount = 5;
+// ---- ФІЗИКА (кінь є наземним) ----
+vspd = 0;
+grv  = 0.8;
  
-// Квіти-снаряди (фаза 2)
-flower_cd     = 0;
-flower_cd_max = room_speed * 1.5;
+// ---- ЗАЛП СТРІЛ ----
+// Стріли закривають все поле АЛЕ є 2-3 безпечних пропуски
+barrage_gap_positions = [];   // Безпечні X-позиції (рандомні)
+barrage_arrows_total  = 20;   // Всього стріл у залпі
+barrage_gap_width     = 50;   // Ширина безпечного пропуску
  
 is_dead = false;
-image_speed = 0.08;
+image_speed = 0.12;

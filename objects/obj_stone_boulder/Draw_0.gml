@@ -1,4 +1,4 @@
-/// @description 
+ /// @description 
 /// obj_stone_boulder — Draw Event
 
 draw_self();
@@ -17,7 +17,7 @@ if (instance_exists(obj_player)
         draw_set_alpha(_alpha);
         draw_set_color(c_yellow);
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "[E] Розбити");
+        draw_text(x, y - sprite_height / 2 - 8, lc("interact_break"));
     }
     else
     {
@@ -25,7 +25,7 @@ if (instance_exists(obj_player)
         draw_set_alpha(0.6);
         draw_set_color(c_ltgray);
         if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, "Потрібне кайло");
+        draw_text(x, y - sprite_height / 2 - 8, lc("need_pickaxe"));
     }
  
     draw_set_alpha(1);

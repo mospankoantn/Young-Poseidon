@@ -5,7 +5,7 @@
 if (is_damage)
 {
     // Блимаємо: кожні 4 кадри змінюємо прозорість
-    image_alpha = (current_time / 60000) mod 2 < 1 ? 0.4 : 1.0;
+    image_alpha = (floor(current_time / 70) mod 2 == 0) ? 0.4 : 1.0;
 }
 else
 {

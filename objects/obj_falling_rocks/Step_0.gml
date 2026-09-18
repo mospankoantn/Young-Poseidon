@@ -48,3 +48,12 @@ switch (state)
     break;
 }
  
+ // Шкода Тритону якщо попали в нього під час падіння
+if (state == 1 && instance_exists(obj_boss_triton))
+{
+    if (place_meeting(x, y, obj_boss_triton))
+    {
+        with (obj_boss_triton) event_user(0);  // 10 шкоди
+        state = 2;   // Каміння залишається на місці
+    }
+}

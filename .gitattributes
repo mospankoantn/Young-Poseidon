@@ -1,2 +1,21 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# GameMaker source and project metadata
+*.gml text eol=lf
+*.yy text eol=lf
+*.yyp text eol=lf
+*.resource_order text eol=lf
+
+# Documentation and plain-text configuration
+*.md text eol=lf
+*.txt text eol=lf
+.gitattributes text eol=lf
+
+# Binary resources and packaged assets
+*.png binary
+*.png~ binary
+*.wav binary
+*.mp3 binary
+*.ico binary
+*.bmp binary
+*.docx binary
+*.zip binary
+*.yyz binary

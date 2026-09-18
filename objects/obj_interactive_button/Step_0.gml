@@ -14,11 +14,17 @@ if (_dist <= interact_range
     is_pressed   = true;
     image_index  = 1;   // Перемикаємо спрайт на "натиснуту" кнопку
  
-    // Активуємо всі цільові об'єкти цього типу в кімнаті
-    with (target_object)
+    if (target_object == obj_falling_rocks && instance_exists(obj_boss_triton))
     {
-        event_user(0);   // Викликаємо User Event 0 на цілі
-                         // (кожен цільовий об'єкт реагує сам)
+        with (obj_boss_triton) _activate_next_rock();
+    }
+    else
+    {
+        // Активуємо всі цільові об'єкти цього типу в кімнаті
+        with (target_object)
+        {
+            event_user(0);
+        }
     }
  
     // audio_play_sound(snd_button_press, 1, false);
@@ -34,4 +40,3 @@ if (_dist <= interact_range
         alarm[0] = room_speed;
     }
 }
- 

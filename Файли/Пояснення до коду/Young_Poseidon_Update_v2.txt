@@ -1,0 +1,1774 @@
+╔══════════════════════════════════════════════════════════════════╗
+║      YOUNG POSEIDON — ОНОВЛЕННЯ ПО ДИЗАЙН-ДОКУМЕНТУ            ║
+╚══════════════════════════════════════════════════════════════════╝
+
+ЩО ЗМІНИЛОСЬ У ДИЗАЙН-ДОКУМЕНТІ:
+  1. Керування повністю переназначено (W=стрибок, S=проскочити вниз,
+     E=кидок, F=взаємодія, Z/X/C=зілля, 1-6=зброя)
+  2. Зілля здоров'я відновлює 5 HP (було 2), Геракл дає +5 ATK
+  3. Боси повністю переписані — у кожного унікальна механіка
+  4. Порядок нагород: Тритон→Тризубець, Німфа→Спис,
+     Уран→Кайло, Харон→Коса, Мінотавр→Весло,
+     Привид→Меч, Мойри→Ключ
+  5. Додано Зони коментарів, S-drop через платформи
+
+ЗМІСТ:
+  1.  obj_player        — Create, Step (повна версія)
+  2.  obj_comment_zone  — Зона коментарів (нова!)
+  3.  obj_boss_triton   — Повна переробка (кнопки+каміння)
+  4.  obj_boss_nymph    — Повна переробка (кінь+стріли)
+  5.  obj_boss_uranus   — Повна переробка (завали+кайло)
+  6.  obj_boss_charon   — Повна переробка (човен+коса-бумеранг)
+  7.  obj_boss_minotaur — Повна переробка (колони+весло)
+  8.  obj_boss_war_ghost— Повна переробка (зигзаг+духи)
+  9.  obj_boss_moirai   — Повна переробка (хвиля+вогонь)
+  10. Нагороди зброї    — Оновлений порядок
+
+
+═══════════════════════════════════════════════════════════════════
+  1. OBJ_PLAYER — Create Event (ОНОВЛЕНО)
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_player — Create Event
+─────────────────────────────────────────
+// ════ ЗДОРОВ'Я ════
+hp     = 5;
+max_hp = 5;
+
+// ════ ЗІЛЛЯ (клавіші Z / X / C) ════
+potion_heal_count     = 0;   // Z — зілля здоров'я (+5 HP)
+potion_strength_count = 0;   // X — зілля Геракла  (+5 ATK на 60с)
+potion_speed_count    = 0;   // C — зілля Гермеса  (+1 SPD на 60с)
+
+// ════ ХАРАКТЕРИСТИКИ ════
+spd            = 1;       // Базова швидкість (sp=1 з документу)
+perm_spd_bonus = 0;       // +1 за кожен сандаль Гермеса (макс 2)
+temp_spd_buff  = 0;       // +1 від зілля Гермеса
+temp_atk_buff  = 0;       // +5 від зілля Геракла
+buff_duration  = 0;       // Кадри до кінця тимчасового бафу
+
+// ════ ФІЗИКА ════
+hspd = 0;    // Горизонтальна швидкість (knockback)
+vspd = 0;    // Вертикальна швидкість
+grv  = 0.5;  // Гравітація
+
+// ════ СТАН ════
+l_right      = true;
+is_damage    = false;
+is_frozen    = false;   // Заморозка від Тіні Аїда
+freeze_timer = 0;
+
+// ════ ЗБРОЯ ════
+// Індекси: 0=Тризубець 1=Спис 2=Кайло 3=Коса 4=Весло 5=Меч
+weapon_names    = ["Тризубець","Спис","Кайло","Коса","Весло","Меч"];
+weapon_sprites  = [spr_weapon_trident, spr_weapon_spear,
+                   spr_weapon_pickaxe, spr_weapon_scythe,
+                   spr_weapon_oar,     spr_weapon_sword];
+
+// ATK і множник SPD — точно з дизайн-документу
+weapon_atk      = [1, 2, 5, 3, 4, 10];
+weapon_spd_mult = [1.0, 2.0, 0.25, 1.0, 0.5, 2.0];
+
+// Розблокована зброя (false = ще не отримана)
+weapon_unlocked = [false, false, false, false, false, false];
+// На початку гравець БЕЗ ЗБРОЇ — отримає Тризубець від Тритона
+
+current_weapon = -1;  // -1 = немає зброї
+
+// ════ ТРИЗУБЕЦЬ / СПИС ════
+trident_instance = noone;
+
+// ════ КЛЮЧ ОЛІМПУ ════
+has_olympus_key = false;
+
+// ════ ФУНКЦІЇ ════
+_unlock_weapon = function(_index)
+{
+    weapon_unlocked[_index] = true;
+    current_weapon          = _index;
+};
+
+_switch_weapon = function(_delta)
+{
+    if (current_weapon == -1) exit;
+    var _n = array_length(weapon_unlocked);
+    var _next = current_weapon;
+    repeat (_n)
+    {
+        _next = (_next + _delta + _n) mod _n;
+        if (weapon_unlocked[_next]) { current_weapon = _next; break; }
+    }
+};
+
+
+═══════════════════════════════════════════════════════════════════
+  1b. OBJ_PLAYER — Step Event (ОНОВЛЕНО)
+      Нові клавіші з дизайн-документу:
+      W/↑ = стрибок,  S/↓ = проскочити крізь платформу,
+      E   = кидок/кинути зброю,  F = активувати предмет,
+      1-6 = вибір зброї,  Z = здоров'я, X = Геракл, C = Гермес
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_player — Step Event
+─────────────────────────────────────────
+// ════════════════════════════════════════
+// БЛОК 1: ЧИТАННЯ КЛАВІШ
+// ════════════════════════════════════════
+var _left  = keyboard_check(ord("A")) || keyboard_check(vk_left);
+var _right = keyboard_check(ord("D")) || keyboard_check(vk_right);
+var _jump  = keyboard_check_pressed(ord("W")) || keyboard_check_pressed(vk_up);
+var _drop  = keyboard_check_pressed(ord("S")) || keyboard_check_pressed(vk_down);
+
+var _e_pressed = keyboard_check_pressed(ord("E"));   // Кидок зброї
+var _f_pressed = keyboard_check_pressed(ord("F"));   // Взаємодія з предметом
+var _q_pressed = keyboard_check_pressed(ord("Q"));   // Закрити діалог
+
+// Зілля
+var _z_pressed = keyboard_check_pressed(ord("Z"));   // Зілля здоров'я
+var _x_pressed = keyboard_check_pressed(ord("X"));   // Зілля Геракла
+var _c_pressed = keyboard_check_pressed(ord("C"));   // Зілля Гермеса
+
+// Колесо миші — переключення зброї
+var _wheel_up   = mouse_wheel_up();
+var _wheel_down = mouse_wheel_down();
+
+// Клавіші 1-6 — пряме переключення зброї
+for (var _ki = 0; _ki < 6; _ki++)
+{
+    if (keyboard_check_pressed(ord(string(_ki + 1))))
+    {
+        if (weapon_unlocked[_ki])
+            current_weapon = _ki;
+    }
+}
+
+// Колесо миші
+if (_wheel_up)   _switch_weapon(1);
+if (_wheel_down) _switch_weapon(-1);
+
+// ════════════════════════════════════════
+// БЛОК 2: ЗАМОРОЗКА (Тінь Аїда)
+// ════════════════════════════════════════
+if (is_frozen)
+{
+    freeze_timer--;
+    if (freeze_timer <= 0) { is_frozen = false; }
+    _left = false; _right = false;
+}
+
+// ════════════════════════════════════════
+// БЛОК 3: РУХ
+// ════════════════════════════════════════
+var _move = _right - _left;
+
+var _weapon_spd  = (current_weapon >= 0) ? weapon_spd_mult[current_weapon] : 1.0;
+var _current_spd = spd * _weapon_spd * 10 + (perm_spd_bonus + temp_spd_buff) * 10;
+var _move_hspd   = _move * _current_spd;
+
+if (_move > 0) { l_right = true;  image_xscale =  1; }
+if (_move < 0) { l_right = false; image_xscale = -1; }
+
+// ════════════════════════════════════════
+// БЛОК 4: ГРАВІТАЦІЯ
+// ════════════════════════════════════════
+vspd += grv;
+if (vspd > 20) vspd = 20;
+
+// ════════════════════════════════════════
+// БЛОК 5: ЗІТКНЕННЯ З ПЛАТФОРМАМИ
+// ════════════════════════════════════════
+var _on_ground = place_meeting(x, y + 1, obj_platform);
+
+// --- S: Проскочити крізь тонку платформу ---
+// (лише якщо платформа є obj_thin_platform — нащадок obj_platform)
+if (_drop && _on_ground && place_meeting(x, y + 1, obj_thin_platform))
+{
+    y    += 8;          // Штовхаємо гравця вниз крізь платформу
+    vspd  = 1;
+}
+
+// Горизонталь
+var _total_hspd = _move_hspd + hspd;
+if (place_meeting(x + _total_hspd, y, obj_platform))
+{
+    while (!place_meeting(x + sign(_total_hspd), y, obj_platform))
+        x += sign(_total_hspd);
+    _total_hspd = 0;
+    hspd        = 0;
+}
+x += _total_hspd;
+
+hspd *= 0.75;
+if (abs(hspd) < 0.5) hspd = 0;
+
+// Стрибок
+if (_on_ground && _jump)
+{
+    vspd = -12;
+    if (audio_exists(snd_jump)) audio_play_sound(snd_jump, 1, false);
+}
+
+// Вертикаль
+if (place_meeting(x, y + vspd, obj_platform))
+{
+    while (!place_meeting(x, y + sign(vspd), obj_platform))
+        y += sign(vspd);
+    vspd = 0;
+}
+y += vspd;
+
+// ════════════════════════════════════════
+// БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДія)
+// ════════════════════════════════════════
+var _can_throw = (current_weapon == 0 || current_weapon == 1);
+
+if (_can_throw && instance_exists(trident_instance))
+{
+    var _t = trident_instance;
+
+    // E — кинути зброю
+    if (_e_pressed)
+    {
+        if (_t.stuck)
+        {
+            // Знімаємо зі стіни і кидаємо знову
+            _t.stuck = false;
+            var _n   = instance_number(obj_trident_platform);
+            for (var _i = _n - 1; _i >= 0; _i--)
+            {
+                var _pl = instance_find(obj_trident_platform, _i);
+                if (instance_exists(_pl)) instance_destroy(_pl);
+            }
+        }
+        if (!_t.thrown && !_t.stuck)
+        {
+            _t.thrown       = true;
+            _t.timer        = 0;
+            _t.x            = x + image_xscale * 24;
+            _t.y            = y - 8;
+            _t.image_xscale = image_xscale;
+        }
+    }
+
+    // F — повернути з будь-якої відстані (натискання "1" у документі)
+    // У документі написано "цифру 1", але F — кнопка взаємодії
+    // Залишаємо обидва варіанти:
+    if (_f_pressed || keyboard_check_pressed(ord("1")))
+    {
+        if (_t.stuck || _t.thrown)
+        {
+            var _n = instance_number(obj_trident_platform);
+            for (var _i = _n - 1; _i >= 0; _i--)
+            {
+                var _pl = instance_find(obj_trident_platform, _i);
+                if (instance_exists(_pl)) instance_destroy(_pl);
+            }
+            _t.stuck       = false;
+            _t.thrown      = false;
+            _t.image_angle = 0;
+        }
+    }
+}
+
+// Меч — випад (E при current_weapon == 5)
+if (current_weapon == 5 && _e_pressed)
+{
+    hspd = image_xscale * 18;
+    var _hit = instance_place(x + image_xscale * 40, y, obj_enemy);
+    if (instance_exists(_hit))
+        with (_hit) hp -= (obj_player.weapon_atk[5] + obj_player.temp_atk_buff);
+}
+
+// ════════════════════════════════════════
+// БЛОК 7: СМЕРТЬ
+// ════════════════════════════════════════
+if (hp <= 0)
+{
+    hp = max_hp;
+    if (variable_global_exists("checkpoint_room") && global.checkpoint_room == room)
+    {
+        x = global.checkpoint_x;
+        y = global.checkpoint_y;
+        vspd = 0; hspd = 0;
+    }
+    else if (variable_global_exists("checkpoint_room"))
+        room_goto(global.checkpoint_room);
+    else
+        game_restart();
+}
+
+// ════════════════════════════════════════
+// БЛОК 8: ТИМЧАСОВІ БАФИ
+// ════════════════════════════════════════
+if (buff_duration > 0)
+{
+    buff_duration--;
+    if (buff_duration <= 0) { temp_spd_buff = 0; temp_atk_buff = 0; }
+}
+
+// ════════════════════════════════════════
+// БЛОК 9: ЗІЛЛЯ (Z / X / C)
+// ════════════════════════════════════════
+
+// Z — Зілля здоров'я: відновлює 5 HP (з дизайн-документу)
+if (_z_pressed && potion_heal_count > 0 && hp < max_hp)
+{
+    hp = min(hp + 5, max_hp);
+    potion_heal_count--;
+    // audio_play_sound(snd_potion_heal, 1, false);
+}
+
+// X — Зілля Геракла: +5 ATK на 60 секунд (з дизайн-документу)
+if (_x_pressed && potion_strength_count > 0 && buff_duration <= 0)
+{
+    potion_strength_count--;
+    temp_atk_buff = 5;
+    buff_duration = room_speed * 60;   // 60 секунд
+    // audio_play_sound(snd_potion_strength, 1, false);
+}
+
+// C — Зілля Гермеса: +1 SPD на 60 секунд (з дизайн-документу)
+if (_c_pressed && potion_speed_count > 0 && buff_duration <= 0)
+{
+    potion_speed_count--;
+    temp_spd_buff = 1;
+    buff_duration = room_speed * 60;   // 60 секунд
+    // audio_play_sound(snd_potion_speed, 1, false);
+}
+
+
+═══════════════════════════════════════════════════════════════════
+  2. OBJ_COMMENT_ZONE — Зона коментарів (НОВИЙ ОБ'ЄКТ)
+     Розміщується в кімнаті. Коли гравець входить в зону —
+     Посейдон щось коментує. Закривається клавішею Q.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_comment_zone — Create Event
+─────────────────────────────────────────
+// ---- РОЗМІР ЗОНИ (встановлюється в кімнаті) ----
+zone_width  = 120;    // Ширина зони спрацювання
+zone_height = 200;    // Висота зони
+
+// ---- ТЕКСТ ----
+// Встановлюється через Instance Creation Code в кімнаті:
+// comment_text = "Хм, тут темно...";
+comment_text = "...";
+
+// Підтримка кількох рядків — розбиваємо по "|"
+// Приклад: "Перший рядок|Другий рядок|Третій рядок"
+comment_lines = string_split(comment_text, "|");
+current_line  = 0;    // Поточний рядок діалогу
+
+// ---- СТАН ----
+is_showing    = false;   // Зараз показується?
+has_triggered = false;   // Вже спрацьовувало? (один раз)
+
+// ---- АНІМАЦІЯ ----
+box_alpha     = 0;       // Прозорість вікна (плавна поява)
+box_alpha_target = 0;
+
+
+─────────────────────────────────────────
+/// @description obj_comment_zone — Step Event
+─────────────────────────────────────────
+if (!instance_exists(obj_player)) exit;
+
+// ---- ПЕРЕВІРКА ВХОДУ В ЗОНУ ----
+var _px = obj_player.x;
+var _py = obj_player.y;
+var _in_zone = (_px > x && _px < x + zone_width
+             && _py > y && _py < y + zone_height);
+
+// Запускаємо один раз коли гравець входить
+if (_in_zone && !has_triggered)
+{
+    has_triggered = true;
+    is_showing    = true;
+    current_line  = 0;
+    box_alpha_target = 1;
+    // audio_play_sound(snd_comment, 1, false);
+}
+
+// ---- Q: НАСТУПНИЙ РЯДОК / ЗАКРИТИ ----
+if (is_showing && keyboard_check_pressed(ord("Q")))
+{
+    current_line++;
+    if (current_line >= array_length(comment_lines))
+    {
+        // Всі рядки показано — закриваємо
+        is_showing       = false;
+        box_alpha_target = 0;
+    }
+}
+
+// Плавна зміна прозорості
+box_alpha = lerp(box_alpha, box_alpha_target, 0.15);
+
+
+─────────────────────────────────────────
+/// @description obj_comment_zone — Draw GUI Event
+─────────────────────────────────────────
+if (!is_showing || box_alpha < 0.05) exit;
+
+var _gw   = display_get_gui_width();
+var _gh   = display_get_gui_height();
+var _bw   = _gw * 0.7;
+var _bh   = 90;
+var _bx   = _gw / 2 - _bw / 2;
+var _by   = _gh - _bh - 70;
+
+// Тло вікна
+draw_set_alpha(box_alpha * 0.88);
+draw_set_color(make_color_rgb(10, 20, 40));
+draw_rectangle(_bx, _by, _bx + _bw, _by + _bh, false);
+
+// Контур
+draw_set_alpha(box_alpha);
+draw_set_color(make_color_rgb(80, 140, 220));
+draw_rectangle(_bx, _by, _bx + _bw, _by + _bh, true);
+
+// Ім'я персонажа
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_color(make_color_rgb(100, 200, 255));
+if (font_exists(fnt_main)) draw_set_font(fnt_main);
+draw_text(_bx + 14, _by + 10, "Посейдон:");
+
+// Текст коментаря
+draw_set_color(c_white);
+var _line_text = "";
+if (current_line < array_length(comment_lines))
+    _line_text = comment_lines[current_line];
+draw_text_ext(_bx + 14, _by + 30, _line_text, 24, _bw - 28);
+
+// Підказка "Q — далі"
+var _has_more = (current_line < array_length(comment_lines) - 1);
+draw_set_halign(fa_right);
+draw_set_color(make_color_rgb(140, 160, 180));
+draw_text(_bx + _bw - 10, _by + _bh - 20,
+    _has_more ? "[Q] Далі ▶" : "[Q] Закрити ✕");
+
+draw_set_alpha(1);
+draw_set_halign(fa_left);
+draw_set_color(c_white);
+draw_set_font(-1);
+
+
+═══════════════════════════════════════════════════════════════════
+  3. OBJ_BOSS_TRITON — ПОВНА ПЕРЕРОБКА
+     hp=50  atk=1  sp=2
+     Гравець НЕ МАЄ ЗБРОЇ. Перемагає натискаючи кнопки
+     щоб впало каміння на Тритона (10 шкоди за камінь).
+     Тритон літає між 4 точками.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_triton — Create Event
+─────────────────────────────────────────
+boss_name = "ТРИТОН";
+max_hp    = 50;
+hp        = max_hp;
+atk       = 1;     // З дизайн-документу
+phase     = 1;
+
+// ---- 4 ТОЧКИ ПАТРУЛЯ ----
+var _cx = x; var _cy = y;
+point_count = 4;
+point_x[0] = _cx - 280;  point_y[0] = _cy - 120;
+point_x[1] = _cx + 280;  point_y[1] = _cy - 120;
+point_x[2] = _cx + 280;  point_y[2] = _cy + 80;
+point_x[3] = _cx - 280;  point_y[3] = _cy + 80;
+current_point = 0;
+fly_speed     = 3;
+
+// ---- КОНТАКТНА АТАКА ----
+// Тритон завдає мінімальну шкоду при дотику (atk=1)
+contact_cd     = 0;
+contact_cd_max = 90;
+
+is_dead = false;
+image_speed = 0.1;
+
+// ---- ПІДКАЗКА ДЛЯ ГРАВЦЯ ----
+// obj_interactive_button вже розміщені в кімнаті.
+// Коли гравець натискає кнопку — з'являється obj_falling_rocks
+// який при попаданні в Тритона завдає 10 шкоди.
+// Це реалізовано через User Event 0 на Тритоні нижче.
+
+
+─────────────────────────────────────────
+/// @description obj_boss_triton — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_trident_reward);
+    instance_destroy();
+    exit;
+}
+
+if (contact_cd > 0) contact_cd--;
+
+// ---- РУХ МІЖ ТОЧКАМИ ----
+var _tx = point_x[current_point];
+var _ty = point_y[current_point];
+var _d  = point_distance(x, y, _tx, _ty);
+
+if (_d > fly_speed)
+{
+    var _dir = point_direction(x, y, _tx, _ty);
+    x += lengthdir_x(fly_speed, _dir);
+    y += lengthdir_y(fly_speed, _dir);
+    image_xscale = (lengthdir_x(1, _dir) > 0) ? 1 : -1;
+}
+else
+{
+    x = _tx; y = _ty;
+    current_point = (current_point + 1) mod point_count;
+}
+
+// ---- КОНТАКТНА ШКОДА ----
+if (contact_cd <= 0 && distance_to_object(obj_player) < 40
+    && !obj_player.is_damage)
+{
+    obj_player.hp       -= atk;
+    var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+    obj_player.hspd     = lengthdir_x(8, _kd);
+    obj_player.vspd     = -5;
+    obj_player.is_damage = true;
+    obj_player.alarm[0]  = room_speed;
+    contact_cd = contact_cd_max;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_boss_triton — User Event 0
+// Викликається obj_falling_rocks коли попадає в Тритона.
+// 10 шкоди за кожен камінь.
+─────────────────────────────────────────
+hp -= 10;
+// Ефект попадання каміння
+// audio_play_sound(snd_triton_hit, 1, false);
+
+
+─────────────────────────────────────────
+// ВАЖЛИВО: obj_falling_rocks в цій кімнаті — Step Event
+// Додати в кінець Step Event obj_falling_rocks:
+─────────────────────────────────────────
+// В obj_falling_rocks Step Event, після шкоди гравцю, додати:
+/*
+// Шкода Тритону якщо попали в нього під час падіння
+if (state == 1 && instance_exists(obj_boss_triton))
+{
+    if (place_meeting(x, y, obj_boss_triton))
+    {
+        with (obj_boss_triton) event_user(0);  // 10 шкоди
+        state = 2;   // Каміння залишається на місці
+    }
+}
+*/
+
+
+═══════════════════════════════════════════════════════════════════
+  4. OBJ_BOSS_NYMPH — ПОВНА ПЕРЕРОБКА
+     hp=10  atk=2  sp=2
+     Воївниця на коні. Бігає по землі між 2 точками.
+     Зупиняється і стріляє градом стріл з пропусками.
+     Гравець ховається на платформах вище і бʼє знизу.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_nymph — Create Event
+─────────────────────────────────────────
+boss_name = "НІМФА";
+max_hp    = 10;
+hp        = max_hp;
+atk       = 2;
+phase     = 1;
+
+// ---- ДВІ ТОЧКИ БІГУ ----
+left_x    = x - 280;
+right_x   = x + 280;
+ground_y  = y;         // Висота землі (встановлюється в кімнаті)
+move_dir  = 1;         // 1=вправо, -1=вліво
+run_speed = 4;
+
+// ---- СТАНИ ----
+// 0=біжить, 1=зупинилась+заряджає стріли, 2=стріляє, 3=пауза
+state      = 0;
+stop_timer = 0;        // Таймер зупинки
+shoot_cd   = 0;
+barrage_count = 0;     // Скільки разів уже вистрілила в поточному залпі
+
+// ---- ФІЗИКА (кінь є наземним) ----
+vspd = 0;
+grv  = 0.8;
+
+// ---- ЗАЛП СТРІЛ ----
+// Стріли закривають все поле АЛЕ є 2-3 безпечних пропуски
+barrage_gap_positions = [];   // Безпечні X-позиції (рандомні)
+barrage_arrows_total  = 20;   // Всього стріл у залпі
+barrage_gap_width     = 50;   // Ширина безпечного пропуску
+
+is_dead = false;
+image_speed = 0.12;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_nymph — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_spear_reward);
+    instance_destroy();
+    exit;
+}
+
+// Гравітація
+vspd += grv;
+if (place_meeting(x, y + vspd, obj_platform))
+{
+    while (!place_meeting(x, y + sign(vspd), obj_platform)) y += sign(vspd);
+    vspd = 0;
+}
+y += vspd;
+
+if (shoot_cd > 0) shoot_cd--;
+
+switch (state)
+{
+    // ------ 0: БІЖИТЬ ------
+    case 0:
+        x += run_speed * move_dir;
+        image_xscale = move_dir;
+
+        // Розворот на межах і при стіні
+        if (x <= left_x || x >= right_x
+            || place_meeting(x + run_speed * move_dir, y, obj_platform))
+        {
+            move_dir *= -1;
+            // Зупиняємось кожні 2 пробіги для стрільби
+            stop_timer++;
+            if (stop_timer >= 2)
+            {
+                stop_timer = 0;
+                state      = 1;
+                shoot_cd   = room_speed;   // 1 секунда заряджання
+                barrage_count = 0;
+
+                // Генеруємо безпечні пропуски (3 штуки)
+                barrage_gap_positions = [];
+                var _room_w = room_width;
+                repeat (3)
+                {
+                    array_push(barrage_gap_positions,
+                        50 + irandom(_room_w - 100));
+                }
+            }
+        }
+    break;
+
+    // ------ 1: ЗАРЯДЖАЄ СТРІЛИ (пауза) ------
+    case 1:
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+
+        if (shoot_cd <= 0)
+        {
+            state = 2;  // Стріляємо
+        }
+    break;
+
+    // ------ 2: ЗАЛП СТРІЛ ------
+    case 2:
+        // Стріляємо barrage_arrows_total стріл рівномірно по ширині кімнати
+        // з урахуванням безпечних пропусків
+        if (shoot_cd <= 0)
+        {
+            var _step = room_width / barrage_arrows_total;
+            for (var _ai = 0; _ai < barrage_arrows_total; _ai++)
+            {
+                var _ax = _ai * _step + _step / 2;
+
+                // Перевіряємо чи ця позиція не в безпечному пропуску
+                var _in_gap = false;
+                for (var _gi = 0; _gi < array_length(barrage_gap_positions); _gi++)
+                {
+                    var _gx = barrage_gap_positions[_gi];
+                    if (abs(_ax - _gx) < barrage_gap_width / 2)
+                    {
+                        _in_gap = true;
+                        break;
+                    }
+                }
+
+                if (!_in_gap)
+                {
+                    var _arr      = instance_create_layer(_ax, y - 50,
+                                        "Instances", obj_arrow);
+                    _arr.direction_x = 0;    // Летять вниз
+                    _arr.fly_speed   = 8;
+                    _arr.damage      = atk;
+                    _arr.image_angle = 270;  // Стріла летить вниз
+                }
+            }
+
+            // audio_play_sound(snd_nymph_barrage, 1, false);
+            shoot_cd = room_speed * 2;   // 2 секунди до наступного залпу
+            state    = 3;
+        }
+    break;
+
+    // ------ 3: ПАУЗА ПІСЛЯ ЗАЛПУ ------
+    case 3:
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+        if (shoot_cd <= 0)
+            state = 0;  // Повертаємось до бігу
+    break;
+}
+
+// ---- КОНТАКТНА ШКОДА ----
+if (distance_to_object(obj_player) < 50 && !obj_player.is_damage)
+{
+    obj_player.hp       -= atk;
+    var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+    obj_player.hspd     = lengthdir_x(8, _kd);
+    obj_player.vspd     = -5;
+    obj_player.is_damage = true;
+    obj_player.alarm[0]  = room_speed;
+}
+
+
+─────────────────────────────────────────
+// ОКРЕМЕ: obj_arrow — Step Event оновлення
+// Стріла Німфи летить ВНИЗ (direction_x=0, потрібна вертикаль)
+─────────────────────────────────────────
+// Додати в obj_arrow Create Event:
+// direction_y = 0;  // 1=вниз, -1=вгору (за замовчуванням)
+// Оновити Step:
+// x += fly_speed * direction_x;
+// y += fly_speed * (direction_y != 0 ? direction_y : 0);
+
+
+═══════════════════════════════════════════════════════════════════
+  5. OBJ_BOSS_URANUS — ПОВНА ПЕРЕРОБКА
+     hp=40  atk=5  sp=5
+     Падший бог з кайлом. 4 завали між ним і гравцем.
+     Руйнує завали кайлом, може застрягти в них.
+     Саме тоді його зручно атакувати!
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_uranus — Create Event
+─────────────────────────────────────────
+boss_name = "УРАН";
+max_hp    = 40;
+hp        = max_hp;
+atk       = 5;
+phase     = 1;
+
+// ---- ПОЗИЦІЯ ----
+spawn_x = x;   // Стартова X — бос стоїть тут весь бій
+
+// ---- ЗАВАЛИ (4 штуки між босом і гравцем) ----
+// Завали створюються в кімнаті як obj_uranus_barrier
+// Бос знає про них через instance_find
+barrier_hp      = [3, 3, 3, 3];   // HP кожного завалу
+barrier_current = 0;              // Який завал зараз б'є (0-3)
+
+// ---- СТАНИ ----
+// 0=стоїть і чекає, 1=б'є завал, 2=застряг (вразливий!),
+// 3=атакує гравця кайлом
+state      = 0;
+action_cd  = 0;
+swing_cd   = 0;     // Кулдаун удару кайлом
+is_stuck   = false; // Застряг у завалі — вразливий
+
+// ---- АТАКА КАЙЛОМ ----
+swing_range   = 80;
+swing_cd_max  = room_speed * 1.5;
+
+// ---- ФІЗИКА ----
+vspd = 0;
+grv  = 0.6;
+
+is_dead = false;
+image_speed = 0.1;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_uranus — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_pickaxe_reward);
+    instance_destroy();
+    exit;
+}
+
+// Гравітація
+vspd += grv;
+if (place_meeting(x, y + vspd, obj_platform))
+{
+    while (!place_meeting(x, y + sign(vspd), obj_platform)) y += sign(vspd);
+    vspd = 0;
+}
+y += vspd;
+
+if (action_cd > 0) action_cd--;
+if (swing_cd   > 0) swing_cd--;
+
+// ---- ПОШУК ЗАВАЛІВ ----
+var _barriers = [];
+var _bn       = instance_number(obj_uranus_barrier);
+for (var _i = 0; _i < _bn; _i++)
+    array_push(_barriers, instance_find(obj_uranus_barrier, _i));
+
+switch (state)
+{
+    // ------ 0: СТОЇТЬ — вибирає дію ------
+    case 0:
+        if (action_cd > 0) break;
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+
+        var _dist = distance_to_object(obj_player);
+
+        // Якщо гравець на землі і немає завалів між ними — атакуємо
+        if (_dist <= swing_range && array_length(_barriers) == 0)
+        {
+            state     = 3;
+            action_cd = swing_cd_max;
+        }
+        // Інакше — б'ємо наступний завал
+        else if (array_length(_barriers) > 0)
+        {
+            state     = 1;
+            action_cd = room_speed * 0.5;
+        }
+    break;
+
+    // ------ 1: Б'Є ЗАВАЛ ------
+    case 1:
+        // Знаходимо найближчий завал до гравця
+        var _target_barrier = noone;
+        var _min_dist_to_player = infinity;
+
+        for (var _i = 0; _i < array_length(_barriers); _i++)
+        {
+            var _b = _barriers[_i];
+            if (!instance_exists(_b)) continue;
+            var _bd = abs(_b.x - obj_player.x);
+            if (_bd < _min_dist_to_player)
+            {
+                _min_dist_to_player = _bd;
+                _target_barrier     = _b;
+            }
+        }
+
+        if (!instance_exists(_target_barrier)) { state = 0; break; }
+
+        image_xscale = (_target_barrier.x > x) ? 1 : -1;
+
+        if (action_cd <= 0 && swing_cd <= 0)
+        {
+            // Завдаємо удар по завалу
+            _target_barrier.hp--;
+            swing_cd = swing_cd_max;
+            // audio_play_sound(snd_uranus_swing, 1, false);
+
+            // Шанс застрягнути (25% кожного удару)
+            if (irandom(3) == 0)
+            {
+                is_stuck  = true;
+                state     = 2;
+                action_cd = room_speed * 2;  // Застряг на 2 секунди
+                // audio_play_sound(snd_uranus_stuck, 1, false);
+                break;
+            }
+
+            // Якщо завал зруйновано
+            if (_target_barrier.hp <= 0)
+            {
+                instance_destroy(_target_barrier);
+                state = 0;
+                action_cd = room_speed;
+            }
+        }
+    break;
+
+    // ------ 2: ЗАСТРЯГ — ВРАЗЛИВИЙ! ------
+    case 2:
+        is_stuck = true;
+        // Бос нерухомий і не атакує
+        // Підсвічування (обробляється в Draw)
+        if (action_cd <= 0)
+        {
+            is_stuck = false;
+            state    = 0;
+            action_cd = room_speed * 0.5;
+        }
+    break;
+
+    // ------ 3: АТАКУЄ ГРАВЦЯ КАЙЛОМ ------
+    case 3:
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+
+        if (action_cd <= 0 && !obj_player.is_damage)
+        {
+            if (distance_to_object(obj_player) <= swing_range)
+            {
+                obj_player.hp       -= atk;
+                var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+                obj_player.hspd     = lengthdir_x(10, _kd);
+                obj_player.vspd     = -6;
+                obj_player.is_damage = true;
+                obj_player.alarm[0]  = room_speed;
+                // audio_play_sound(snd_uranus_attack, 1, false);
+            }
+            state = 0;
+            action_cd = room_speed * 1.5;
+        }
+    break;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_boss_uranus — Draw Event
+─────────────────────────────────────────
+// Підсвічування червоним коли застряг (вразливий)
+if (is_stuck)
+{
+    var _flash = 0.5 + 0.5 * sin(current_time / 80000);
+    image_blend = merge_color(c_white, c_red, _flash);
+    // Текст над босом
+    draw_set_halign(fa_center);
+    draw_set_color(c_red);
+    if (font_exists(fnt_main)) draw_set_font(fnt_main);
+    draw_text(x, y - sprite_height / 2 - 20, "ВРАЗЛИВИЙ!");
+    draw_set_halign(fa_left);
+    draw_set_color(c_white);
+    draw_set_font(-1);
+}
+else
+{
+    image_blend = c_white;
+}
+draw_self();
+
+
+─────────────────────────────────────────
+/// @description obj_uranus_barrier — Create Event
+// Завал між Ураном і гравцем
+─────────────────────────────────────────
+hp          = 3;    // 3 удари кайлом до руйнування
+image_index = 0;    // 0=цілий, 1=тріснутий, 2=сильно тріснутий
+image_speed = 0;
+hit_flash   = 0;
+
+─────────────────────────────────────────
+/// @description obj_uranus_barrier — Step Event
+─────────────────────────────────────────
+// Гравець може стояти на завалі (він є платформою)
+if (hp <= 0) { instance_destroy(); exit; }
+image_index = clamp(3 - hp, 0, 2);
+if (hit_flash > 0) { hit_flash--; image_blend = merge_color(c_white, c_orange, hit_flash/8); }
+else image_blend = c_white;
+
+
+═══════════════════════════════════════════════════════════════════
+  6. OBJ_BOSS_CHARON — ПОВНА ПЕРЕРОБКА
+     hp=100  atk=3  sp=3
+     Плаває на човні по воді. Кидає косу-бумеранг.
+     Гравець б'є кайлом по сталактитах — падає каміння.
+     Каміння завдає 10 шкоди І босу І гравцю.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_charon — Create Event
+─────────────────────────────────────────
+boss_name = "ХАРОН";
+max_hp    = 100;
+hp        = max_hp;
+atk       = 3;
+phase     = 1;
+
+// ---- РУХ ЧОВНОМ ----
+// Харон плаває ліво-право по воді
+water_left  = x - 350;
+water_right = x + 350;
+boat_speed  = 3;
+move_dir    = 1;
+
+// ---- КОСА-БУМЕРАНГ ----
+scythe_instance  = noone;  // ID кинутої коси
+scythe_cd        = 0;
+scythe_cd_max    = room_speed * 3;   // Кидає кожні 3 секунди
+scythe_fly_speed = 7;
+scythe_damage    = atk;
+
+// ---- СТАЛАКТИТИ ----
+// obj_stalactite розміщені в кімнаті. У кожного є 4 каміння.
+// Гравець б'є кайлом → падає 1 камінь → шкода 10 і боссу і гравцю
+// Після 4 каменів сталактит зникає.
+
+// ---- ФІЗИКА (човен ковзає по воді) ----
+// Вертикального руху немає — човен на рівні води
+
+is_dead = false;
+image_speed = 0.08;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_charon — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_scythe_reward);
+    // Знищуємо косу якщо летить
+    if (instance_exists(scythe_instance)) instance_destroy(scythe_instance);
+    instance_destroy();
+    exit;
+}
+
+if (scythe_cd > 0) scythe_cd--;
+
+// ---- РУХ ЧОВНОМ ----
+x += boat_speed * move_dir;
+image_xscale = move_dir;
+
+if (x <= water_left)  { move_dir =  1; x = water_left;  }
+if (x >= water_right) { move_dir = -1; x = water_right; }
+
+// ---- КОСА-БУМЕРАНГ ----
+// Кидає косу в гравця, вона летить і повертається як бумеранг
+if (scythe_cd <= 0 && !instance_exists(scythe_instance))
+{
+    scythe_instance       = instance_create_layer(x, y - 10,
+                                "Instances", obj_charon_scythe);
+    scythe_instance.owner = id;
+    scythe_instance.dmg   = scythe_damage;
+    scythe_instance.spd   = scythe_fly_speed;
+    scythe_instance.target_x = obj_player.x;
+    scythe_instance.target_y = obj_player.y;
+    scythe_cd = scythe_cd_max;
+    // audio_play_sound(snd_charon_scythe, 1, false);
+}
+
+// ---- КОНТАКТНА ШКОДА (човен б'є гравця) ----
+if (distance_to_object(obj_player) < 50 && !obj_player.is_damage)
+{
+    obj_player.hp       -= atk;
+    var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+    obj_player.hspd     = lengthdir_x(8, _kd);
+    obj_player.vspd     = -4;
+    obj_player.is_damage = true;
+    obj_player.alarm[0]  = room_speed;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_charon_scythe — Create Event
+// Коса-бумеранг Харона
+─────────────────────────────────────────
+owner     = noone;   // ID Харона
+dmg       = 3;
+spd       = 7;
+target_x  = 0;
+target_y  = 0;
+returning = false;   // Летить до цілі чи повертається?
+lifetime  = room_speed * 4;
+
+─────────────────────────────────────────
+/// @description obj_charon_scythe — Step Event
+─────────────────────────────────────────
+image_angle += 12;   // Крутиться
+lifetime--;
+if (lifetime <= 0) { instance_destroy(); exit; }
+
+if (!returning)
+{
+    // Летить до позиції гравця
+    var _d = point_distance(x, y, target_x, target_y);
+    if (_d > spd)
+    {
+        var _dir = point_direction(x, y, target_x, target_y);
+        x += lengthdir_x(spd, _dir);
+        y += lengthdir_y(spd, _dir);
+    }
+    else
+        returning = true;  // Досягла цілі — повертається
+
+    // Шкода гравцю під час польоту
+    if (instance_exists(obj_player) && place_meeting(x, y, obj_player)
+        && !obj_player.is_damage)
+    {
+        obj_player.hp       -= dmg;
+        obj_player.is_damage = true;
+        obj_player.alarm[0]  = room_speed;
+    }
+}
+else
+{
+    // Повертається до Харона
+    if (!instance_exists(owner)) { instance_destroy(); exit; }
+    var _d = point_distance(x, y, owner.x, owner.y);
+    if (_d > spd)
+    {
+        var _dir = point_direction(x, y, owner.x, owner.y);
+        x += lengthdir_x(spd * 1.3, _dir);
+        y += lengthdir_y(spd * 1.3, _dir);
+    }
+    else
+        instance_destroy();  // Повернулась
+}
+
+
+─────────────────────────────────────────
+/// @description obj_stalactite — Create Event
+// Сталактит: гравець б'є кайлом → падає каміння → шкода 10
+─────────────────────────────────────────
+stones_left = 4;      // Скільки каменів може впасти
+hit_cd      = 0;      // Кулдаун удару (щоб не спамити)
+interact_range = 60;
+
+─────────────────────────────────────────
+/// @description obj_stalactite — Step Event
+─────────────────────────────────────────
+if (stones_left <= 0) { instance_destroy(); exit; }
+if (hit_cd > 0) hit_cd--;
+
+// Гравець б'є кайлом (E або F) поблизу
+if (!instance_exists(obj_player)) exit;
+var _dist = distance_to_object(obj_player);
+
+if (_dist <= interact_range && hit_cd <= 0
+    && obj_player.current_weapon == 2   // Кайло
+    && (keyboard_check_pressed(ord("E")) || keyboard_check_pressed(ord("F"))))
+{
+    stones_left--;
+    hit_cd = room_speed * 0.5;
+
+    // Створюємо камінь що падає
+    var _stone    = instance_create_layer(x + irandom_range(-20, 20), y,
+                        "Instances", obj_falling_stone);
+    _stone.damage = 10;   // 10 шкоди і гравцю і Харону
+
+    // audio_play_sound(snd_stalactite_hit, 1, false);
+
+    // Оновлюємо спрайт (тріщини)
+    image_index = clamp(4 - stones_left, 0, 3);
+}
+
+
+─────────────────────────────────────────
+/// @description obj_falling_stone — Create Event
+// Камінь що падає зі сталактиту
+─────────────────────────────────────────
+damage = 10;
+vspd   = 2;
+grv    = 0.6;
+hit_player = false;
+hit_boss   = false;
+
+─────────────────────────────────────────
+/// @description obj_falling_stone — Step Event
+─────────────────────────────────────────
+vspd += grv;
+y    += vspd;
+
+// Шкода Харону
+if (!hit_boss && instance_exists(obj_boss_charon)
+    && place_meeting(x, y, obj_boss_charon))
+{
+    obj_boss_charon.hp -= damage;
+    hit_boss = true;
+    // audio_play_sound(snd_stone_hit_boss, 1, false);
+}
+
+// Шкода гравцю
+if (!hit_player && instance_exists(obj_player)
+    && place_meeting(x, y, obj_player) && !obj_player.is_damage)
+{
+    obj_player.hp       -= damage;
+    obj_player.vspd     = -3;
+    obj_player.is_damage = true;
+    obj_player.alarm[0]  = room_speed;
+    hit_player = true;
+}
+
+// Зупинка на платформі
+if (place_meeting(x, y + vspd, obj_platform))
+{
+    while (!place_meeting(x, y + 1, obj_platform)) y++;
+    vspd = 0;
+    // Камінь залишається як перешкода (або знищується)
+    alarm[0] = room_speed * 3;
+}
+
+
+═══════════════════════════════════════════════════════════════════
+  7. OBJ_BOSS_MINOTAUR — ПОВНА ПЕРЕРОБКА
+     hp=60  atk=4  sp=3  — Весло в руках
+     Є колони — гравець ховається на них.
+     Мінотавр б'є по колонах. Колони ламаються після 5 ударів.
+     Якщо гравець на колоні під час удару — отримує шкоду.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_minotaur — Create Event
+─────────────────────────────────────────
+boss_name = "МІНОТАВР";
+max_hp    = 60;
+hp        = max_hp;
+atk       = 4;
+phase     = 1;
+
+// ---- РУХ ----
+move_speed = 3;
+move_dir   = 1;
+vspd = 0;
+grv  = 0.6;
+
+// ---- АТАКА ПО КОЛОНАХ ----
+// obj_minotaur_column розміщені в кімнаті
+column_strike_cd     = 0;
+column_strike_cd_max = room_speed * 2;
+nearest_column       = noone;
+
+// ---- ЗВИЧАЙНА АТАКА (якщо гравець на землі) ----
+melee_cd     = 0;
+melee_cd_max = room_speed * 1.5;
+melee_range  = 60;
+
+is_dead = false;
+image_speed = 0.1;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_minotaur — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_oar_reward);
+    instance_destroy();
+    exit;
+}
+
+// Гравітація
+vspd += grv;
+if (place_meeting(x, y + vspd, obj_platform))
+{
+    while (!place_meeting(x, y + sign(vspd), obj_platform)) y += sign(vspd);
+    vspd = 0;
+}
+y += vspd;
+
+if (column_strike_cd > 0) column_strike_cd--;
+if (melee_cd         > 0) melee_cd--;
+
+// ---- РУХ ДО ГРАВЦЯ ----
+var _dir_x = sign(obj_player.x - x);
+var _move  = _dir_x * move_speed;
+
+if (!place_meeting(x + _move, y, obj_platform))
+    x += _move;
+image_xscale = _dir_x;
+
+var _dist = distance_to_object(obj_player);
+
+// ---- ПОШУК КОЛОНИ НА ЯКІЙ ГРАВЕЦЬ ----
+// Якщо гравець на колоні — б'ємо по колоні
+var _player_on_column = noone;
+var _cn = instance_number(obj_minotaur_column);
+for (var _i = 0; _i < _cn; _i++)
+{
+    var _col = instance_find(obj_minotaur_column, _i);
+    if (!instance_exists(_col)) continue;
+    // Гравець стоїть на колоні якщо він прямо над нею
+    if (abs(obj_player.x - _col.x) < _col.col_width / 2
+        && abs(obj_player.y - (_col.y - _col.col_height / 2)) < 16)
+    {
+        _player_on_column = _col;
+        break;
+    }
+}
+
+if (instance_exists(_player_on_column) && column_strike_cd <= 0)
+{
+    // Б'ємо по колоні
+    _player_on_column.hp--;
+    column_strike_cd = column_strike_cd_max;
+    // audio_play_sound(snd_minotaur_strike, 1, false);
+
+    // Шкода гравцю якщо він на колоні під час удару
+    if (!obj_player.is_damage)
+    {
+        obj_player.hp       -= atk;
+        obj_player.vspd     = -5;
+        obj_player.is_damage = true;
+        obj_player.alarm[0]  = room_speed;
+    }
+}
+else if (!instance_exists(_player_on_column)
+         && _dist <= melee_range && melee_cd <= 0
+         && !obj_player.is_damage)
+{
+    // Гравець на землі — звичайна атака
+    obj_player.hp       -= atk;
+    var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+    obj_player.hspd     = lengthdir_x(9, _kd);
+    obj_player.vspd     = -5;
+    obj_player.is_damage = true;
+    obj_player.alarm[0]  = room_speed;
+    melee_cd = melee_cd_max;
+}
+
+
+─────────────────────────────────────────
+/// @description obj_minotaur_column — Create Event
+─────────────────────────────────────────
+hp         = 5;      // 5 ударів до руйнування
+col_width  = 40;
+col_height = 120;
+image_index = 0;
+image_speed = 0;
+
+─────────────────────────────────────────
+/// @description obj_minotaur_column — Step Event
+─────────────────────────────────────────
+if (hp <= 0)
+{
+    // Колона руйнується — гравець падає вниз
+    instance_destroy();
+    exit;
+}
+image_index = clamp(5 - hp, 0, 4);
+
+
+═══════════════════════════════════════════════════════════════════
+  8. OBJ_BOSS_WAR_GHOST — ПОВНА ПЕРЕРОБКА
+     hp=50  atk=4  sp=3
+     Летить зигзагами між 5 точками циклічно.
+     Підіймає по 5 Духів полеглих з купи кісток.
+     Поки духи живі — бос невразливий (літає вгорі).
+     Коли духи вбиті — бос спускається і вразливий.
+     Кожен вбитий дух завдає шкоди босу.
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_war_ghost — Create Event
+─────────────────────────────────────────
+boss_name = "ПРИВИД ВІЙНИ";
+max_hp    = 50;
+hp        = max_hp;
+atk       = 4;
+phase     = 1;
+
+// ---- 5 ТОЧОК ЗИГЗАГУ (верхня частина кімнати) ----
+var _cx = x; var _cy = y;
+point_count = 5;
+point_x[0] = _cx - 300;  point_y[0] = _cy - 150;
+point_x[1] = _cx - 100;  point_y[1] = _cy - 80;
+point_x[2] = _cx;        point_y[2] = _cy - 160;
+point_x[3] = _cx + 100;  point_y[3] = _cy - 80;
+point_x[4] = _cx + 300;  point_y[4] = _cy - 150;
+current_point = 0;
+fly_speed     = 4;
+
+// ---- ПІДЙОМ ДУХІВ ----
+summon_wave    = 0;         // Номер хвилі
+spirits_alive  = 0;        // Скільки духів зараз живе
+is_vulnerable  = false;    // Чи вразливий бос
+summon_cd      = 0;
+summon_cd_max  = room_speed * 1;   // Затримка перед підйомом
+
+// ---- СТАНИ ----
+// 0=зигзаг+вразлив, 1=очікує поки духи живуть, 2=спустився+вразливий
+state     = 1;   // Починаємо з підйому першої хвилі
+action_cd = room_speed * 2;
+
+// ---- АТАКА ВНИЗУ ----
+melee_range  = 60;
+melee_cd     = 0;
+melee_cd_max = room_speed;
+
+// ---- ПОЗИЦІЯ КІСТОК (звідки підіймаються духи) ----
+// obj_bone_pile розміщений в кімнаті внизу
+bone_pile_x = x;   // Встановити в кімнаті
+
+image_alpha = 0.85;
+is_dead     = false;
+image_speed = 0.1;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_war_ghost — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_sword_reward);
+    instance_destroy();
+    exit;
+}
+
+if (action_cd > 0) action_cd--;
+if (melee_cd  > 0) melee_cd--;
+if (summon_cd > 0) summon_cd--;
+
+// Підраховуємо живих духів
+spirits_alive = instance_number(obj_fallen_spirit);
+
+// Пульсація прозорості
+image_alpha = is_vulnerable
+    ? (0.7 + 0.3 * sin(current_time / 150000))   // Швидша коли вразливий
+    : (0.5 + 0.2 * sin(current_time / 300000));
+
+switch (state)
+{
+    // ------ 0: ЛІТАЄ ЗИГЗАГОМ (невразливий) ------
+    case 0:
+        var _tx = point_x[current_point];
+        var _ty = point_y[current_point];
+        var _d  = point_distance(x, y, _tx, _ty);
+
+        if (_d > fly_speed)
+        {
+            var _dir = point_direction(x, y, _tx, _ty);
+            x += lengthdir_x(fly_speed, _dir);
+            y += lengthdir_y(fly_speed, _dir);
+        }
+        else
+        {
+            x = _tx; y = _ty;
+            current_point = (current_point + 1) mod point_count;
+        }
+
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+
+        // Якщо всі духи вбиті — спускаємось
+        if (spirits_alive == 0 && action_cd <= 0)
+        {
+            state        = 2;
+            is_vulnerable = true;
+            action_cd    = room_speed * 3;   // 3 секунди вразливості
+        }
+    break;
+
+    // ------ 1: ПІДІЙМАЄ ДУХІВ ------
+    case 1:
+        if (summon_cd <= 0 && action_cd <= 0)
+        {
+            // Підіймаємо 5 духів з купи кісток
+            var _bp_x = variable_global_exists("bone_pile_x")
+                        ? global.bone_pile_x : x;
+
+            for (var _si = 0; _si < 5; _si++)
+            {
+                var _sp = instance_create_layer(
+                    _bp_x + irandom_range(-60, 60),
+                    room_height - 100,
+                    "Instances", obj_fallen_spirit);
+                // Духи в бою зі слабшими характеристиками
+                _sp.hp  = 8;
+                _sp.atk = 3;
+            }
+            summon_wave++;
+            state = 0;   // Летимо поки духи живуть
+            // audio_play_sound(snd_warghost_summon, 1, false);
+        }
+    break;
+
+    // ------ 2: СПУСТИВСЯ — ВРАЗЛИВИЙ ------
+    case 2:
+        is_vulnerable = true;
+        // Летимо вниз до рівня гравця
+        var _target_y = obj_player.y - 50;
+        y = lerp(y, _target_y, 0.05);
+        image_xscale = (obj_player.x > x) ? 1 : -1;
+
+        // Атака в ближньому бою
+        if (distance_to_object(obj_player) <= melee_range
+            && melee_cd <= 0 && !obj_player.is_damage)
+        {
+            obj_player.hp       -= atk;
+            var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+            obj_player.hspd     = lengthdir_x(9, _kd);
+            obj_player.vspd     = -5;
+            obj_player.is_damage = true;
+            obj_player.alarm[0]  = room_speed;
+            melee_cd = melee_cd_max;
+        }
+
+        // Через 3 секунди піднімаємо нову хвилю
+        if (action_cd <= 0)
+        {
+            is_vulnerable = false;
+            state         = 1;
+            action_cd     = room_speed * 1.5;
+            summon_cd     = room_speed;
+        }
+    break;
+}
+
+
+// ---- ЗВ'ЯЗОК: вбитий дух завдає шкоди босу ----
+// Це реалізується в obj_fallen_spirit — Destroy Event:
+// (Додай Destroy Event в obj_fallen_spirit)
+/*
+if (instance_exists(obj_boss_war_ghost))
+{
+    obj_boss_war_ghost.hp -= 5;  // Кожен вбитий дух = 5 шкоди босу
+}
+*/
+
+
+═══════════════════════════════════════════════════════════════════
+  9. OBJ_BOSS_MOIRAI — ПОВНА ПЕРЕРОБКА
+     hp=50  atk немає прямої атаки
+     Три сестри. При отриманні шкоди — хвиля що відкидає гравця.
+     Постійно насилають Вогонь Олімпу.
+     Швидко бити поки не заповнили поле!
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_boss_moirai — Create Event
+─────────────────────────────────────────
+boss_name = "МОЙРИ";
+max_hp    = 50;
+hp        = max_hp;
+// atk = немає (з дизайн-документу "atk = -")
+phase     = 1;
+
+// ---- 4 ТОЧКИ ПАТРУЛЯ ----
+var _cx = x; var _cy = y;
+point_count = 4;
+point_x[0] = _cx - 200;  point_y[0] = _cy - 100;
+point_x[1] = _cx + 200;  point_y[1] = _cy - 100;
+point_x[2] = _cx + 200;  point_y[2] = _cy + 60;
+point_x[3] = _cx - 200;  point_y[3] = _cy + 60;
+current_point = 0;
+fly_speed     = 2;
+
+// ---- ХВИЛЯ ВІДКИДАННЯ (при отриманні шкоди) ----
+last_hp       = max_hp;
+wave_knockback = 12;   // Сила відкидання хвилею
+wave_cd        = 0;
+wave_cd_max    = room_speed * 0.5;  // Не частіше ніж раз на 0.5с
+
+// ---- ВИКЛИК ВОГНЮ ----
+fire_cd     = 0;
+fire_cd_max = room_speed * 1.5;   // Новий вогонь кожні 1.5 секунди
+max_fires   = 8;                  // Максимум вогнів одночасно
+
+// ---- ДВІ ТІНІ ----
+shadow1_point = 1;
+shadow2_point = 2;
+
+is_dead = false;
+image_speed = 0.07;
+
+
+─────────────────────────────────────────
+/// @description obj_boss_moirai — Step Event
+─────────────────────────────────────────
+if (is_dead || !instance_exists(obj_player)) exit;
+
+if (hp <= 0)
+{
+    is_dead = true;
+    instance_create_layer(x, y, "Instances", obj_pickup_olympus_key);
+    // Знищуємо всі вогні
+    with (obj_olympus_fire) instance_destroy();
+    instance_destroy();
+    exit;
+}
+
+if (fire_cd > 0) fire_cd--;
+if (wave_cd > 0) wave_cd--;
+
+// ---- ХВИЛЯ ПРИ ОТРИМАННІ ШКОДИ ----
+if (hp < last_hp && wave_cd <= 0)
+{
+    // Отримали шкоду — хвиля відкидає гравця
+    if (instance_exists(obj_player) && !obj_player.is_damage)
+    {
+        var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+        obj_player.hspd     = lengthdir_x(wave_knockback, _kd);
+        obj_player.vspd     = -8;
+        obj_player.is_damage = true;
+        obj_player.alarm[0]  = room_speed * 0.5;
+        // audio_play_sound(snd_moirai_wave, 1, false);
+    }
+    wave_cd = wave_cd_max;
+}
+last_hp = hp;
+
+// ---- РУХ МІЖ ТОЧКАМИ ----
+var _tx = point_x[current_point];
+var _ty = point_y[current_point];
+var _d  = point_distance(x, y, _tx, _ty);
+
+if (_d > fly_speed)
+{
+    var _dir = point_direction(x, y, _tx, _ty);
+    x += lengthdir_x(fly_speed, _dir);
+    y += lengthdir_y(fly_speed, _dir);
+    image_xscale = (obj_player.x > x) ? 1 : -1;
+}
+else
+{
+    x = _tx; y = _ty;
+    current_point = (current_point + 1) mod point_count;
+    // Тіні рухаються з відставанням
+    shadow1_point = (current_point + 1) mod point_count;
+    shadow2_point = (current_point + 2) mod point_count;
+}
+
+// ---- ПОСТІЙНИЙ ВИКЛИК ВОГНЮ ОЛІМПУ ----
+if (fire_cd <= 0 && instance_number(obj_olympus_fire) < max_fires)
+{
+    // Створюємо вогонь в рандомному місці вгорі
+    var _fx = obj_player.x + irandom_range(-200, 200);
+    var _fy = obj_player.y - irandom_range(100, 200);
+    instance_create_layer(clamp(_fx, 50, room_width - 50),
+                          clamp(_fy, 50, room_height / 2),
+                          "Instances", obj_olympus_fire);
+    fire_cd = fire_cd_max;
+    // audio_play_sound(snd_moirai_summon, 1, false);
+}
+
+
+─────────────────────────────────────────
+/// @description obj_boss_moirai — Draw Event
+─────────────────────────────────────────
+// Дві напівпрозорі тіні
+var _s1x = point_x[shadow1_point];
+var _s1y = point_y[shadow1_point];
+var _s2x = point_x[shadow2_point];
+var _s2y = point_y[shadow2_point];
+
+draw_set_alpha(0.3);
+draw_sprite_ext(sprite_index, image_index, _s1x, _s1y,
+    image_xscale, 1, 0, make_color_rgb(180, 100, 255), 1);
+draw_sprite_ext(sprite_index, image_index, _s2x, _s2y,
+    image_xscale, 1, 0, make_color_rgb(180, 100, 255), 1);
+draw_set_alpha(1);
+
+draw_self();
+
+
+═══════════════════════════════════════════════════════════════════
+  10. НАГОРОДИ — ОНОВЛЕНИЙ ПОРЯДОК З ДИЗАЙН-ДОКУМЕНТУ
+═══════════════════════════════════════════════════════════════════
+
+  Зона          Бос              Нагорода       Індекс зброї
+  ──────────────────────────────────────────────────────────
+  Море          Тритон      →   Тризубець       0
+  Узбережжя     Німфа       →   Спис            1
+  Шахти         Уран        →   Кайло           2
+  Аїд           Харон       →   Коса            3  ← ЗМІНЕНО
+  Греція        Мінотавр    →   Весло           4  ← ЗМІНЕНО
+  Поле битви    Привид       →  Меч             5  ← ЗМІНЕНО
+  Олімп         Мойри       →   Ключ Олімпу    (не зброя)
+
+  ──────────────────────────────────────────────────────────
+  obj_player Create Event — оновити масиви:
+  ──────────────────────────────────────────────────────────
+
+weapon_names    = ["Тризубець","Спис","Кайло","Коса","Весло","Меч"];
+weapon_atk      = [1, 2, 5, 3, 4, 10];
+weapon_spd_mult = [1.0, 2.0, 0.25, 1.0, 0.5, 2.0];
+
+  ──────────────────────────────────────────────────────────
+  obj_pickup_oar_reward   → weapon_index = 4   (Весло)
+  obj_pickup_scythe_reward→ weapon_index = 3   (Коса)
+  obj_pickup_sword_reward → weapon_index = 5   (Меч)
+  ──────────────────────────────────────────────────────────
+
+
+═══════════════════════════════════════════════════════════════════
+  НОВІ ОБ'ЄКТИ ЩО ТРЕБА СТВОРИТИ
+═══════════════════════════════════════════════════════════════════
+
+  obj_comment_zone      — Зона коментарів
+  obj_charon_scythe     — Коса-бумеранг Харона
+  obj_stalactite        — Сталактит (кімната Харона)
+  obj_falling_stone     — Камінь зі сталактиту
+  obj_uranus_barrier    — Завали (кімната Урана)
+  obj_minotaur_column   — Колона (кімната Мінотавра)
+  obj_thin_platform     — Тонка платформа (S=проскочити вниз)
+                          Parent = obj_platform
+
+  obj_thin_platform — Step Event:
+  ─────────────────────────────────────────
+  // Тонка платформа — гравець може проскочити вниз (S+вниз)
+  // Вся логіка вже в obj_player Step Event (перевірка obj_thin_platform)
+  // Тут нічого не потрібно — платформа пасивна.
+  ─────────────────────────────────────────
+
+  obj_fallen_spirit — Destroy Event (ДОДАТИ):
+  ─────────────────────────────────────────
+  // Коли дух полеглого вмирає в бою з Привидом — завдає шкоди босу
+  if (instance_exists(obj_boss_war_ghost))
+      obj_boss_war_ghost.hp -= 5;
+  ─────────────────────────────────────────
+
+
+═══════════════════════════════════════════════════════════════════
+  ЗМІНИ В UI — obj_ui_controller Step Event
+  Оновлені клавіші підказки
+═══════════════════════════════════════════════════════════════════
+
+// В Draw GUI Event — оновити рядок підказки:
+draw_text(_gw - _m, _gh - _m,
+    "ESC-Меню | WASD-Рух | S↓-Вниз | E-Кидок | F-Взаємодія | Q-Діалог | Z/X/C-Зілля | 1-6-Зброя");
+
+
+═══════════════════════════════════════════════════════════════════
+  ЗМІНИ В obj_pickup (ОНОВЛЕНІ ЗНАЧЕННЯ)
+═══════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────
+/// @description obj_pickup_potion_heal — Collision with obj_player
+// ОНОВЛЕНО: відновлює 5 HP (з дизайн-документу, було 2)
+─────────────────────────────────────────
+if (can_pickup)
+{
+    with (other)
+    {
+        hp = min(hp + 5, max_hp);   // +5 HP з документу
+    }
+    instance_destroy();
+}
+
+─────────────────────────────────────────
+/// @description obj_pickup_sandal — Collision with obj_player
+// ОНОВЛЕНО: +1 до максимального SPD (документ: "перманентно дає +1")
+─────────────────────────────────────────
+if (can_pickup)
+{
+    with (other)
+    {
+        perm_spd_bonus += 1;   // +1 з документу (було 0.3)
+    }
+    instance_destroy();
+}

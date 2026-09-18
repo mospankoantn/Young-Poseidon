@@ -1,34 +1,36 @@
 /// @description 
 /// obj_boss_uranus — Create Event
 
-boss_name = "УРАН";
-max_hp    = 50;
+boss_name_key = "boss_uranus";
+max_hp    = 40;
 hp        = max_hp;
-atk       = 12;
+atk       = 5;
 phase     = 1;
  
-// ---- ТОЧКИ ПАТРУЛЯ (у верхній частині кімнати) ----
-var _cx = x; var _cy = y;
-point_count = 4;
-point_x[0] = _cx - 300;  point_y[0] = _cy - 150;
-point_x[1] = _cx + 300;  point_y[1] = _cy - 150;
-point_x[2] = _cx + 300;  point_y[2] = _cy - 60;
-point_x[3] = _cx - 300;  point_y[3] = _cy - 60;
-current_point = 0;
-fly_speed     = 3.5;
+// ---- ПОЗИЦІЯ ----
+spawn_x = x;   // Стартова X — бос стоїть тут весь бій
  
-// ---- АТАКИ ----
-// Блискавка падає з неба на гравця
-lightning_cd     = 0;
-lightning_cd_max = room_speed * 3;
+// ---- ЗАВАЛИ (4 штуки між босом і гравцем) ----
+// Завали створюються в кімнаті як obj_uranus_barrier
+// Бос знає про них через instance_find
+barrier_hp      = [3, 3, 3, 3];   // HP кожного завалу
+barrier_current = 0;              // Який завал зараз б'є (0-3)
  
-// Попередження перед блискавкою (червоне коло)
-// Реалізується через obj_proj_lightning з затримкою
+// ---- СТАНИ ----
+// 0=стоїть і чекає, 1=б'є завал, 2=застряг (вразливий!),
+// 3=атакує гравця кайлом
+state      = 0;
+action_cd  = 0;
+swing_cd   = 0;     // Кулдаун удару кайлом
+is_stuck   = false; // Застряг у завалі — вразливий
  
-// Електричне поле (фаза 2) — шкода всім поблизу
-field_cd     = 0;
-field_cd_max = room_speed * 2;
-field_radius = 120;
+// ---- АТАКА КАЙЛОМ ----
+swing_range   = 80;
+swing_cd_max  = room_speed * 1.5;
+ 
+// ---- ФІЗИКА ----
+vspd = 0;
+grv  = 0.6;
  
 is_dead = false;
 image_speed = 0.1;

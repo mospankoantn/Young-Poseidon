@@ -5,8 +5,7 @@ if (can_pickup)
 {
     with (other)
     {
-        perm_spd_bonus += 0.3;  // +30% до базової швидкості
+        perm_spd_bonus += 1;   // +1 з документу (було 0.3)
     }
-    // audio_play_sound(snd_pickup_sandal, 1, false);
     instance_destroy();
 }

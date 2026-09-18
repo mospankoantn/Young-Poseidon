@@ -2,28 +2,42 @@
 /// obj_boss_moirai — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
- 
-if (hp <= max_hp / 2 && phase == 1)
+if (obj_player.has_olympus_key)
 {
-    phase             = 2;
-    clotho_cd_max     = room_speed * 2;    // Все вдвічі частіше
-    lachesis_cd_max   = room_speed * 3;
-    atropos_cd_max    = room_speed * 5;
-    fly_speed         = 4;
+    with (obj_olympus_fire) instance_destroy();
+    instance_destroy();
+    exit;
 }
  
 if (hp <= 0)
 {
     is_dead = true;
-    // Фінальна нагорода — ключ від Олімпу
     instance_create_layer(x, y, "Instances", obj_pickup_olympus_key);
+    // Знищуємо всі вогні
+    with (obj_olympus_fire) instance_destroy();
     instance_destroy();
     exit;
 }
  
-if (clotho_cd   > 0) clotho_cd--;
-if (lachesis_cd > 0) lachesis_cd--;
-if (atropos_cd  > 0) atropos_cd--;
+if (fire_cd > 0) fire_cd--;
+if (wave_cd > 0) wave_cd--;
+ 
+// ---- ХВИЛЯ ПРИ ОТРИМАННІ ШКОДИ ----
+if (hp < last_hp && wave_cd <= 0)
+{
+    // Отримали шкоду — хвиля відкидає гравця
+    if (instance_exists(obj_player) && !obj_player.is_damage)
+    {
+        var _kd = point_direction(x, y, obj_player.x, obj_player.y);
+        obj_player.hspd     = lengthdir_x(wave_knockback, _kd);
+        obj_player.vspd     = -8;
+        obj_player.is_damage = true;
+        obj_player.alarm[0]  = room_speed * 0.5;
+        // audio_play_sound(snd_moirai_wave, 1, false);
+    }
+    wave_cd = wave_cd_max;
+}
+last_hp = hp;
  
 // ---- РУХ МІЖ ТОЧКАМИ ----
 var _tx = point_x[current_point];
@@ -41,82 +55,20 @@ else
 {
     x = _tx; y = _ty;
     current_point = (current_point + 1) mod point_count;
+    // Тіні рухаються з відставанням
+    shadow1_point = (current_point + 1) mod point_count;
+    shadow2_point = (current_point + 2) mod point_count;
 }
  
-// ---- АТАКА 1: КЛОТО — НИТКИ УПОВІЛЬНЕННЯ ----
-if (clotho_cd <= 0)
+// ---- ПОСТІЙНИЙ ВИКЛИК ВОГНЮ ОЛІМПУ ----
+if (fire_cd <= 0 && instance_number(obj_olympus_fire) < max_fires)
 {
-    // Уповільнюємо гравця
-    obj_player.temp_spd_buff = -0.5;
-    obj_player.buff_duration = room_speed * 3;
- 
-    // Стріляємо 2 снаряди-нитки (з obj_proj_fate_beam)
-    for (var _fi = -1; _fi <= 1; _fi += 2)
-    {
-        var _thread    = instance_create_layer(x, y, "Instances", obj_proj_fate_beam);
-        var _td        = point_direction(x, y, obj_player.x, obj_player.y);
-        _thread.hspd   = lengthdir_x(5, _td + _fi * 15);
-        _thread.vspd   = lengthdir_y(5, _td + _fi * 15);
-        _thread.damage = atk / 3;
-    }
-    clotho_cd = clotho_cd_max;
-    // audio_play_sound(snd_moirai_clotho, 1, false);
-}
- 
-// ---- АТАКА 2: ЛАХЕСІС — ПРОМІНЬ ДОЛІ ----
-if (!beam_charging && lachesis_cd <= 0)
-{
-    beam_charging  = true;
-    beam_charge_t  = 0;
-    lachesis_cd    = lachesis_cd_max;
-}
- 
-if (beam_charging)
-{
-    beam_charge_t++;
- 
-    // 2 секунди заряджання (попередження — намалюємо лінію в Draw)
-    if (beam_charge_t >= beam_charge_max)
-    {
-        beam_charging = false;
-        beam_charge_t = 0;
- 
-        // Завдаємо шкоди якщо гравець в зоні
-        if (distance_to_object(obj_player) < 300
-            && !obj_player.is_damage)
-        {
-            obj_player.hp       -= atk * 2;   // Промінь б'є вдвічі сильніше
-            var _bd              = point_direction(x, y, obj_player.x, obj_player.y);
-            obj_player.hspd     = lengthdir_x(6, _bd);
-            obj_player.vspd     = -4;
-            obj_player.is_damage = true;
-            obj_player.alarm[0]  = room_speed;
-        }
-        // audio_play_sound(snd_moirai_lachesis, 1, false);
-    }
-}
- 
-// ---- АТАКА 3: АТРОПОС — РІЗАННЯ НИТКИ ----
-if (atropos_cd <= 0)
-{
-    // Забирає 40% поточного HP гравця (незалежно від захисту)
-    if (!obj_player.is_damage)
-    {
-        obj_player.hp       -= max(1, floor(obj_player.hp * 0.4));
-        obj_player.is_damage = true;
-        obj_player.alarm[0]  = room_speed * 0.5;
-        atropos_cd = atropos_cd_max;
-        // audio_play_sound(snd_moirai_atropos, 1, false);
-    }
-}
- 
-// ---- КОНТАКТНА ШКОДА ----
-if (distance_to_object(obj_player) < 40 && !obj_player.is_damage)
-{
-    obj_player.hp       -= atk;
-    var _kd              = point_direction(x, y, obj_player.x, obj_player.y);
-    obj_player.hspd     = lengthdir_x(8, _kd);
-    obj_player.vspd     = -5;
-    obj_player.is_damage = true;
-    obj_player.alarm[0]  = room_speed;
+    // Створюємо вогонь в рандомному місці вгорі
+    var _fx = obj_player.x + irandom_range(-200, 200);
+    var _fy = obj_player.y - irandom_range(100, 200);
+    instance_create_layer(clamp(_fx, 50, room_width - 50),
+                          clamp(_fy, 50, room_height / 2),
+                          "Instances", obj_olympus_fire);
+    fire_cd = fire_cd_max;
+    // audio_play_sound(snd_moirai_summon, 1, false);
 }

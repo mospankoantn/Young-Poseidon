@@ -11,8 +11,8 @@
   "name":"obj_olympus_door",
   "overriddenProperties":[],
   "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+    "name":"Interactive objects",
+    "path":"folders/Объекты/Interactive objects.yy",
   },
   "parentObjectId":null,
   "persistent":false,
@@ -33,8 +33,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_test_proj",
-    "path":"sprites/spr_test_proj/spr_test_proj.yy",
+    "name":"spr_door_test",
+    "path":"sprites/spr_door_test/spr_door_test.yy",
   },
   "spriteMaskId":null,
   "visible":true,
