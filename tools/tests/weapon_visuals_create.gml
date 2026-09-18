@@ -1,5 +1,7 @@
 report_path = "__REPORT__";
 global.load_pending = false;
+global.test_attack_pressed = false;
+global.test_recall_pressed = false;
 p = instance_create_layer(400, 300, "Instances", obj_player);
 p.grv = 0;
 p.anim_was_on_ground = true;
@@ -9,6 +11,7 @@ floor_instance.y += p.bbox_bottom - floor_instance.bbox_top;
 t = instance_create_layer(p.x, p.y, "Instances", obj_trident);
 p.trident_instance = t;
 tick = 0;
+warmup = 20;
 check = function(ok, message)
 {
     if (!ok && !file_exists(report_path))

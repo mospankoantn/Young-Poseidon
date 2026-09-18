@@ -22,7 +22,15 @@ function lc(_key)
     var _arr   = global.lang_db[? _key];
     var _index = (global.lang == "UA") ? 0 : 1;
  
-    return _arr[_index];
+    var _text = _arr[_index];
+    var _letters = "ADWSEFQZXC";
+    for (var _i=1; _i<=string_length(_letters); _i++) {
+        var _letter=string_char_at(_letters,_i);
+        _text=string_replace_all(_text,"["+_letter+"]","{key"+string(_i)+"}");
+    }
+    for (var _i=1; _i<=string_length(_letters); _i++)
+        _text=string_replace_all(_text,"{key"+string(_i)+"}","["+yp_key_name(string_char_at(_letters,_i))+"]");
+    return _text;
 }
  
  
@@ -35,12 +43,12 @@ function lc(_key)
 
 function set_language(_lang)
 {
+    if (_lang != "UA" && _lang != "EN") return;
     global.lang = _lang;
+    global.yp_settings.language = _lang;
  
     // Зберігаємо вибір у файлі
-    ini_open("young_poseidon_save.ini");
-    ini_write_string("settings", "language", _lang);
-    ini_close();
+    yp_settings_save();
  
     // Оновлюємо масиви зброї у гравця якщо він існує
     if (instance_exists(obj_player))

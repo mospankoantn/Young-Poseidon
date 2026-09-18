@@ -12,7 +12,7 @@ if (obj_player.is_dead || obj_player.hp <= 0)
 // ---- ВХІД/ВИХІД ----
 var _dist = distance_to_object(obj_player);
  
-if (keyboard_check_pressed(ord("E")))
+if (yp_input("E",true))
 {
     if (!has_player && _dist <= interact_range)
     {
@@ -56,8 +56,8 @@ if (on_rail)
     if (has_player)
     {
         // Гравець керує вагонеткою
-        var _left  = keyboard_check(ord("A")) || keyboard_check(vk_left);
-        var _right = keyboard_check(ord("D")) || keyboard_check(vk_right);
+        var _left  = yp_input("A",false) || keyboard_check(vk_left);
+        var _right = yp_input("D",false) || keyboard_check(vk_right);
  
         if (_right) cart_spd = min(cart_spd + cart_accel, cart_spd_max);
         if (_left)  cart_spd = max(cart_spd - cart_accel, -cart_spd_max);

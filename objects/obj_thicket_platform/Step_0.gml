@@ -24,7 +24,7 @@ if (obj_player.is_dead || obj_player.hp <= 0) exit;
 // Спосіб 1: Натискання E з косою
 if (_dist <= interact_range
     && obj_player.current_weapon == 3    // 3 = Коса
-    && keyboard_check_pressed(ord("E")))
+    && yp_input("E",true))
 {
     _start_cut();
 }

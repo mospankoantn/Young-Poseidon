@@ -17,19 +17,19 @@ image_xscale = l_right ? 1 : -1;
 // ════════════════════════════════════════
 // БЛОК 1: ЧИТАННЯ КЛАВІШ
 // ════════════════════════════════════════
-var _left  = keyboard_check(ord("A")) || keyboard_check(vk_left);
-var _right = keyboard_check(ord("D")) || keyboard_check(vk_right);
-var _jump  = keyboard_check_pressed(ord("W")) || keyboard_check_pressed(vk_up);
-var _drop  = keyboard_check_pressed(ord("S")) || keyboard_check_pressed(vk_down);
+var _left  = yp_input("A",false) || keyboard_check(vk_left);
+var _right = yp_input("D",false) || keyboard_check(vk_right);
+var _jump  = yp_input("W",true) || keyboard_check_pressed(vk_up);
+var _drop  = yp_input("S",true) || keyboard_check_pressed(vk_down);
  
-var _e_pressed = keyboard_check_pressed(ord("E"));   // Кидок зброї
-var _f_pressed = keyboard_check_pressed(ord("F"));   // Взаємодія з предметом
-var _q_pressed = keyboard_check_pressed(ord("Q"));   // Закрити діалог
+var _e_pressed = yp_input("E",true);   // Кидок зброї
+var _f_pressed = yp_input("F",true);   // Взаємодія з предметом
+var _q_pressed = yp_input("Q",true);   // Закрити діалог
  
 // Зілля
-var _z_pressed = keyboard_check_pressed(ord("Z"));   // Зілля здоров'я
-var _x_pressed = keyboard_check_pressed(ord("X"));   // Зілля Геракла
-var _c_pressed = keyboard_check_pressed(ord("C"));   // Зілля Гермеса
+var _z_pressed = yp_input("Z",true);   // Зілля здоров'я
+var _x_pressed = yp_input("X",true);   // Зілля Геракла
+var _c_pressed = yp_input("C",true);   // Зілля Гермеса
  
 // Колесо миші — переключення зброї
 var _wheel_up   = mouse_wheel_up();

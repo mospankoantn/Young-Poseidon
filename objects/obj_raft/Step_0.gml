@@ -28,8 +28,8 @@ if (instance_exists(obj_player) && !obj_player.is_dead && obj_player.hp > 0)
         // ---- КЕРУВАННЯ ПЛОТОМ (тільки з веслом) ----
         if (obj_player.current_weapon == 4)   // 4 = Весло
         {
-            var _left  = keyboard_check(ord("A")) || keyboard_check(vk_left);
-            var _right = keyboard_check(ord("D")) || keyboard_check(vk_right);
+            var _left  = yp_input("A",false) || keyboard_check(vk_left);
+            var _right = yp_input("D",false) || keyboard_check(vk_right);
  
             if (_right) raft_spd = min(raft_spd + 0.3, raft_spd_max);
             if (_left)  raft_spd = max(raft_spd - 0.3, -raft_spd_max);

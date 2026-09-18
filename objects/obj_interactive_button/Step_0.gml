@@ -9,7 +9,7 @@ var _dist = distance_to_object(obj_player);
 // Гравець натискає E коли близько
 if (_dist <= interact_range
     && !obj_player.is_dead && obj_player.hp > 0
-    && keyboard_check_pressed(ord("E"))
+    && yp_input("E",true)
     && !is_pressed)
 {
     is_pressed   = true;

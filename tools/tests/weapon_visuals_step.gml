@@ -1,3 +1,5 @@
+// Let the startup display reset finish before injecting keyboard input.
+if (warmup > 0) { warmup--; exit; }
 tick++;
 if (tick == 1)
 {
@@ -46,22 +48,19 @@ if (tick == 1)
     instance_destroy(ledge);
     t.stuck = false;
     p.l_right = true;
-    keyboard_clear(ord("E"));
-    keyboard_key_press(ord("E"));
+    global.test_attack_pressed = true;
     with (p) event_perform(ev_step, ev_step_normal);
-    keyboard_key_release(ord("E"));
+    global.test_attack_pressed = false;
 }
-if (tick == 2) keyboard_key_release(ord("E"));
 if (tick == 3)
 {
     check(t.visual_weapon == 1, "spear throw appearance: weapon=" + string(p.current_weapon) + " thrown=" + string(t.thrown));
     check(p.anim_action_sprite == spr_player_spear_cast, "cast input");
     check(t.mask_index == spr_weapon_collision, "throw mask");
-    keyboard_key_press(ord("F"));
+    global.test_recall_pressed = true;
     with (p) event_perform(ev_step, ev_step_normal);
-    keyboard_key_release(ord("F"));
+    global.test_recall_pressed = false;
 }
-if (tick == 4) keyboard_key_release(ord("F"));
 if (tick == 5)
 {
     check(!t.thrown && !t.stuck, "recall input");

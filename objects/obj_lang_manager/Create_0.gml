@@ -12,9 +12,7 @@ if (instance_number(obj_lang_manager) > 1)
  
 // ════ ПОТОЧНА МОВА ════
 // Завантажуємо з ini або ставимо UA за замовчуванням
-ini_open("young_poseidon_save.ini");
-global.lang = ini_read_string("settings", "language", "UA");
-ini_close();
+yp_settings_init();
  
 // ════ СЛОВНИК ════
 // ds_map: ключ → [UA_текст, EN_текст]

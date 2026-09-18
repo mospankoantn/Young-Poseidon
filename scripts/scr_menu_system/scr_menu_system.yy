@@ -1,0 +1,1 @@
+{"$GMScript":"v1","%Name":"scr_menu_system","isCompatibility":false,"isDnD":false,"name":"scr_menu_system","parent":{"name":"Скрипты","path":"folders/Скрипты.yy"},"resourceType":"GMScript","resourceVersion":"2.0"}

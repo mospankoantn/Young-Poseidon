@@ -22,7 +22,7 @@ if (_in_zone && !has_triggered)
 }
  
 // ---- Q: НАСТУПНИЙ РЯДОК / ЗАКРИТИ ----
-if (is_showing && keyboard_check_pressed(ord("Q")))
+if (is_showing && yp_input("Q",true))
 {
     current_line++;
     if (current_line >= array_length(comment_lines))

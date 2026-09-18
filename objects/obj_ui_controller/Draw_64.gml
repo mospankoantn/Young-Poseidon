@@ -1,7 +1,9 @@
 /// @description Clean gameplay HUD
 /// obj_ui_controller - Draw GUI Event
 
+if (game_paused) { yp_menu_draw(); exit; }
 if (!instance_exists(obj_player)) exit;
+yp_capture_world();
 var _p = obj_player;
 
 if (font_exists(fnt_main)) draw_set_font(fnt_main);
@@ -102,7 +104,7 @@ draw_set_color(c_white);
 draw_text(_pause_x + 15, _pause_y + 14, "II");
 
 // Center hint toast. It appears only when there is something useful to say.
-if (hint_alpha > 0.05)
+if (hint_alpha > 0.05 && global.yp_settings.hints)
 {
     var _hint_w = min(gw - 72, max(260, string_width(hint_text) + 42));
     var _hint_h = 40;
@@ -186,9 +188,9 @@ var _slot = 42;
 var _slot_gap = 8;
 var _slots_y = _bot_y + 6;
 var _potion_data = [
-    [_p.potion_heal_count, spr_potion_heal, "Z", make_color_rgb(62, 146, 82)],
-    [_p.potion_strength_count, spr_potion_strength, "X", make_color_rgb(176, 74, 54)],
-    [_p.potion_speed_count, spr_potion_speed, "C", make_color_rgb(54, 126, 176)]
+    [_p.potion_heal_count, spr_potion_heal, yp_key_name("Z"), make_color_rgb(62, 146, 82)],
+    [_p.potion_strength_count, spr_potion_strength, yp_key_name("X"), make_color_rgb(176, 74, 54)],
+    [_p.potion_speed_count, spr_potion_speed, yp_key_name("C"), make_color_rgb(54, 126, 176)]
 ];
 
 for (var _pi = 0; _pi < 3; _pi++)
@@ -275,128 +277,6 @@ if (_p.has_olympus_key)
         draw_text(_kx + 21, _weapon_y + 21, "KEY");
 }
 
-// Pause menu.
-if (game_paused)
-{
-    draw_set_alpha(0.68);
-    draw_set_color(c_black);
-    draw_rectangle(0, 0, gw, gh, false);
-    draw_set_alpha(1);
-
-    var _pw = 330;
-    var _ph = 374;
-    var _px = gw * 0.5 - _pw * 0.5;
-    var _py = gh * 0.5 - _ph * 0.5;
-
-    draw_set_alpha(0.96);
-    draw_set_color(_ink);
-    draw_rectangle(_px, _py, _px + _pw, _py + _ph, false);
-    draw_set_alpha(1);
-    draw_set_color(_teal);
-    draw_rectangle(_px, _py, _px + _pw, _py + _ph, true);
-
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_top);
-    draw_set_color(c_white);
-    if (font_exists(fnt_title)) draw_set_font(fnt_title);
-    draw_text(gw * 0.5, _py + 18, lc("pause_title"));
-    if (font_exists(fnt_main)) draw_set_font(fnt_main);
-
-    var _menu_items = [
-        lc("pause_resume"),
-        lc("pause_save"),
-        lc("pause_load"),
-        lc("pause_settings"),
-        lc("pause_mainmenu"),
-        lc("pause_quit")
-    ];
-
-    var _mx = device_mouse_x_to_gui(0);
-    var _my = device_mouse_y_to_gui(0);
-    var _item_h = 40;
-    var _item_y = _py + 72;
-
-    for (var _mi = 0; _mi < array_length(_menu_items); _mi++)
-    {
-        var _iy = _item_y + _mi * _item_h;
-        var _hover = (_mx >= _px + 24 && _mx <= _px + _pw - 24
-                   && _my >= _iy && _my <= _iy + _item_h - 6);
-
-        if (_hover)
-        {
-            draw_set_alpha(0.28);
-            draw_set_color(_teal);
-            draw_rectangle(_px + 24, _iy, _px + _pw - 24, _iy + _item_h - 6, false);
-            draw_set_alpha(1);
-        }
-
-        draw_set_color(_hover ? _gold : c_white);
-        draw_text(gw * 0.5, _iy + 10, _menu_items[_mi]);
-
-        if (_hover && mouse_check_button_pressed(mb_left))
-        {
-            switch (_mi)
-            {
-                case 0:
-                    game_paused = false;
-                    break;
-                case 1:
-                    save_game();
-                    break;
-                case 2:
-                    load_game();
-                    break;
-                case 3:
-                    show_hint(lc("pause_settings"), 120);
-                    break;
-                case 4:
-                    game_paused = false;
-                    with (obj_player) instance_destroy();
-                    room_goto(rm_menu);
-                    break;
-                case 5:
-                    game_end();
-                    break;
-            }
-        }
-    }
-
-    var _flag_y = _py + _ph - 40;
-    draw_set_alpha(global.lang == "UA" ? 1 : 0.45);
-    draw_set_color(make_color_rgb(0, 87, 183));
-    draw_rectangle(_px + 30, _flag_y, _px + 64, _flag_y + 14, false);
-    draw_set_color(make_color_rgb(255, 215, 0));
-    draw_rectangle(_px + 30, _flag_y + 14, _px + 64, _flag_y + 28, false);
-    if (global.lang == "UA")
-    {
-        draw_set_alpha(1);
-        draw_set_color(_gold);
-        draw_rectangle(_px + 28, _flag_y - 2, _px + 66, _flag_y + 30, true);
-    }
-
-    draw_set_alpha(global.lang == "EN" ? 1 : 0.45);
-    draw_set_color(make_color_rgb(1, 33, 105));
-    draw_rectangle(_px + 76, _flag_y, _px + 110, _flag_y + 28, false);
-    draw_set_color(make_color_rgb(200, 16, 46));
-    draw_line(_px + 76, _flag_y, _px + 110, _flag_y + 28);
-    draw_line(_px + 110, _flag_y, _px + 76, _flag_y + 28);
-    if (global.lang == "EN")
-    {
-        draw_set_alpha(1);
-        draw_set_color(_gold);
-        draw_rectangle(_px + 74, _flag_y - 2, _px + 112, _flag_y + 30, true);
-    }
-
-    draw_set_alpha(1);
-    if (mouse_check_button_pressed(mb_left))
-    {
-        if (_mx >= _px + 28 && _mx <= _px + 66 && _my >= _flag_y - 2 && _my <= _flag_y + 30)
-            set_language("UA");
-
-        if (_mx >= _px + 74 && _mx <= _px + 112 && _my >= _flag_y - 2 && _my <= _flag_y + 30)
-            set_language("EN");
-    }
-}
 
 draw_set_font(-1);
 draw_set_color(c_white);

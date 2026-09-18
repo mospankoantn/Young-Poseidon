@@ -11,7 +11,7 @@ var _dist = distance_to_object(obj_player);
 if (_dist <= interact_range && hit_cd <= 0
     && !obj_player.is_dead && obj_player.hp > 0
     && obj_player.current_weapon == 2   // Кайло
-    && (keyboard_check_pressed(ord("E")) || keyboard_check_pressed(ord("F"))))
+    && (yp_input("E",true) || yp_input("F",true)))
 {
     stones_left--;
     obj_player._play_weapon_action("special");

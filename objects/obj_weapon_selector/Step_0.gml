@@ -47,10 +47,10 @@ for (var _i = 0; _i < _count; _i++)
 }
  
 // ---- ВИБІР КЛАВІАТУРОЮ ----
-if (keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("D")))
+if (keyboard_check_pressed(vk_right) || yp_input("D",true))
     selected_slot = (selected_slot + 1) mod _count;
  
-if (keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("A")))
+if (keyboard_check_pressed(vk_left) || yp_input("A",true))
     selected_slot = (selected_slot - 1 + _count) mod _count;
  
 if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space))

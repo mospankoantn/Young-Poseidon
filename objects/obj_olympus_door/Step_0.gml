@@ -8,7 +8,7 @@ if (!is_open
     && !obj_player.is_dead && obj_player.hp > 0
     && distance_to_object(obj_player) <= interact_range
     && obj_player.has_olympus_key
-    && keyboard_check_pressed(ord("E")))
+    && yp_input("E",true))
 {
     event_user(0);   // Відкрити
 }

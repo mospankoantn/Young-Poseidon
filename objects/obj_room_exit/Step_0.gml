@@ -21,7 +21,7 @@ if (lock_shake > 0)
     lock_shake = max(0, lock_shake - 1);
  
 // ---- F — АКТИВУВАТИ ПЕРЕХІД ----
-if (player_in_range && keyboard_check_pressed(ord("F")))
+if (player_in_range && yp_input("F",true))
 {
     _try_enter();
 }

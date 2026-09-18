@@ -51,7 +51,7 @@ show_hint = function(_text, _duration)
 };
  
 // ════ ПАУЗА ════
-game_paused = false;
+yp_menu_init(true);
  
 // ════ РОЗМІРИ GUI ════
 gw = display_get_gui_width();

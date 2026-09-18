@@ -38,6 +38,14 @@ foreach($pair in @(@("${TestPrefix}_create.gml",'Create_0.gml'),@("${TestPrefix}
     [IO.File]::WriteAllText((Join-Path $projectDir ('objects/obj_main_menu/'+$pair[1])),$source,$utf8)
 }
 [IO.File]::WriteAllText((Join-Path $projectDir 'objects/obj_main_menu/Draw_64.gml'),'',$utf8)
+if($TestPrefix -eq 'weapon_visuals') {
+    # Feed action signals in the isolated fixture, without OS key injection/focus races.
+    $playerStep=Join-Path $projectDir 'objects/obj_player/Step_0.gml'
+    $code=[IO.File]::ReadAllText($playerStep)
+    $code=$code.Replace('yp_input("E",true)','global.test_attack_pressed')
+    $code=$code.Replace('yp_input("F",true)','global.test_recall_pressed')
+    [IO.File]::WriteAllText($playerStep,$code,$utf8)
+}
 $path=Join-Path $projectDir 'options/windows/options_windows.yy'
 $options=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json -Depth 100
 $options.option_windows_disable_sandbox=$true
