@@ -1,59 +1,27 @@
-/// @description 
-/// obj_falling_rocks — Step Event
-
-switch (state)
-{
-    // ------ 0: ЧЕКАЄ ------
-    case 0:
-        // Нічого не робимо, чекаємо User Event 0
-    break;
- 
-    // ------ 1: ПАДАЄ ------
-    case 1:
-        fall_spd += grv;
-        if (fall_spd > 20) fall_spd = 20;  // Максимальна швидкість
- 
-        // Перевіряємо зіткнення з платформою
-        if (place_meeting(x, y + fall_spd, obj_platform))
-        {
-            while (!place_meeting(x, y + 1, obj_platform))
-                y += 1;
-            state    = 2;
-            fall_spd = 0;
-            solid    = true;  // Тепер каміння є твердою перешкодою
-            // audio_play_sound(snd_rock_land, 1, false);
+if(state==1) {
+    fall_spd=min(fall_spd+grv,20);
+    // Sweep at one-pixel intervals so thin ledges and the boss cannot be skipped.
+    var _remaining=fall_spd;
+    while(_remaining>0) {
+        var _dy=min(1,_remaining);
+        if(place_meeting(x,y+_dy,obj_platform)){rock_land();break;}
+        y+=_dy;_remaining-=_dy;
+        if(!hit_boss && instance_exists(obj_boss_triton) && place_meeting(x,y,obj_boss_triton)) {
+            if(obj_boss_triton.hp>0) with(obj_boss_triton) event_user(0);
+            hit_boss=true;
         }
-        else
-        {
-            y += fall_spd;
+        if(!hit_player && instance_exists(obj_player) && !obj_player.is_dead
+            && place_meeting(x,y,obj_player) && !obj_player.is_damage) {
+            obj_player.hp-=damage;obj_player.vspd=-5;
+            obj_player.is_damage=true;obj_player.alarm[0]=room_speed;
+            hit_player=true;
         }
- 
-        // Шкода гравцю під час падіння
-        if (instance_exists(obj_player)
-            && place_meeting(x, y, obj_player)
-            && !obj_player.is_damage)
-        {
-            obj_player.hp       -= damage;
-            obj_player.vspd     = -5;
-            obj_player.hspd     = 0;
-            obj_player.is_damage = true;
-            obj_player.alarm[0]  = room_speed;
-        }
-    break;
- 
-    // ------ 2: ЛЕЖИТЬ ------
-    case 2:
-        // Каміння стало звичайною платформою-перешкодою
-        // Нічого не робимо
-    break;
-}
- 
- // Шкода Тритону якщо попали в нього під час падіння
-if (state == 1 && instance_exists(obj_boss_triton))
-{
-    if (place_meeting(x, y, obj_boss_triton))
-    {
-        with (obj_boss_triton) event_user(0);  // 10 шкоди
-        state = 2;   // Каміння залишається на місці
     }
+    if(y>room_height+64) rock_land();
 }
+if(state==2) {
+    debris_timer--;
+    image_alpha=clamp(debris_timer/room_speed,0,1);
+    if(debris_timer<=0) {state=3;image_alpha=0;}
+}
+if(state==3 && !instance_exists(obj_boss_triton)) instance_destroy();

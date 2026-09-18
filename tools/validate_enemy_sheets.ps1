@@ -18,13 +18,13 @@ foreach($r in $order.ResourceOrderSettings) {
     if(!(Test-Path -LiteralPath (Join-Path $ProjectRoot $r.path))) {throw "Missing resource-order path: $($r.path)"}
 }
 $items=@(
-    @('giant_crab','Спрайти Краба.png'),@('harpy_seagull','Sprites obj_harpy_seagull.png'),
-    @('miner_spirit','Sprites obj_miner_spirit.png'),@('hades_shadow','Sprites obj_hades_shadow.png'),
-    @('greek_warrior','Sprites obj_greek_warrior.png'),@('fallen_spirit','Sprites obj_fallen_spirit.png'),
-    @('olympus_fire','Sprites obj_olympus_fire.png'),@('boss_triton','Sprites obj_boss_triton.png'),
-    @('boss_nymph','Sprites obj_boss_nymph.png'),@('boss_uranus','Sprites obj_boss_uranus.png'),
-    @('boss_charon','Sprites obj_boss_charon.png'),@('boss_minotaur','Sprites obj_boss_minotaur.png'),
-    @('boss_war_ghost','Sprites obj_boss_war_ghost.png'),@('boss_moirai','Sprites obj_boss_moirai.png')
+    @('giant_crab','Графіка/Вороги/Спрайти Краба.png'),@('harpy_seagull','Графіка/Вороги/Sprites obj_harpy_seagull.png'),
+    @('miner_spirit','Графіка/Вороги/Sprites obj_miner_spirit.png'),@('hades_shadow','Графіка/Вороги/Sprites obj_hades_shadow.png'),
+    @('greek_warrior','Графіка/Вороги/Sprites obj_greek_warrior.png'),@('fallen_spirit','Графіка/Вороги/Sprites obj_fallen_spirit.png'),
+    @('olympus_fire','Графіка/Вороги/Sprites obj_olympus_fire.png'),@('boss_triton','Графіка/Боси/Sprites obj_boss_triton.png'),
+    @('boss_nymph','Графіка/Боси/Sprites obj_boss_nymph.png'),@('boss_uranus','Графіка/Боси/Sprites obj_boss_uranus.png'),
+    @('boss_charon','Графіка/Боси/Sprites obj_boss_charon.png'),@('boss_minotaur','Графіка/Боси/Sprites obj_boss_minotaur.png'),
+    @('boss_war_ghost','Графіка/Боси/Sprites obj_boss_war_ghost.png'),@('boss_moirai','Графіка/Боси/Sprites obj_boss_moirai.png')
 )
 $seenSources=@{}
 $totalFrames=0
@@ -84,4 +84,3 @@ if($resourceMap['scr_enemy_animation'] -ne 'scripts/scr_enemy_animation/scr_enem
 if($totalFrames -ne 224) {throw "Unexpected total: $totalFrames"}
 Write-Output "PASS: 14 unique source sheets map to 14 objects and 56 sprites."
 Write-Output "PASS: 224 transparent frames, YY/YYP links, sequence tracks, collision masks and End Step events."
-

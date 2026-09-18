@@ -1,4 +1,59 @@
-You are an expert GameMaker Studio 2 (GML) developer. 
-Always write code using modern GML syntax (structs, anonymous functions, method variables).
-Remember that object events are separated into individual .gml files.
-When writing code for scripts, use the modern function syntax: function name() {}.
+# Young Poseidon: Repository Rules
+
+## Scope and Sources of Truth
+- This is a GameMaker/GML 2D platformer prototype, not a finished campaign.
+- Inspect the relevant code, room instances, creation code and resource metadata before editing.
+- Current code and room data take precedence over old design documents and completion notes.
+- Read README.md for current state, FIXES_APPLIED.txt for implemented changes, and Що треба зробити.md for remaining work.
+- Reference material is organized under Файли/Документація and Файли/Графіка; Файли/README.md indexes it.
+- Files in Файли/Портфоліо are presentation material, not evidence of implemented functionality.
+- Preserve the user's existing edits, especially manually placed room instances and tile layers.
+- Keep changes scoped to the request. Do not refactor movement, AI, combat or save rules just to change graphics.
+
+## GML and Events
+- Follow existing modern GML functions, structs and bound methods; do not introduce abstractions without a need.
+- Object Events live in separate GML files. Register added Events in the object's eventList.
+- Register scripts in the project before referencing their functions.
+- Keep player animation selection in the existing Create/Step/End Step/Animation End flow.
+- Preserve spr_player as the player collision mask and keep feet/origin alignment consistent.
+- Keep existing spriteMaskId values when replacing art unless changing collision is explicitly needed.
+- image_xscale handles facing. Avoid combining a horizontal flip and 180-degree mask rotation unintentionally.
+- One-shot actions and death must not loop; death must retain the existing checkpoint/respawn rules.
+- Check is_dead and HP before interactions. Respect riding_cart and the existing pause lifecycle.
+- Use yp_input, yp_key_name and yp_text/lc for rebindable actions and localized prompts; respect the hints setting.
+
+## GameMaker Resources
+- The current verified Windows runtime is 2026.0.0.23. Do not silently upgrade the project format.
+- Clone a compatible resource from this project; never invent YY structure.
+- Preserve resourceType, resourceVersion (currently "2.0"), schema markers, sequence/tracks and frame/layer references.
+- YY/YYP files use GameMaker's JSON format, including trailing commas; use a compatible structured parser.
+- Reuse existing resource names, frame GUIDs and folder entries where possible. Do not create duplicates.
+- Register new resources in Young Poseidon.yyp and Young Poseidon.resource_order.
+- Virtual folders are defined by the project Folders entries; verify parent paths against them.
+- A sprite frame needs its composite PNG, layer PNG and matching sequence keyframe.
+- Never reorder existing tile indices without migrating every affected room tile map.
+- Tile graphics are not a substitute for obj_platform collision. Do not move collision geometry during an art-only edit.
+- Preserve original PNG sources. Inspect actual sheet dimensions and frame/state boundaries before slicing.
+- Update importer defaults, source manifests, validators and documentation if source files are moved.
+- Import/build/place tools mutate resources. Do not run them as if they were read-only validators.
+
+## Gameplay Contracts
+- scr_save_system owns progression saves and automatic room routes; scr_settings owns persistent options.
+- Keep young_poseidon_save.ini separate from young_poseidon_settings.ini.
+- Respect manually placed exits and blocks_auto_routes/blocks_auto_direction overrides.
+- A placed boss is not proof of a complete arena or a verified playthrough.
+- Bosses can remove themselves when their reward weapon/key is already owned; consider this during debug teleports.
+- Do not change checkpoint coordinates, item-gated routes or save semantics as an unrelated fix.
+
+## Verification and Reporting
+- Use PowerShell 7 for tools. Run focused validators for the resources touched.
+- Available validators: validate_player_animations.ps1, validate_enemy_sheets.ps1,
+  validate_weapon_visuals.ps1, validate_level_tilesets.ps1, validate_interactive_props.ps1 (all in tools).
+- Runtime tests: test_player_death.ps1, test_enemy_animations.ps1, test_weapon_visuals.ps1,
+  test_menu_settings.ps1, test_interactive_props.ps1 (all in tools).
+- Runtime tests build temporary copies with GameMaker; do not overwrite authored rooms with fixtures.
+- After art changes, inspect a preview or Runner screenshot in addition to metadata checks.
+- After room edits, verify actual instance placement and traversal; isolated tests do not prove the campaign is completable.
+- If GameMaker is unavailable, report static checks only. Never claim a successful build/run without evidence.
+- Keep README.md, FIXES_APPLIED.txt and Що треба зробити.md consistent: implemented work belongs in FIXES, remaining work in the backlog.
+- Write user-facing documentation in Ukrainian, use accurate paths, and distinguish current checks from earlier test results.

@@ -12,8 +12,8 @@ prepared a cleaner six-row variant; no API/CLI fallback was used.
 A follow-up background-removal edit still returned a painted background,
 so the importer removes edge-connected neutral pixels and writes real alpha.
 
-Selected source: ../Файли/player_animation_source.png
-Reviewed contact sheet: ../Файли/player_animation_preview.png
+Selected source: ../Файли/Графіка/Гравець/player_animation_source.png
+Reviewed contact sheet: ../Файли/Графіка/Гравець/player_animation_preview.png
 GameMaker assets: ../sprites/spr_player_{idle,run,jump,land,attack,hurt}/
 
 Generation prompt:
@@ -27,7 +27,7 @@ Edit the attached Young Poseidon pixel-art character sprite sheet into a product
 Run from the project root in PowerShell 7 (System.Drawing on Windows):
 
 ```powershell
-./tools/import_player_animations.ps1 -Source './Файли/player_animation_source.png'
+./tools/import_player_animations.ps1 -Source './Файли/Графіка/Гравець/player_animation_source.png'
 ./tools/import_player_run_death.ps1
 ./tools/validate_player_animations.ps1
 ./tools/test_player_death.ps1
@@ -56,8 +56,8 @@ production rooms or saves.
 ## Revised run and death artwork
 
 Prepared with the built-in image_gen tool. Source:
-../Файли/player_run_death_source.png; preview:
-../Файли/player_run_death_preview.png. Import uses a reviewed magenta key
+../Файли/Графіка/Гравець/player_run_death_source.png; preview:
+../Файли/Графіка/Гравець/player_run_death_preview.png. Import uses a reviewed magenta key
 and writes transparent 128x96 PNGs into the existing run/death resources.
 The original six-row preview is retained as a historical source preview.
 

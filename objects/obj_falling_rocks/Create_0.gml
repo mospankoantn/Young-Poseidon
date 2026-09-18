@@ -1,24 +1,12 @@
-/// @description 
-/// obj_falling_rocks — Create Event
-
-// ---- ХАРАКТЕРИСТИКИ ----
-damage    = 5;     // Шкода при падінні на гравця
-fall_spd  = 0;     // Поточна швидкість падіння
-grv       = 0.6;   // Прискорення падіння
-initial_x = x;
-initial_y = y;
- 
-// ---- СТАН ----
-// 0 = чекає активації (висить вгорі)
-// 1 = падає
-// 2 = лежить (стала перешкода)
-state     = 0;
-is_next   = false;
- 
-// Попереджальна лінія (показуємо тінь де впаде каміння)
-show_warning = false;
- 
-// ---- ФІЗИКА ----
-// Поки state=0 — нерухомий
-// Ставимо solid = false щоб гравець міг стояти під камінням до падіння
-solid = false;
+damage=5;fall_spd=0;grv=0.6;
+initial_x=x;initial_y=y;
+state=0;is_next=false;show_warning=false;solid=false;
+image_speed=0;image_index=0;
+debris_timer=0;hit_boss=false;hit_player=false;
+rock_reset=function(){
+    x=initial_x;y=initial_y;fall_spd=0;state=0;is_next=false;
+    hit_boss=false;hit_player=false;debris_timer=0;image_alpha=1;image_index=0;
+};
+rock_land=function(){
+    state=2;fall_spd=0;solid=false;debris_timer=room_speed*3;image_index=1;
+};

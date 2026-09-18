@@ -1,9 +1,9 @@
-/// @description 
+/// @description
 /// obj_boss_minotaur — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
 if (obj_player.weapon_unlocked[4]) { instance_destroy(); exit; }
- 
+
 if (hp <= 0)
 {
     if (!enemy_anim_death_tick(spr_boss_minotaur_death)) exit;
@@ -12,7 +12,7 @@ if (hp <= 0)
     instance_destroy();
     exit;
 }
- 
+
 // Гравітація
 vspd += grv;
 if (place_meeting(x, y + vspd, obj_platform))
@@ -21,20 +21,20 @@ if (place_meeting(x, y + vspd, obj_platform))
     vspd = 0;
 }
 y += vspd;
- 
+
 if (column_strike_cd > 0) column_strike_cd--;
 if (melee_cd         > 0) melee_cd--;
- 
+
 // ---- РУХ ДО ГРАВЦЯ ----
 var _dir_x = sign(obj_player.x - x);
 var _move  = _dir_x * move_speed;
- 
+
 if (!place_meeting(x + _move, y, obj_platform))
     x += _move;
 image_xscale = _dir_x;
- 
+
 var _dist = distance_to_object(obj_player);
- 
+
 // ---- ПОШУК КОЛОНИ НА ЯКІЙ ГРАВЕЦЬ ----
 // Якщо гравець на колоні — б'ємо по колоні
 var _player_on_column = noone;
@@ -44,14 +44,14 @@ for (var _i = 0; _i < _cn; _i++)
     var _col = instance_find(obj_minotaur_column, _i);
     if (!instance_exists(_col)) continue;
     // Гравець стоїть на колоні якщо він прямо над нею
-    if (abs(obj_player.x - _col.x) < _col.col_width / 2
-        && abs(obj_player.y - (_col.y - _col.col_height / 2)) < 16)
+    if (obj_player.bbox_right > _col.bbox_left && obj_player.bbox_left < _col.bbox_right
+        && abs(obj_player.bbox_bottom - (_col.bbox_top - 1)) < 6)
     {
         _player_on_column = _col;
         break;
     }
 }
- 
+
 if (instance_exists(_player_on_column) && column_strike_cd <= 0)
 {
     // Б'ємо по колоні
@@ -59,7 +59,7 @@ if (instance_exists(_player_on_column) && column_strike_cd <= 0)
     column_strike_cd = column_strike_cd_max;
     enemy_anim_attack(spr_boss_minotaur_attack);
     // audio_play_sound(snd_minotaur_strike, 1, false);
- 
+
     // Шкода гравцю якщо він на колоні під час удару
     if (!obj_player.is_damage)
     {

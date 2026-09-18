@@ -12,30 +12,31 @@ if (instance_number(obj_player) > 1)
 // ════ ЗДОРОВ'Я ════
 hp     = 5;
 max_hp = 5;
- 
+
 // ════ ЗІЛЛЯ (клавіші Z / X / C) ════
 potion_heal_count     = 0;   // Z — зілля здоров'я (+5 HP)
 potion_strength_count = 0;   // X — зілля Геракла  (+5 ATK на 60с)
 potion_speed_count    = 0;   // C — зілля Гермеса  (+1 SPD на 60с)
- 
+
 // ════ ХАРАКТЕРИСТИКИ ════
 spd            = 1;       // Базова швидкість (sp=1 з документу)
 perm_spd_bonus = 0;       // +1 за кожен сандаль Гермеса (макс 2)
 temp_spd_buff  = 0;       // +1 від зілля Гермеса
 temp_atk_buff  = 0;       // +5 від зілля Геракла
 buff_duration  = 0;       // Кадри до кінця тимчасового бафу
- 
+
 // ════ ФІЗИКА ════
 hspd = 0;    // Горизонтальна швидкість (knockback)
 vspd = 0;    // Вертикальна швидкість
 grv  = 0.8;  // Гравітація
 drop_timer = 0;   // коли > 0 — падаємо крізь тонку платформу
- 
+
 // ════ СТАН ════
 l_right      = true;
 is_damage    = false;
 is_frozen    = false;   // Заморозка від Тіні Аїда
 freeze_timer = 0;
+riding_cart = noone;
 
 // ════ АНІМАЦІЇ ════
 // Стара маска залишається активною: нові кадри не змінюють колізії гравця.
@@ -125,7 +126,7 @@ _respawn_player = function()
     is_damage = alarm[0] > 0;
     _reset_player_animation();
 };
- 
+
 // ════ ЗБРОЯ ════
 // Індекси: 0=Тризубець 1=Спис 2=Кайло 3=Коса 4=Весло 5=Меч
 weapon_names = [
@@ -139,20 +140,20 @@ weapon_names = [
 weapon_sprites  = [spr_weapon_trident, spr_weapon_spear,
                    spr_weapon_pickaxe, spr_weapon_scythe,
                    spr_weapon_oar,     spr_weapon_sword];
- 
+
 // ATK і множник SPD — точно з дизайн-документу
 weapon_atk      = [1, 2, 5, 3, 4, 10];
 weapon_spd_mult = [1.0, 2.0, 0.25, 1.0, 0.5, 2.0];
- 
+
 // Розблокована зброя (false = ще не отримана)
 weapon_unlocked = [false, false, false, false, false, false];
 // На початку гравець БЕЗ ЗБРОЇ — отримає Тризубець від Тритона
- 
+
 current_weapon = -1;  // -1 = немає зброї
- 
+
 // ════ ТРИЗУБЕЦЬ / СПИС ════
 trident_instance = noone;
- 
+
 // ════ КЛЮЧ ОЛІМПУ ════
 has_olympus_key = false;
 
@@ -190,7 +191,7 @@ _play_weapon_action = function(_kind)
     if (!variable_struct_exists(_clips, _kind)) return;
     if (_play_player_action(variable_struct_get(_clips, _kind))) anim_action_weapon = current_weapon;
 };
- 
+
 // ════ ФУНКЦІЇ ════
 _unlock_weapon = function(_index)
 {
@@ -200,7 +201,7 @@ _unlock_weapon = function(_index)
     current_weapon          = _index;
     _play_weapon_action("pickup");
 };
- 
+
 _switch_weapon = function(_delta)
 {
     if (current_weapon == -1) exit;

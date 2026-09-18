@@ -1,5 +1,5 @@
 param(
-    [string]$Source = (Join-Path (Split-Path $PSScriptRoot -Parent) 'Файли/player_run_death_source.png'),
+    [string]$Source = (Join-Path (Split-Path $PSScriptRoot -Parent) 'Файли/Графіка/Гравець/player_run_death_source.png'),
     [string]$ProjectRoot = (Split-Path $PSScriptRoot -Parent)
 )
 $ErrorActionPreference = 'Stop'
@@ -82,5 +82,5 @@ for($row=0;$row -lt $specs.Count;$row++) {
     $graphics.DrawString($spec.Name,$font,[System.Drawing.Brushes]::White,4,$row*112)
     Write-Output "$name : $($frames.Count) frames, $($spec.FPS) fps, origin 64/88"
 }
-$preview.Save((Join-Path $ProjectRoot 'Файли/player_run_death_preview.png'),[System.Drawing.Imaging.ImageFormat]::Png)
+$preview.Save((Join-Path $ProjectRoot 'Файли/Графіка/Гравець/player_run_death_preview.png'),[System.Drawing.Imaging.ImageFormat]::Png)
 $font.Dispose(); $graphics.Dispose(); $preview.Dispose(); $sourceImage.Dispose()

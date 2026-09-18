@@ -1,88 +1,36 @@
-/// @description 
-/// obj_mine_cart — Step Event
-
-if (!instance_exists(obj_player)) exit;
-if (obj_player.is_dead || obj_player.hp <= 0)
-{
-    if (has_player) obj_player.is_frozen = false;
-    has_player = false;
-    exit;
+if(has_player && (!instance_exists(obj_player) || obj_player.is_dead || obj_player.hp<=0)) {
+    if(instance_exists(obj_player)) obj_player.riding_cart=noone;
+    has_player=false;
 }
- 
-// ---- ВХІД/ВИХІД ----
-var _dist = distance_to_object(obj_player);
- 
-if (yp_input("E",true))
-{
-    if (!has_player && _dist <= interact_range)
-    {
-        // Гравець сідає у вагонетку
-        has_player          = true;
-        obj_player.is_frozen = true;   // Блокуємо самостійний рух гравця
-        // audio_play_sound(snd_cart_enter, 1, false);
-    }
-    else if (has_player)
-    {
-        // Гравець виходить
-        _exit_cart();
-    }
+if(yp_input("E",true)) {
+    if(has_player) _exit_cart();
+    else if(prop_player_near(interact_range) && instance_nearest(obj_player.x,obj_player.y,obj_mine_cart)==id) _enter_cart();
 }
- 
-// Вихід стрибком (SPACE)
-if (has_player && keyboard_check_pressed(vk_space))
-{
-    _exit_cart();
-    obj_player.vspd = -10;   // Стрибок при виході
+if(has_player && (yp_input("W",true) || keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_space))) {
+    if(_exit_cart()) obj_player.vspd=-10;
 }
- 
-// ---- ГРАВІТАЦІЯ ВАГОНЕТКИ ----
-on_rail = place_meeting(x, y + 1, obj_rail)
-          || place_meeting(x, y + 1, obj_platform);
- 
-vspd += grv;
-if (place_meeting(x, y + vspd, obj_platform)
-    || place_meeting(x, y + vspd, obj_rail))
-{
-    while (!place_meeting(x, y + sign(vspd), obj_platform)
-           && !place_meeting(x, y + sign(vspd), obj_rail))
-        y += sign(vspd);
-    vspd = 0;
+on_rail=place_meeting(x,y+1,obj_rail) || place_meeting(x,y+1,obj_platform);
+vspd=min(vspd+grv,16);
+var _remain=vspd;
+while(_remain>0){
+    var _dy=min(1,_remain);
+    if(place_meeting(x,y+_dy,obj_platform)||place_meeting(x,y+_dy,obj_rail)){vspd=0;on_rail=true;break;}
+    y+=_dy;_remain-=_dy;
 }
-y += vspd;
- 
-// ---- РУХ ПО РЕЙКАХ ----
-if (on_rail)
-{
-    if (has_player)
-    {
-        // Гравець керує вагонеткою
-        var _left  = yp_input("A",false) || keyboard_check(vk_left);
-        var _right = yp_input("D",false) || keyboard_check(vk_right);
- 
-        if (_right) cart_spd = min(cart_spd + cart_accel, cart_spd_max);
-        if (_left)  cart_spd = max(cart_spd - cart_accel, -cart_spd_max);
-    }
- 
-    // Тертя
-    cart_spd *= (1 - cart_friction);
-    if (abs(cart_spd) < 0.1) cart_spd = 0;
- 
-    // Горизонтальне зіткнення
-    if (!place_meeting(x + cart_spd, y, obj_platform))
-        x += cart_spd;
-    else
-    {
-        cart_spd = 0;
-        // audio_play_sound(snd_cart_bump, 1, false);
-    }
+if(on_rail && has_player){
+    var _dir=(yp_input("D",false)||keyboard_check(vk_right))-(yp_input("A",false)||keyboard_check(vk_left));
+    cart_spd=clamp(cart_spd+_dir*cart_accel,-cart_spd_max,cart_spd_max);
 }
- 
-// ---- ПОЗИЦІЯ ГРАВЦЯ У ВАГОНЕТЦІ ----
-if (has_player)
-{
-    // Гравець сидить всередині — переміщуємо разом із вагонеткою
-    obj_player.x    = x;
-    obj_player.y    = y - sprite_height / 2 + 4;
-    obj_player.vspd = 0;
-    obj_player.hspd = 0;
+cart_spd*=1-cart_friction;
+if(abs(cart_spd)<0.1) cart_spd=0;
+var _remain=abs(cart_spd),_dir=sign(cart_spd);
+while(_remain>0){
+    var _dx=min(1,_remain)*_dir;
+    if(x+_dx<0 || bbox_right+_dx>=room_width || place_meeting(x+_dx,y,obj_platform)){cart_spd=0;break;}
+    x+=_dx;_remain-=abs(_dx);
+}
+_sync_rider();
+if(y>room_height+96) {
+    if(instance_exists(obj_player) && has_player) obj_player.riding_cart=noone;
+    has_player=false;x=xstart;y=ystart;vspd=0;cart_spd=0;
 }

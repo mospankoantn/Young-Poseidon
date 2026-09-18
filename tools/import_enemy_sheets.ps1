@@ -75,20 +75,20 @@ public static class EnemySheet {
 '@
 
 $items = @(
-    @{Name='giant_crab'; Source='Спрайти Краба.png'; Size=96},
-    @{Name='harpy_seagull'; Source='Sprites obj_harpy_seagull.png'; Size=96},
-    @{Name='miner_spirit'; Source='Sprites obj_miner_spirit.png'; Size=96},
-    @{Name='hades_shadow'; Source='Sprites obj_hades_shadow.png'; Size=96},
-    @{Name='greek_warrior'; Source='Sprites obj_greek_warrior.png'; Size=96},
-    @{Name='fallen_spirit'; Source='Sprites obj_fallen_spirit.png'; Size=96},
-    @{Name='olympus_fire'; Source='Sprites obj_olympus_fire.png'; Size=96},
-    @{Name='boss_triton'; Source='Sprites obj_boss_triton.png'; Size=192},
-    @{Name='boss_nymph'; Source='Sprites obj_boss_nymph.png'; Size=192},
-    @{Name='boss_uranus'; Source='Sprites obj_boss_uranus.png'; Size=192},
-    @{Name='boss_charon'; Source='Sprites obj_boss_charon.png'; Size=192},
-    @{Name='boss_minotaur'; Source='Sprites obj_boss_minotaur.png'; Size=192},
-    @{Name='boss_war_ghost'; Source='Sprites obj_boss_war_ghost.png'; Size=192},
-    @{Name='boss_moirai'; Source='Sprites obj_boss_moirai.png'; Size=192}
+    @{Name='giant_crab'; Source='Графіка/Вороги/Спрайти Краба.png'; Size=96},
+    @{Name='harpy_seagull'; Source='Графіка/Вороги/Sprites obj_harpy_seagull.png'; Size=96},
+    @{Name='miner_spirit'; Source='Графіка/Вороги/Sprites obj_miner_spirit.png'; Size=96},
+    @{Name='hades_shadow'; Source='Графіка/Вороги/Sprites obj_hades_shadow.png'; Size=96},
+    @{Name='greek_warrior'; Source='Графіка/Вороги/Sprites obj_greek_warrior.png'; Size=96},
+    @{Name='fallen_spirit'; Source='Графіка/Вороги/Sprites obj_fallen_spirit.png'; Size=96},
+    @{Name='olympus_fire'; Source='Графіка/Вороги/Sprites obj_olympus_fire.png'; Size=96},
+    @{Name='boss_triton'; Source='Графіка/Боси/Sprites obj_boss_triton.png'; Size=192},
+    @{Name='boss_nymph'; Source='Графіка/Боси/Sprites obj_boss_nymph.png'; Size=192},
+    @{Name='boss_uranus'; Source='Графіка/Боси/Sprites obj_boss_uranus.png'; Size=192},
+    @{Name='boss_charon'; Source='Графіка/Боси/Sprites obj_boss_charon.png'; Size=192},
+    @{Name='boss_minotaur'; Source='Графіка/Боси/Sprites obj_boss_minotaur.png'; Size=192},
+    @{Name='boss_war_ghost'; Source='Графіка/Боси/Sprites obj_boss_war_ghost.png'; Size=192},
+    @{Name='boss_moirai'; Source='Графіка/Боси/Sprites obj_boss_moirai.png'; Size=192}
 )
 $states = @('idle','move','attack','death')
 $fps = @(8,10,12,8)

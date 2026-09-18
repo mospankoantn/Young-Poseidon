@@ -1,4 +1,4 @@
-/// @description 
+/// @description
 /// obj_minotaur_column — Step Event
 
 if (hp <= 0)
@@ -7,4 +7,4 @@ if (hp <= 0)
     instance_destroy();
     exit;
 }
-image_index = clamp(5 - hp, 0, 4);
+image_index = hp <= 3 ? 1 : 0;

@@ -1,28 +1,5 @@
-/// @description
-/// obj_olympus_door — Step Event
-
-if (!instance_exists(obj_player)) exit;
- 
-// Перевіряємо чи гравець підходить до дверей з ключем
-if (!is_open
-    && !obj_player.is_dead && obj_player.hp > 0
-    && distance_to_object(obj_player) <= interact_range
-    && obj_player.has_olympus_key
-    && yp_input("E",true))
-{
-    event_user(0);   // Відкрити
-}
- 
-// Анімація відкриття
-if (is_open && image_index < 5)
-{
-    open_timer++;
-    if (open_timer mod 6 == 0)
-        image_index++;
-}
- 
-// Коли двері повністю відкриті — прибираємо solid
-if (image_index >= 5)
-{
-    solid = false;   // Тепер можна пройти крізь
+if(!is_open && prop_player_near(interact_range) && obj_player.has_olympus_key && yp_input("E",true)) event_user(0);
+if(is_open) {
+    open_timer=min(open_timer+1,30);
+    if(open_timer>=30){solid=false;sprite_index=-1;mask_index=-1;}
 }

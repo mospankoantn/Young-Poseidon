@@ -143,6 +143,7 @@ $manifest=@();$preview=[Drawing.Bitmap]::new(1440,6*160);$pg=[Drawing.Graphics]:
 $weapons=@('trident','spear','pickaxe','scythe','oar','sword')
 for($wi=0;$wi -lt $weapons.Count;$wi++) {
     $weapon=$weapons[$wi];$file=if($weapon -eq 'pickaxe'){'Sprite examples pickaxe .png'}else{"Sprite examples $weapon.png"}
+    $file="Графіка/Зброя/$file"
     $source=[Drawing.Bitmap]::new((Join-Path $ProjectRoot "Файли/$file"))
     try {
         if($source.Width -ne 1254 -or $source.Height -ne 1254){throw "Review source size: $file"}
@@ -188,9 +189,9 @@ for($wi=0;$wi -lt $weapons.Count;$wi++) {
         Write-Host "$weapon rows=$($rows -join ',') scale=$scale"
     }finally{$source.Dispose()}
 }
-$preview.Save((Join-Path $ProjectRoot 'Файли/weapon_animation_preview.png'),[Drawing.Imaging.ImageFormat]::Png);$pg.Dispose();$font.Dispose();$preview.Dispose()
+$preview.Save((Join-Path $ProjectRoot 'Файли/Графіка/Зброя/weapon_animation_preview.png'),[Drawing.Imaging.ImageFormat]::Png);$pg.Dispose();$font.Dispose();$preview.Dispose()
 
-$effects=[Drawing.Bitmap]::new((Join-Path $ProjectRoot 'Файли/weapon_projectile_effects_source.png'))
+$effects=[Drawing.Bitmap]::new((Join-Path $ProjectRoot 'Файли/Графіка/Ефекти/weapon_projectile_effects_source.png'))
 try {
     $rows=@(0);for($r=1;$r -lt 6;$r++){$rows += [WeaponSheet]::Gap($effects,$true,[int]($effects.Height*$r/6),30,0,$effects.Width)};$rows+=$effects.Height
     $specs=@(@{Name='spr_projectile_water';W=28;H=28;OX=6;OY=6},@{Name='spr_projectile_coin';W=24;H=24;OX=4;OY=4},@{Name='spr_projectile_ghost_spear';W=64;H=32;OX=24;OY=8},@{Name='spr_projectile_fate';W=64;H=32;OX=24;OY=8},@{Name='spr_projectile_lightning';W=64;H=128;OX=32;OY=128},@{Name='spr_olympus_key';W=64;H=64;OX=32;OY=32})

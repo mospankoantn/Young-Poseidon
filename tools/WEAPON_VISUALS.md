@@ -8,12 +8,12 @@
 
 | PNG у Файли | Іконка / нагорода | Анімації obj_player |
 | --- | --- | --- |
-| Sprite examples trident.png | spr_weapon_trident / obj_pickup_trident_reward | spr_player_trident_* |
-| Sprite examples spear.png | spr_weapon_spear / obj_pickup_spear_reward | spr_player_spear_* |
-| Sprite examples pickaxe .png | spr_weapon_pickaxe / obj_pickup_pickaxe_reward | spr_player_pickaxe_* |
-| Sprite examples scythe.png | spr_weapon_scythe / obj_pickup_scythe_reward | spr_player_scythe_* |
-| Sprite examples oar.png | spr_weapon_oar / obj_pickup_oar_reward | spr_player_oar_* |
-| Sprite examples sword.png | spr_weapon_sword / obj_pickup_sword_reward | spr_player_sword_* |
+| Графіка/Зброя/Sprite examples trident.png | spr_weapon_trident / obj_pickup_trident_reward | spr_player_trident_* |
+| Графіка/Зброя/Sprite examples spear.png | spr_weapon_spear / obj_pickup_spear_reward | spr_player_spear_* |
+| Графіка/Зброя/Sprite examples pickaxe .png | spr_weapon_pickaxe / obj_pickup_pickaxe_reward | spr_player_pickaxe_* |
+| Графіка/Зброя/Sprite examples scythe.png | spr_weapon_scythe / obj_pickup_scythe_reward | spr_player_scythe_* |
+| Графіка/Зброя/Sprite examples oar.png | spr_weapon_oar / obj_pickup_oar_reward | spr_player_oar_* |
+| Графіка/Зброя/Sprite examples sword.png | spr_weapon_sword / obj_pickup_sword_reward | spr_player_sword_* |
 
 Для всіх видів зброї імпортовані idle, run, pickup, attack.
 Для тризубця й списа також cast і recall; для інших чотирьох видів special.
@@ -57,7 +57,7 @@ Draw вимкнений, бо застряглу зброю малює obj_tride
 | obj_charon_scythe | spr_projectile_scythe | spr_test_arrow |
 
 Для ключа й п'яти ефектів створений додатковий прозорий атлас
-Файли/weapon_projectile_effects_source.png через imagegen:
+Файли/Графіка/Ефекти/weapon_projectile_effects_source.png через imagegen:
 4 колонки, 6 рядків, чотири кадри водяної кулі, золотої монети,
 примарного списа вправо, пурпурної нитки долі вправо, вертикальної блискавки
 та ключа Олімпу. Іконки зброї й фізичні метальні спрайти взято з наданих PNG.

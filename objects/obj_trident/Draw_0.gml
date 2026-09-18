@@ -18,7 +18,7 @@ if (thrown || stuck)
 {
     draw_set_color(make_color_rgb(200, 220, 255));
     draw_set_alpha(0.5);
-    draw_line(x, y, obj_player.x, obj_player.y);
+    draw_line(x, y, obj_player.x, (obj_player.bbox_top + obj_player.bbox_bottom) * 0.5);
     draw_set_alpha(1);
     draw_set_color(c_white);
 }
@@ -26,12 +26,10 @@ if (thrown || stuck)
 // Мерехтливе коло коли застряг (підказка гравцю що можна натиснути 1)
 if (stuck)
 {
-    var _pulse = 0.5 + 0.5 * sin(current_time / 150000);
+    var _pulse = 0.5 + 0.5 * sin(current_time / 180);
     draw_set_alpha(_pulse);
     draw_set_color(c_yellow);
     draw_circle(x, y, 18, true);
     draw_set_alpha(1);
     draw_set_color(c_white);
 }
-
-

@@ -1,21 +1,30 @@
-# GameMaker source and project metadata
+# Default text detection; no LFS or custom merge driver is required.
+* text=auto
+
+# GameMaker source, resources and project metadata.
 *.gml text eol=lf
 *.yy text eol=lf
 *.yyp text eol=lf
 *.resource_order text eol=lf
 
-# Documentation and plain-text configuration
+# PowerShell 7 tools, manifests and UTF-8 documentation.
+*.ps1 text eol=lf
+*.json text eol=lf
 *.md text eol=lf
 *.txt text eol=lf
+.codexrules text eol=lf
 .gitattributes text eol=lf
 
-# Binary resources and packaged assets
+# Binary assets, documents and packages; do not normalize or text-merge.
 *.png binary
 *.png~ binary
+*.jpg binary
+*.jpeg binary
 *.wav binary
 *.mp3 binary
 *.ico binary
 *.bmp binary
 *.docx binary
+*.pdf binary
 *.zip binary
 *.yyz binary

@@ -1,4 +1,4 @@
-/// @description 
+/// @description
 /// obj_boss_triton — Create Event
 
 boss_intro_shown = false;
@@ -8,7 +8,7 @@ max_hp    = 50;
 hp        = max_hp;
 atk       = 1;     // З дизайн-документу
 phase     = 1;
- 
+
 // ---- 4 ТОЧКИ ПАТРУЛЯ ----
 var _cx = x; var _cy = y;
 point_count = 4;
@@ -18,12 +18,12 @@ point_x[2] = _cx + 280;  point_y[2] = _cy + 80;
 point_x[3] = _cx - 280;  point_y[3] = _cy + 80;
 current_point = 0;
 fly_speed     = 3;
- 
+
 // ---- КОНТАКТНА АТАКА ----
 // Тритон завдає мінімальну шкоду при дотику (atk=1)
 contact_cd     = 0;
 contact_cd_max = 90;
- 
+
 is_dead = false;
 image_speed = 0.1;
 
@@ -92,13 +92,7 @@ _triton_reset_rock_wave = function()
 {
     with (obj_falling_rocks)
     {
-        x = initial_x;
-        y = initial_y;
-        fall_spd = 0;
-        state = 0;
-        solid = false;
-        show_warning = false;
-        is_next = false;
+        rock_reset();
     }
 
     _triton_mark_next_rock();
@@ -107,16 +101,17 @@ _triton_reset_rock_wave = function()
 
 _activate_next_rock = function()
 {
+    if (hp <= 0 || is_dead) return false;
     if (rock_recharge_timer > 0)
     {
         _triton_rock_hint("triton_rocks_recharging");
-        return;
+        return false;
     }
 
     if (_triton_has_falling_rock())
     {
         _triton_rock_hint("triton_rock_busy");
-        return;
+        return false;
     }
 
     var _next = _triton_next_rock();
@@ -125,12 +120,13 @@ _activate_next_rock = function()
         _next.is_next = true;
         with (_next) event_user(0);
         _triton_mark_next_rock();
-        return;
+        return true;
     }
 
     _triton_begin_rock_recharge();
+    return false;
 };
- 
+
 // ---- ПІДКАЗКА ДЛЯ ГРАВЦЯ ----
 // obj_interactive_button вже розміщені в кімнаті.
 // Коли гравець натискає кнопку — з'являється obj_falling_rocks

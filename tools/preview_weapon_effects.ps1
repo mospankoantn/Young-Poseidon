@@ -19,5 +19,5 @@ for($r=0;$r -lt $names.Count;$r++){
         $im.Dispose()
     }
 }
-$canvas.Save((Join-Path $ProjectRoot 'Файли/weapon_effects_preview.png'),[Drawing.Imaging.ImageFormat]::Png)
+$canvas.Save((Join-Path $ProjectRoot 'Файли/Графіка/Ефекти/weapon_effects_preview.png'),[Drawing.Imaging.ImageFormat]::Png)
 $font.Dispose();$g.Dispose();$canvas.Dispose()

@@ -46,6 +46,15 @@ if($TestPrefix -eq 'weapon_visuals') {
     $code=$code.Replace('yp_input("F",true)','global.test_recall_pressed')
     [IO.File]::WriteAllText($playerStep,$code,$utf8)
 }
+if($TestPrefix -eq 'interactive_props') {
+    foreach($file in Get-ChildItem -LiteralPath (Join-Path $projectDir 'objects') -Filter '*.gml' -Recurse) {
+        $code=[IO.File]::ReadAllText($file.FullName)
+        $code=$code.Replace('yp_input("E",true)','global.test_attack_pressed').Replace('yp_input("F",true)','global.test_recall_pressed')
+        [IO.File]::WriteAllText($file.FullName,$code,$utf8)
+    }
+    $draw=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/interactive_props_draw.gml') -Raw
+    [IO.File]::WriteAllText((Join-Path $projectDir 'objects/obj_main_menu/Draw_64.gml'),$draw,$utf8)
+}
 $path=Join-Path $projectDir 'options/windows/options_windows.yy'
 $options=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json -Depth 100
 $options.option_windows_disable_sandbox=$true

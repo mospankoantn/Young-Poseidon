@@ -136,7 +136,7 @@ for ($row=0;$row -lt $specs.Count;$row++) {
     $graphics.DrawString($spec.Name,$font,[System.Drawing.Brushes]::White,4,$row*112)
     Write-Output "$name : $count frames, $($spec.FPS) fps, 128x96, origin 64/88"
 }
-$assetDir=Join-Path $ProjectRoot 'Файли'
+$assetDir=Join-Path $ProjectRoot 'Файли/Графіка/Гравець'
 $sourceTarget=Join-Path $assetDir 'player_animation_source.png'
 if ([IO.Path]::GetFullPath($Source) -ne [IO.Path]::GetFullPath($sourceTarget)) {
     Copy-Item -LiteralPath $Source -Destination $sourceTarget -Force

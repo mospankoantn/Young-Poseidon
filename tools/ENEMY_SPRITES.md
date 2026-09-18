@@ -8,20 +8,20 @@
 
 | Джерело в `Файли` | GameMaker спрайти | Об'єкт |
 | --- | --- | --- |
-| Спрайти Краба.png | spr_giant_crab_{idle,move,attack,death} | obj_giant_crab |
-| Sprites obj_harpy_seagull.png | spr_harpy_seagull_{idle,move,attack,death} | obj_harpy_seagull |
-| Sprites obj_miner_spirit.png | spr_miner_spirit_{idle,move,attack,death} | obj_miner_spirit |
-| Sprites obj_hades_shadow.png | spr_hades_shadow_{idle,move,attack,death} | obj_hades_shadow |
-| Sprites obj_greek_warrior.png | spr_greek_warrior_{idle,move,attack,death} | obj_greek_warrior |
-| Sprites obj_fallen_spirit.png | spr_fallen_spirit_{idle,move,attack,death} | obj_fallen_spirit |
-| Sprites obj_olympus_fire.png | spr_olympus_fire_{idle,move,attack,death} | obj_olympus_fire |
-| Sprites obj_boss_triton.png | spr_boss_triton_{idle,move,attack,death} | obj_boss_triton |
-| Sprites obj_boss_nymph.png | spr_boss_nymph_{idle,move,attack,death} | obj_boss_nymph |
-| Sprites obj_boss_uranus.png | spr_boss_uranus_{idle,move,attack,death} | obj_boss_uranus |
-| Sprites obj_boss_charon.png | spr_boss_charon_{idle,move,attack,death} | obj_boss_charon |
-| Sprites obj_boss_minotaur.png | spr_boss_minotaur_{idle,move,attack,death} | obj_boss_minotaur |
-| Sprites obj_boss_war_ghost.png | spr_boss_war_ghost_{idle,move,attack,death} | obj_boss_war_ghost |
-| Sprites obj_boss_moirai.png | spr_boss_moirai_{idle,move,attack,death} | obj_boss_moirai |
+| Графіка/Вороги/Спрайти Краба.png | spr_giant_crab_{idle,move,attack,death} | obj_giant_crab |
+| Графіка/Вороги/Sprites obj_harpy_seagull.png | spr_harpy_seagull_{idle,move,attack,death} | obj_harpy_seagull |
+| Графіка/Вороги/Sprites obj_miner_spirit.png | spr_miner_spirit_{idle,move,attack,death} | obj_miner_spirit |
+| Графіка/Вороги/Sprites obj_hades_shadow.png | spr_hades_shadow_{idle,move,attack,death} | obj_hades_shadow |
+| Графіка/Вороги/Sprites obj_greek_warrior.png | spr_greek_warrior_{idle,move,attack,death} | obj_greek_warrior |
+| Графіка/Вороги/Sprites obj_fallen_spirit.png | spr_fallen_spirit_{idle,move,attack,death} | obj_fallen_spirit |
+| Графіка/Вороги/Sprites obj_olympus_fire.png | spr_olympus_fire_{idle,move,attack,death} | obj_olympus_fire |
+| Графіка/Боси/Sprites obj_boss_triton.png | spr_boss_triton_{idle,move,attack,death} | obj_boss_triton |
+| Графіка/Боси/Sprites obj_boss_nymph.png | spr_boss_nymph_{idle,move,attack,death} | obj_boss_nymph |
+| Графіка/Боси/Sprites obj_boss_uranus.png | spr_boss_uranus_{idle,move,attack,death} | obj_boss_uranus |
+| Графіка/Боси/Sprites obj_boss_charon.png | spr_boss_charon_{idle,move,attack,death} | obj_boss_charon |
+| Графіка/Боси/Sprites obj_boss_minotaur.png | spr_boss_minotaur_{idle,move,attack,death} | obj_boss_minotaur |
+| Графіка/Боси/Sprites obj_boss_war_ghost.png | spr_boss_war_ghost_{idle,move,attack,death} | obj_boss_war_ghost |
+| Графіка/Боси/Sprites obj_boss_moirai.png | spr_boss_moirai_{idle,move,attack,death} | obj_boss_moirai |
 
 На цих аркушах немає окремого ряду hurt. Четвертий ряд — послідовність
 пошкодження та смерті, відтворювана одноразово перед існуючим
@@ -39,4 +39,3 @@
 Остання перевірка: 14 відповідностей, 56 GMSprite ресурсів, 224 кадри,
 успішне завантаження й компіляція GameMaker 2026 LTS та Runner-тест
 усіх 14 об'єктів.
-

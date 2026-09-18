@@ -32,7 +32,7 @@ public static class TilePreview {
 }
 '@
 
-$referencePath = Join-Path $ProjectRoot 'Файли/tiles_reference_2026.png'
+$referencePath = Join-Path $ProjectRoot 'Файли/Графіка/Оточення/tiles_reference_2026.png'
 $seaFrame = 'abecefd3-acfc-4cc5-b3b1-5e4d0db84a78'
 $seaLayer = 'f8f26872-df30-47e9-978e-3de1db90f9df'
 $zones = @(

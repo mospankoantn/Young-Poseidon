@@ -2,6 +2,7 @@
 /// obj_checkpoint — Step Event
 
 if (is_activated || !instance_exists(obj_player)) exit;
+if(obj_player.is_dead || obj_player.hp<=0) exit;
  
 if (place_meeting(x, y, obj_player))
 {

@@ -1,10 +1,10 @@
 param([string]$Source='')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
-if(!$Source) {$Source=Join-Path $root 'Файли/Menu_background_clean.png'}
+if(!$Source) {$Source=Join-Path $root 'Файли/Графіка/Меню/Menu_background_clean.png'}
 $utf8=[Text.UTF8Encoding]::new($false)
 # Reuse the existing sprite frame and layer IDs.
-$dest=Join-Path $root 'Файли/Menu_background_clean.png'
+$dest=Join-Path $root 'Файли/Графіка/Меню/Menu_background_clean.png'
 if([IO.Path]::GetFullPath($Source) -ne [IO.Path]::GetFullPath($dest)) {
     Copy-Item -LiteralPath $Source -Destination $dest -Force
 }

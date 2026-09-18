@@ -1,35 +1,5 @@
-/// @description
-/// obj_olympus_door — Draw Event
-
-draw_self();
- 
-// Підказка "E — відкрити" якщо гравець поруч і має ключ
-if (!is_open
-    && instance_exists(obj_player)
-    && distance_to_object(obj_player) <= interact_range)
-{
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_bottom);
- 
-    if (obj_player.has_olympus_key)
-    {
-        var _a = 0.7 + 0.3 * sin(current_time / 200000);
-        draw_set_alpha(_a);
-        draw_set_color(c_yellow);
-        if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, lc("interact_open"));
-    }
-    else
-    {
-        draw_set_alpha(0.8);
-        draw_set_color(c_red);
-        if (font_exists(fnt_main)) draw_set_font(fnt_main);
-        draw_text(x, y - sprite_height / 2 - 8, lc("need_key"));
-    }
- 
-    draw_set_alpha(1);
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    draw_set_color(c_white);
-    draw_set_font(-1);
-}
+var _open=is_open ? min(1,open_timer/30) : 0;
+draw_sprite_ext(spr_olympus_door,0,x,y,image_xscale,image_yscale,0,c_white,1-_open);
+if(_open>0) draw_sprite_ext(spr_olympus_door,1,x,y,image_xscale,image_yscale,0,c_white,_open);
+if(!is_open && prop_player_near(interact_range))
+    prop_hint(obj_player.has_olympus_key ? lc("interact_open") : lc("need_key"),c_white);

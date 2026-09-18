@@ -1,4 +1,4 @@
-/// @description 
+/// @description
 /// @description obj_player — Step Event
 
 if (hp <= 0 && !is_dead) _begin_player_death();
@@ -12,6 +12,11 @@ if (is_dead)
 // АНІМАЦІЙНІ ТАЙМЕРИ
 // ════════════════════════════════════════
 if (anim_action_timer > 0) anim_action_timer--;
+if(instance_exists(riding_cart) && riding_cart.has_player) {
+    riding_cart._sync_rider();
+    exit;
+}
+if(!instance_exists(riding_cart)) riding_cart=noone;
 image_xscale = l_right ? 1 : -1;
 
 // ════════════════════════════════════════
@@ -21,20 +26,26 @@ var _left  = yp_input("A",false) || keyboard_check(vk_left);
 var _right = yp_input("D",false) || keyboard_check(vk_right);
 var _jump  = yp_input("W",true) || keyboard_check_pressed(vk_up);
 var _drop  = yp_input("S",true) || keyboard_check_pressed(vk_down);
- 
+
 var _e_pressed = yp_input("E",true);   // Кидок зброї
+// Interacting with a nearby mechanism should not also throw a held weapon.
+if(instance_exists(prop_nearest_button())) _e_pressed=false;
+if(instance_exists(obj_mine_cart)) {
+    var _cart=instance_nearest(x,y,obj_mine_cart);
+    if(distance_to_object(_cart)<=_cart.interact_range) _e_pressed=false;
+}
 var _f_pressed = yp_input("F",true);   // Взаємодія з предметом
 var _q_pressed = yp_input("Q",true);   // Закрити діалог
- 
+
 // Зілля
 var _z_pressed = yp_input("Z",true);   // Зілля здоров'я
 var _x_pressed = yp_input("X",true);   // Зілля Геракла
 var _c_pressed = yp_input("C",true);   // Зілля Гермеса
- 
+
 // Колесо миші — переключення зброї
 var _wheel_up   = mouse_wheel_up();
 var _wheel_down = mouse_wheel_down();
- 
+
 // Клавіші 1-6 — пряме переключення зброї
 for (var _ki = 0; _ki < 6; _ki++)
 {
@@ -44,14 +55,14 @@ for (var _ki = 0; _ki < 6; _ki++)
             current_weapon = _ki;
     }
 }
- 
+
 // Колесо миші
 if (_wheel_up)   _switch_weapon(1);
 if (_wheel_down) _switch_weapon(-1);
 
 if (current_weapon >= array_length(weapon_unlocked))
     current_weapon = -1;
- 
+
 // ════════════════════════════════════════
 // БЛОК 2: ЗАМОРОЗКА (Тінь Аїда)
 // ════════════════════════════════════════
@@ -61,30 +72,30 @@ if (is_frozen)
     if (freeze_timer <= 0) { is_frozen = false; }
     _left = false; _right = false;
 }
- 
+
 // ════════════════════════════════════════
 // БЛОК 3: РУХ
 // ════════════════════════════════════════
 var _move = _right - _left;
- 
+
 var _weapon_spd  = (current_weapon >= 0) ? weapon_spd_mult[current_weapon] : 1.0;
 var _current_spd = spd * _weapon_spd * 10 + (perm_spd_bonus + temp_spd_buff) * 10;
 var _move_hspd   = _move * _current_spd;
- 
+
 if (_move > 0) { l_right = true;  image_xscale =  1; }
 if (_move < 0) { l_right = false; image_xscale = -1; }
- 
+
 // ════════════════════════════════════════
 // БЛОК 4: ГРАВІТАЦІЯ
 // ════════════════════════════════════════
 vspd += grv;
 if (vspd > 20) vspd = 20;
- 
+
 // ════════════════════════════════════════
 // БЛОК 5: ЗІТКНЕННЯ З ПЛАТФОРМАМИ
 // ════════════════════════════════════════
 var _on_ground = place_meeting(x, y + 1, obj_platform);
- 
+
 // --- S: Проскочити крізь тонку платформу ---
 // (лише якщо платформа є obj_thin_platform — нащадок obj_platform)
 if (_drop && place_meeting(x, y + 1, obj_thin_platform) && vspd >= 0)
@@ -93,7 +104,7 @@ if (_drop && place_meeting(x, y + 1, obj_thin_platform) && vspd >= 0)
 }
 if (drop_timer > 0) drop_timer--;
 
- 
+
 // Горизонталь
 var _total_hspd = _move_hspd + hspd;
 if (place_meeting(x + _total_hspd, y, obj_platform))
@@ -104,17 +115,17 @@ if (place_meeting(x + _total_hspd, y, obj_platform))
     hspd        = 0;
 }
 x += _total_hspd;
- 
+
 hspd *= 0.75;
 if (abs(hspd) < 0.5) hspd = 0;
- 
+
 // Стрибок
 if (_on_ground && _jump)
 {
     vspd = -12;
     if (audio_exists(snd_jump)) audio_play_sound(snd_jump, 1, false);
 }
- 
+
 // Вертикаль
 if (place_meeting(x, y + vspd, obj_platform))
 {
@@ -144,16 +155,16 @@ if (place_meeting(x, y + vspd, obj_platform))
     }
 }
 y += vspd;
- 
+
 // ════════════════════════════════════════
 // БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДія)
 // ════════════════════════════════════════
 var _can_throw = (current_weapon == 0 || current_weapon == 1);
- 
+
 if (_can_throw && instance_exists(trident_instance))
 {
     var _t = trident_instance;
- 
+
     // E — кинути зброю
     if (_e_pressed)
     {
@@ -174,13 +185,16 @@ if (_can_throw && instance_exists(trident_instance))
             _t.thrown       = true;
             _t.timer        = 0;
             _t.x            = x + image_xscale * 24;
-            _t.y            = y - 8;
+            // The player origin is at the feet; launch from chest/hand height.
+            _t.y            = bbox_top + (bbox_bottom - bbox_top) * 0.5;
+            _t.image_angle  = 0;
+            _t.invisible_time = false;
             _t.image_xscale = image_xscale;
             _t.visual_weapon = current_weapon;
             _play_weapon_action("cast");
         }
     }
- 
+
     // F — повернути з будь-якої відстані (натискання "1" у документі)
     // У документі написано "цифру 1", але F — кнопка взаємодії
     // Залишаємо обидва варіанти:
@@ -201,7 +215,7 @@ if (_can_throw && instance_exists(trident_instance))
         }
     }
 }
- 
+
 // Меч — випад (E при current_weapon == 5)
 if (current_weapon == 5 && _e_pressed)
 {
@@ -211,7 +225,7 @@ if (current_weapon == 5 && _e_pressed)
     if (instance_exists(_hit))
         with (_hit) hp -= (obj_player.weapon_atk[5] + obj_player.temp_atk_buff);
 }
- 
+
 // Tool swings are visual only; obstacle scripts retain their existing effects.
 if (_e_pressed && current_weapon >= 2 && current_weapon <= 4)
     _play_weapon_action("attack");
@@ -220,7 +234,7 @@ if (_e_pressed && current_weapon >= 2 && current_weapon <= 4)
 // БЛОК 7: СМЕРТЬ
 // ════════════════════════════════════════
 // Lethal collision damage is handled in End Step, before animation selection.
- 
+
 // ════════════════════════════════════════
 // БЛОК 8: ТИМЧАСОВІ БАФИ
 // ════════════════════════════════════════
@@ -229,11 +243,11 @@ if (buff_duration > 0)
     buff_duration--;
     if (buff_duration <= 0) { temp_spd_buff = 0; temp_atk_buff = 0; }
 }
- 
+
 // ════════════════════════════════════════
 // БЛОК 9: ЗІЛЛЯ (Z / X / C)
 // ════════════════════════════════════════
- 
+
 // Z — Зілля здоров'я: відновлює 5 HP (з дизайн-документу)
 if (_z_pressed && potion_heal_count > 0 && hp < max_hp)
 {
@@ -241,7 +255,7 @@ if (_z_pressed && potion_heal_count > 0 && hp < max_hp)
     potion_heal_count--;
     // audio_play_sound(snd_potion_heal, 1, false);
 }
- 
+
 // X — Зілля Геракла: +5 ATK на 60 секунд (з дизайн-документу)
 if (_x_pressed && potion_strength_count > 0 && buff_duration <= 0)
 {
@@ -250,7 +264,7 @@ if (_x_pressed && potion_strength_count > 0 && buff_duration <= 0)
     buff_duration = room_speed * 60;   // 60 секунд
     // audio_play_sound(snd_potion_strength, 1, false);
 }
- 
+
 // C — Зілля Гермеса: +1 SPD на 60 секунд (з дизайн-документу)
 if (_c_pressed && potion_speed_count > 0 && buff_duration <= 0)
 {

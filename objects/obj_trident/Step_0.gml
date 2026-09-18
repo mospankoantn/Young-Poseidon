@@ -26,7 +26,8 @@ if (thrown && !invisible_time)
     y += lengthdir_y(fly_speed, _fly_dir);
  
     // Обертання для візуального ефекту
-    image_angle = (image_xscale > 0) ? 0 : 180;
+    // Flip the collision mask once; Draw handles the visual rotation separately.
+    image_angle = 0;
  
     timer++;
  

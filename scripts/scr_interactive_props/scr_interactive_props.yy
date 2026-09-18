@@ -1,0 +1,1 @@
+{"$GMScript":"v1","%Name":"scr_interactive_props","isCompatibility":false,"isDnD":false,"name":"scr_interactive_props","parent":{"name":"Скрипты","path":"folders/Скрипты.yy"},"resourceType":"GMScript","resourceVersion":"2.0"}
