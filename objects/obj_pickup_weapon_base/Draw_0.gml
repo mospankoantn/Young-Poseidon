@@ -19,7 +19,7 @@ if (font_exists(fnt_main)) draw_set_font(fnt_main);
  
 var _bounce = sin(bob_offset * 2) * 3;
 draw_text(x, base_y - sprite_height / 2 - 20 + _bounce,
-    (is_key ? "🗝 " : "⚔ ") + weapon_label);
+    weapon_label);
  
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);

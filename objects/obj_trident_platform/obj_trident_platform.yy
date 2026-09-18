@@ -33,9 +33,12 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_weapon_trident",
-    "path":"sprites/spr_weapon_trident/spr_weapon_trident.yy",
+    "name":"spr_weapon_collision",
+    "path":"sprites/spr_weapon_collision/spr_weapon_collision.yy",
   },
-  "spriteMaskId":null,
-  "visible":true,
+  "spriteMaskId":{
+    "name":"spr_weapon_collision",
+    "path":"sprites/spr_weapon_collision/spr_weapon_collision.yy",
+  },
+  "visible":false,
 }

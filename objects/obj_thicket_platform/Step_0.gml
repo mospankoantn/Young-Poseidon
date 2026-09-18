@@ -41,6 +41,7 @@ _start_cut = function()
     if (!is_cutting)
     {
         is_cutting  = true;
+        obj_player._play_weapon_action("special");
         is_cleared  = true;
         // audio_play_sound(snd_thicket_cut, 1, false);
     }

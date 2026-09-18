@@ -6,4 +6,4 @@ vspd     = 0;
 damage   = 0;
 lifetime = room_speed * 2.5;
 grv      = 0.25;
-image_speed = 0.2;   // Монета крутиться
+image_speed = 1;   // Sprite playback is authored at 12 FPS.

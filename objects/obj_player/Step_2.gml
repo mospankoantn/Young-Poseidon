@@ -2,6 +2,12 @@
 if (hp <= 0 && !is_dead) _begin_player_death();
 if (is_dead) exit;
 
+if (anim_action_weapon >= 0 && anim_action_weapon != current_weapon)
+{
+    anim_action_timer = 0;
+    anim_action_weapon = -1;
+}
+
 var _ground_now = vspd == 0 && drop_timer <= 0
     && place_meeting(x, y + 1, obj_platform);
 var _hurt_now = hp < anim_last_hp || (is_damage && !anim_was_damage);
@@ -33,9 +39,9 @@ else if (!_ground_now)
     image_index = clamp(floor(((vspd + 12) / 24) * image_number), 0, image_number - 1);
 }
 else if (abs(x - anim_last_x) > 0.1)
-    _set_player_animation(spr_player_run, clamp(abs(x - anim_last_x) / 10, 0.6, 1.5));
+    _set_player_animation(_weapon_locomotion(true), clamp(abs(x - anim_last_x) / 10, 0.6, 1.5));
 else
-    _set_player_animation(spr_player_idle, 1);
+    _set_player_animation(_weapon_locomotion(false), 1);
 
 anim_was_on_ground = _ground_now;
 anim_was_damage = is_damage;

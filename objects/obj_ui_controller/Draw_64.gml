@@ -240,7 +240,8 @@ if (_p.current_weapon >= 0)
     var _wspd = _p.weapon_spd_mult[_p.current_weapon];
 
     if (sprite_exists(_wspr))
-        draw_sprite_ext(_wspr, 0, _weapon_x + 24, _weapon_y + _weapon_h * 0.5, 1.2, 1.2, 0, c_white, 1);
+        var _weapon_scale = 32 / max(sprite_get_width(_wspr), sprite_get_height(_wspr));
+        draw_sprite_ext(_wspr, 0, _weapon_x + 24, _weapon_y + _weapon_h * 0.5, _weapon_scale, _weapon_scale, 0, c_white, 1);
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_middle);
@@ -269,7 +270,7 @@ if (_p.has_olympus_key)
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     if (sprite_exists(spr_olympus_key))
-        draw_sprite_ext(spr_olympus_key, 0, _kx + 21, _weapon_y + 21, 0.9, 0.9, 0, c_white, 1);
+        draw_sprite_ext(spr_olympus_key, 0, _kx + 21, _weapon_y + 21, 0.47, 0.47, 0, c_white, 1);
     else
         draw_text(_kx + 21, _weapon_y + 21, "KEY");
 }

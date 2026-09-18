@@ -8,7 +8,10 @@ var _dist = point_distance(x, y, obj_player.x, obj_player.y);
 if (_dist < 20 && !thrown && !stuck)
     exit;
  
-draw_self();
+var _visual = visual_weapon == 1 ? spr_projectile_spear : spr_projectile_trident;
+// Flight uses image_xscale for physics; do not mirror AND rotate the artwork.
+var _angle = (thrown || stuck) ? (image_xscale > 0 ? 0 : 180) : image_angle;
+draw_sprite_ext(_visual, 0, x, y, 1, 1, _angle, image_blend, image_alpha);
  
 // Лінія від тризубця до гравця (тільки коли летить або застряг)
 if (thrown || stuck)

@@ -11,6 +11,7 @@ image_angle += 1.5;
 // Перевірка підбору
 if (can_pickup
     && instance_exists(obj_player)
+    && !obj_player.is_dead && obj_player.hp > 0
     && place_meeting(x, y, obj_player))
 {
     // Викликаємо User Event 0 — перевизначений у кожному нащадку

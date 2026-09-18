@@ -4,4 +4,4 @@
 event_inherited();
 weapon_index = 4;       // Весло (індекс 4!)
 weapon_label = "Весло";
-image_blend  = make_color_rgb(160, 120, 80);    // Дерев'яний колір
+image_blend = c_white;

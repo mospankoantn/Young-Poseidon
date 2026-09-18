@@ -1,8 +1,4 @@
-/// @description Нитка = пурпурна лінія з ефектом слід
-/// obj_proj_fate_beam — Draw Event
-
-draw_set_color(make_color_rgb(200, 100, 255));
-draw_set_alpha(0.8);
-draw_circle(x, y, 6, false);
-draw_set_alpha(1);
-draw_set_color(c_white);
+/// @description Animated fate thread, aligned with its existing velocity.
+draw_sprite_ext(sprite_index, image_index, x - hspd, y - vspd,
+    image_xscale, image_yscale, image_angle, c_white, 0.25);
+draw_self();

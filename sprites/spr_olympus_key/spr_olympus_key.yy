@@ -1,11 +1,11 @@
 {
   "$GMSprite": "v2",
   "%Name": "spr_olympus_key",
-  "bboxMode": 0,
-  "bbox_bottom": 25,
-  "bbox_left": 2,
-  "bbox_right": 28,
-  "bbox_top": 6,
+  "bboxMode": 2,
+  "bbox_bottom": 63,
+  "bbox_left": 0,
+  "bbox_right": 63,
+  "bbox_top": 0,
   "collisionKind": 1,
   "collisionTolerance": 0,
   "DynamicTexturePage": false,
@@ -18,11 +18,32 @@
       "name": "e66ad008-6acd-4299-8278-d5fac96e5d3f",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "a301b551-f11d-46a2-a70f-c9d4f86126c4",
+      "name": "a301b551-f11d-46a2-a70f-c9d4f86126c4",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "061db60d-3ccc-4edc-af03-034ead09f49e",
+      "name": "061db60d-3ccc-4edc-af03-034ead09f49e",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "8cee7cf6-b0b1-4942-af14-8305e6b85f67",
+      "name": "8cee7cf6-b0b1-4942-af14-8305e6b85f67",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
     }
   ],
   "gridX": 0,
   "gridY": 0,
-  "height": 32,
+  "height": 64,
   "HTile": false,
   "layers": [
     {
@@ -40,7 +61,7 @@
   ],
   "name": "spr_olympus_key",
   "nineSlice": null,
-  "origin": 0,
+  "origin": 9,
   "parent": {
     "name": "Items",
     "path": "folders/Спрайты/Items.yy"
@@ -66,7 +87,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 1.0,
+    "length": 4.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -76,7 +97,7 @@
     },
     "name": "spr_olympus_key",
     "playback": 1,
-    "playbackSpeed": 30.0,
+    "playbackSpeed": 12.0,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -115,6 +136,72 @@
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
               "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "a301b551-f11d-46a2-a70f-c9d4f86126c4",
+                    "path": "sprites/spr_olympus_key/spr_olympus_key.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "c7ee7725-a8a7-459a-8d26-f2cc01149266",
+              "IsCreationKey": false,
+              "Key": 1.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "061db60d-3ccc-4edc-af03-034ead09f49e",
+                    "path": "sprites/spr_olympus_key/spr_olympus_key.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "24bb0589-b5ec-49d5-b8e0-511476648588",
+              "IsCreationKey": false,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "8cee7cf6-b0b1-4942-af14-8305e6b85f67",
+                    "path": "sprites/spr_olympus_key/spr_olympus_key.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "d61372cf-1238-47bd-b586-fe8a3690b991",
+              "IsCreationKey": false,
+              "Key": 3.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
             }
           ],
           "resourceType": "KeyframeStore<SpriteFrameKeyframe>",
@@ -132,8 +219,8 @@
     ],
     "visibleRange": null,
     "volume": 1.0,
-    "xorigin": 0,
-    "yorigin": 0
+    "xorigin": 32,
+    "yorigin": 32
   },
   "swatchColours": null,
   "swfPrecision": 0.5,
@@ -143,5 +230,5 @@
   },
   "type": 0,
   "VTile": false,
-  "width": 32
+  "width": 64
 }

@@ -33,6 +33,8 @@ if (instance_exists(obj_player) && !obj_player.is_dead && obj_player.hp > 0)
  
             if (_right) raft_spd = min(raft_spd + 0.3, raft_spd_max);
             if (_left)  raft_spd = max(raft_spd - 0.3, -raft_spd_max);
+            if ((_left || _right) && obj_player.anim_action_timer <= 0)
+                obj_player._play_weapon_action("special");
  
             // Пліт рухає гравця разом із собою
             obj_player.x += raft_spd;

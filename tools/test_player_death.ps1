@@ -1,6 +1,8 @@
 param(
     [string]$Runtime='C:/ProgramData/GameMakerStudio2-LTS2026/Cache/runtimes/runtime-2026.0.0.23',
-    [string]$UserDir=(Join-Path $env:APPDATA 'GameMakerStudio2-LTS2026/unknownUser_unknownUserID')
+    [string]$UserDir=(Join-Path $env:APPDATA 'GameMakerStudio2-LTS2026/unknownUser_unknownUserID'),
+    [string]$TestPrefix='player_death',
+    [string]$SuccessMarker='PASS: no-checkpoint game_restart'
 )
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
@@ -30,7 +32,7 @@ foreach($name in @('rm_menu','rm_sea_1')) {
     Save-Json $path $room
 }
 $report=Join-Path $temp 'report.txt'
-foreach($pair in @(@('player_death_create.gml','Create_0.gml'),@('player_death_step.gml','Step_0.gml'))) {
+foreach($pair in @(@("${TestPrefix}_create.gml",'Create_0.gml'),@("${TestPrefix}_step.gml",'Step_0.gml'))) {
     $source=Get-Content -LiteralPath (Join-Path $PSScriptRoot ('tests/'+$pair[0])) -Raw
     $source=$source.Replace('__REPORT__',$report.Replace('\','/'))
     [IO.File]::WriteAllText((Join-Path $projectDir ('objects/obj_main_menu/'+$pair[1])),$source,$utf8)
@@ -58,4 +60,4 @@ if(!(Test-Path -LiteralPath $report)) {
 $result=Get-Content -LiteralPath $report -Raw
 Write-Output $result
 Write-Output "Test artifacts: $temp"
-if($result.Contains('FAIL:') -or !$result.Contains('PASS: no-checkpoint game_restart')) {throw 'Death runtime test failed'}
+if($result.Contains('FAIL:') -or !$result.Contains($SuccessMarker)) {throw "$TestPrefix runtime test failed"}

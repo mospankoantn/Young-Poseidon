@@ -4,4 +4,4 @@
 event_inherited();
 weapon_index = 2;       // Кайло
 weapon_label = "Кайло";
-image_blend  = make_color_rgb(200, 160, 100);   // Коричнево-сірий
+image_blend = c_white;

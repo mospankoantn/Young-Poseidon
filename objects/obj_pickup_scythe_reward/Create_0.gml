@@ -4,4 +4,4 @@
 event_inherited();
 weapon_index = 3;       // Коса (індекс 3!)
 weapon_label = "Коса";
-image_blend  = make_color_rgb(255, 100, 80);    // Криваво-червоний
+image_blend = c_white;

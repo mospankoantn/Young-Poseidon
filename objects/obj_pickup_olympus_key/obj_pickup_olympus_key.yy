@@ -1,42 +1,65 @@
 {
-  "$GMObject":"",
-  "%Name":"obj_pickup_olympus_key",
-  "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":10,"eventType":7,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  "$GMObject": "",
+  "%Name": "obj_pickup_olympus_key",
+  "eventList": [
+    {
+      "$GMEvent": "v1",
+      "%Name": "",
+      "collisionObjectId": null,
+      "eventNum": 0,
+      "eventType": 0,
+      "isDnD": false,
+      "name": "",
+      "resourceType": "GMEvent",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMEvent": "v1",
+      "%Name": "",
+      "collisionObjectId": null,
+      "eventNum": 10,
+      "eventType": 7,
+      "isDnD": false,
+      "name": "",
+      "resourceType": "GMEvent",
+      "resourceVersion": "2.0"
+    }
   ],
-  "managed":true,
-  "name":"obj_pickup_olympus_key",
-  "overriddenProperties":[],
-  "parent":{
-    "name":"Item",
-    "path":"folders/Объекты/Item.yy",
+  "managed": true,
+  "name": "obj_pickup_olympus_key",
+  "overriddenProperties": [],
+  "parent": {
+    "name": "Item",
+    "path": "folders/Объекты/Item.yy"
   },
-  "parentObjectId":{
-    "name":"obj_pickup_weapon_base",
-    "path":"objects/obj_pickup_weapon_base/obj_pickup_weapon_base.yy",
+  "parentObjectId": {
+    "name": "obj_pickup_weapon_base",
+    "path": "objects/obj_pickup_weapon_base/obj_pickup_weapon_base.yy"
   },
-  "persistent":false,
-  "physicsAngularDamping":0.1,
-  "physicsDensity":0.5,
-  "physicsFriction":0.2,
-  "physicsGroup":1,
-  "physicsKinematic":false,
-  "physicsLinearDamping":0.1,
-  "physicsObject":false,
-  "physicsRestitution":0.1,
-  "physicsSensor":false,
-  "physicsShape":1,
-  "physicsShapePoints":[],
-  "physicsStartAwake":true,
-  "properties":[],
-  "resourceType":"GMObject",
-  "resourceVersion":"2.0",
-  "solid":false,
-  "spriteId":{
-    "name":"spr_weapon_trident",
-    "path":"sprites/spr_weapon_trident/spr_weapon_trident.yy",
+  "persistent": false,
+  "physicsAngularDamping": 0.1,
+  "physicsDensity": 0.5,
+  "physicsFriction": 0.2,
+  "physicsGroup": 1,
+  "physicsKinematic": false,
+  "physicsLinearDamping": 0.1,
+  "physicsObject": false,
+  "physicsRestitution": 0.1,
+  "physicsSensor": false,
+  "physicsShape": 1,
+  "physicsShapePoints": [],
+  "physicsStartAwake": true,
+  "properties": [],
+  "resourceType": "GMObject",
+  "resourceVersion": "2.0",
+  "solid": false,
+  "spriteId": {
+    "name": "spr_olympus_key",
+    "path": "sprites/spr_olympus_key/spr_olympus_key.yy"
   },
-  "spriteMaskId":null,
-  "visible":true,
+  "spriteMaskId": {
+    "name": "spr_weapon_collision",
+    "path": "sprites/spr_weapon_collision/spr_weapon_collision.yy"
+  },
+  "visible": true
 }

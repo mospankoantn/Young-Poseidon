@@ -14,6 +14,7 @@ if (_dist <= interact_range && hit_cd <= 0
     && (keyboard_check_pressed(ord("E")) || keyboard_check_pressed(ord("F"))))
 {
     stones_left--;
+    obj_player._play_weapon_action("special");
     hit_cd = room_speed * 0.5;
  
     // Створюємо камінь що падає

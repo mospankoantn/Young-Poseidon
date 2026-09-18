@@ -50,7 +50,8 @@ for (var _i = 0; _i < _count; _i++)
     var _wspr = obj_player.weapon_sprites[_windex];
     if (sprite_exists(_wspr))
     {
-        draw_sprite_ext(_wspr, 0, _ix, _iy, 1, 1, 0, c_white, appear_scale);
+        var _icon_scale = 40 / max(sprite_get_width(_wspr), sprite_get_height(_wspr));
+        draw_sprite_ext(_wspr, 0, _ix, _iy, _icon_scale, _icon_scale, 0, c_white, appear_scale);
     }
     else
     {

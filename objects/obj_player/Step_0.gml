@@ -176,7 +176,8 @@ if (_can_throw && instance_exists(trident_instance))
             _t.x            = x + image_xscale * 24;
             _t.y            = y - 8;
             _t.image_xscale = image_xscale;
-            _play_player_action(spr_player_attack);
+            _t.visual_weapon = current_weapon;
+            _play_weapon_action("cast");
         }
     }
  
@@ -196,6 +197,7 @@ if (_can_throw && instance_exists(trident_instance))
             _t.stuck       = false;
             _t.thrown      = false;
             _t.image_angle = 0;
+            _play_weapon_action("recall");
         }
     }
 }
@@ -203,13 +205,17 @@ if (_can_throw && instance_exists(trident_instance))
 // Меч — випад (E при current_weapon == 5)
 if (current_weapon == 5 && _e_pressed)
 {
-    _play_player_action(spr_player_attack);
+    _play_weapon_action("attack");
     hspd = image_xscale * 18;
     var _hit = instance_place(x + image_xscale * 40, y, obj_enemy);
     if (instance_exists(_hit))
         with (_hit) hp -= (obj_player.weapon_atk[5] + obj_player.temp_atk_buff);
 }
  
+// Tool swings are visual only; obstacle scripts retain their existing effects.
+if (_e_pressed && current_weapon >= 2 && current_weapon <= 4)
+    _play_weapon_action("attack");
+
 // ════════════════════════════════════════
 // БЛОК 7: СМЕРТЬ
 // ════════════════════════════════════════

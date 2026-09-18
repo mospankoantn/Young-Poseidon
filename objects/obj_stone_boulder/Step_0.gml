@@ -23,6 +23,7 @@ if (_dist <= interact_range
     && keyboard_check_pressed(ord("E")))
 {
     hp--;
+    obj_player._play_weapon_action("special");
     hit_flash = 8;
  
     // Оновлюємо стан тріщин

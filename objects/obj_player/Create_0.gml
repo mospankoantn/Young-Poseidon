@@ -46,6 +46,7 @@ image_speed = 1;
 
 anim_action_sprite = -1;
 anim_action_timer = 0;
+anim_action_weapon = -1;
 anim_was_on_ground = false;
 anim_was_damage = false;
 anim_last_hp = hp;
@@ -66,14 +67,16 @@ _set_player_animation = function(_sprite, _speed, _restart = false)
 
 _play_player_action = function(_sprite)
 {
-    if (is_dead) return;
+    if (is_dead) return false;
     if (anim_action_sprite == spr_player_hurt && anim_action_timer > 0
-        && _sprite != spr_player_hurt) return;
+        && _sprite != spr_player_hurt) return false;
 
     anim_action_sprite = _sprite;
+    anim_action_weapon = -1;
     // Gameplay clips store their playback speed in frames per second.
     anim_action_timer = ceil(sprite_get_number(_sprite) * room_speed / sprite_get_speed(_sprite));
     _set_player_animation(_sprite, 1, true);
+    return true;
 };
 
 _reset_player_animation = function()
@@ -82,6 +85,7 @@ _reset_player_animation = function()
     death_finished = false;
     anim_action_sprite = -1;
     anim_action_timer = 0;
+    anim_action_weapon = -1;
     anim_was_on_ground = place_meeting(x, y + 1, obj_platform);
     anim_was_damage = is_damage;
     anim_last_hp = hp;
@@ -151,6 +155,41 @@ trident_instance = noone;
  
 // ════ КЛЮЧ ОЛІМПУ ════
 has_olympus_key = false;
+
+// Sheets provide grounded locomotion and actions; airborne/hurt/death keep their original clips.
+weapon_animations = [
+    { idle: spr_player_trident_idle, run: spr_player_trident_run, pickup: spr_player_trident_pickup, attack: spr_player_trident_attack, cast: spr_player_trident_cast, recall: spr_player_trident_recall, special: spr_player_trident_attack },
+    { idle: spr_player_spear_idle, run: spr_player_spear_run, pickup: spr_player_spear_pickup, attack: spr_player_spear_attack, cast: spr_player_spear_cast, recall: spr_player_spear_recall, special: spr_player_spear_attack },
+    { idle: spr_player_pickaxe_idle, run: spr_player_pickaxe_run, pickup: spr_player_pickaxe_pickup, attack: spr_player_pickaxe_attack, special: spr_player_pickaxe_special },
+    { idle: spr_player_scythe_idle, run: spr_player_scythe_run, pickup: spr_player_scythe_pickup, attack: spr_player_scythe_attack, special: spr_player_scythe_special },
+    { idle: spr_player_oar_idle, run: spr_player_oar_run, pickup: spr_player_oar_pickup, attack: spr_player_oar_attack, special: spr_player_oar_special },
+    { idle: spr_player_sword_idle, run: spr_player_sword_run, pickup: spr_player_sword_pickup, attack: spr_player_sword_attack, special: spr_player_sword_special }
+];
+
+_weapon_in_hand = function()
+{
+    if (current_weapon < 0 || current_weapon >= array_length(weapon_animations)) return false;
+    if (current_weapon <= 1 && instance_exists(trident_instance))
+    {
+        var _t = trident_instance;
+        if (_t.thrown || _t.stuck || point_distance(x, y, _t.x, _t.y) >= 20) return false;
+    }
+    return true;
+};
+
+_weapon_locomotion = function(_running)
+{
+    if (!_weapon_in_hand()) return _running ? spr_player_run : spr_player_idle;
+    return _running ? weapon_animations[current_weapon].run : weapon_animations[current_weapon].idle;
+};
+
+_play_weapon_action = function(_kind)
+{
+    if (current_weapon < 0 || current_weapon >= array_length(weapon_animations)) return;
+    var _clips = weapon_animations[current_weapon];
+    if (!variable_struct_exists(_clips, _kind)) return;
+    if (_play_player_action(variable_struct_get(_clips, _kind))) anim_action_weapon = current_weapon;
+};
  
 // ════ ФУНКЦІЇ ════
 _unlock_weapon = function(_index)
@@ -159,6 +198,7 @@ _unlock_weapon = function(_index)
 
     weapon_unlocked[_index] = true;
     current_weapon          = _index;
+    _play_weapon_action("pickup");
 };
  
 _switch_weapon = function(_delta)

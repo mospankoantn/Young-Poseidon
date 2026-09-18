@@ -1,11 +1,11 @@
 {
   "$GMSprite": "v2",
   "%Name": "spr_weapon_sword",
-  "bboxMode": 0,
-  "bbox_bottom": 9,
+  "bboxMode": 2,
+  "bbox_bottom": 63,
   "bbox_left": 0,
-  "bbox_right": 31,
-  "bbox_top": 1,
+  "bbox_right": 63,
+  "bbox_top": 0,
   "collisionKind": 1,
   "collisionTolerance": 0,
   "DynamicTexturePage": false,
@@ -22,7 +22,7 @@
   ],
   "gridX": 0,
   "gridY": 0,
-  "height": 10,
+  "height": 64,
   "HTile": false,
   "layers": [
     {
@@ -40,7 +40,7 @@
   ],
   "name": "spr_weapon_sword",
   "nineSlice": null,
-  "origin": 0,
+  "origin": 9,
   "parent": {
     "name": "Weapons",
     "path": "folders/Спрайты/Weapons.yy"
@@ -76,7 +76,7 @@
     },
     "name": "spr_weapon_sword",
     "playback": 1,
-    "playbackSpeed": 30.0,
+    "playbackSpeed": 1.0,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -132,8 +132,8 @@
     ],
     "visibleRange": null,
     "volume": 1.0,
-    "xorigin": 0,
-    "yorigin": 0
+    "xorigin": 32,
+    "yorigin": 32
   },
   "swatchColours": null,
   "swfPrecision": 2.525,
@@ -143,5 +143,5 @@
   },
   "type": 0,
   "VTile": false,
-  "width": 32
+  "width": 64
 }
