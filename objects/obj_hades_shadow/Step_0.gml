@@ -5,6 +5,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_hades_shadow_death)) exit;
     // audio_play_sound(snd_shadow_die, 1, false);
     instance_destroy();
     exit;
@@ -57,6 +58,7 @@ switch (state)
             obj_player.is_frozen    = true;
             obj_player.freeze_timer = room_speed;  // 1 секунда
             scream_cd = scream_cd_max;
+            enemy_anim_attack(spr_hades_shadow_attack);
             // audio_play_sound(snd_shadow_scream, 1, false);
  
             // Візуальний спалах (можна додати частинки або ефект)
@@ -79,6 +81,7 @@ switch (state)
             obj_player.is_damage = true;
             obj_player.alarm[0]  = room_speed;
             attack_cd = attack_cd_max;
+            enemy_anim_attack(spr_hades_shadow_attack);
             // audio_play_sound(snd_shadow_attack, 1, false);
         }
  

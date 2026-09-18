@@ -5,6 +5,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_fallen_spirit_death)) exit;
     // audio_play_sound(snd_fallen_die, 1, false);
     instance_destroy();
     exit;
@@ -85,6 +86,7 @@ switch (state)
             _arrow.fly_speed    = 8;
             _arrow.damage       = atk;
             bow_cd = bow_cd_max;
+            enemy_anim_attack(spr_fallen_spirit_attack);
             // audio_play_sound(snd_fallen_bow, 1, false);
         }
  
@@ -105,6 +107,7 @@ switch (state)
             obj_player.is_damage = true;
             obj_player.alarm[0]  = room_speed;
             melee_cd = melee_cd_max;
+            enemy_anim_attack(spr_fallen_spirit_attack);
             // audio_play_sound(snd_fallen_melee, 1, false);
         }
  

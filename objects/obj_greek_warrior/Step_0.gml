@@ -5,6 +5,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_greek_warrior_death)) exit;
     // audio_play_sound(snd_warrior_die, 1, false);
     instance_destroy();
     exit;
@@ -88,6 +89,7 @@ switch (state)
             obj_player.is_damage = true;
             obj_player.alarm[0]  = room_speed;
             attack_cd = attack_cd_max;
+            enemy_anim_attack(spr_greek_warrior_attack);
             // audio_play_sound(snd_warrior_attack, 1, false);
         }
  

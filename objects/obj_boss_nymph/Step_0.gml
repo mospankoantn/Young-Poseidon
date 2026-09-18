@@ -6,6 +6,7 @@ if (obj_player.weapon_unlocked[1]) { instance_destroy(); exit; }
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_nymph_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_spear_reward);
     instance_destroy();
@@ -102,6 +103,7 @@ switch (state)
  
             // audio_play_sound(snd_nymph_barrage, 1, false);
             shoot_cd = room_speed * 2;   // 2 секунди до наступного залпу
+            enemy_anim_attack(spr_boss_nymph_attack);
             state    = 3;
         }
     break;

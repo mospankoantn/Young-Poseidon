@@ -31,3 +31,10 @@ scythe_damage    = atk;
  
 is_dead = false;
 image_speed = 0.08;
+anim_attack_sprite = -1;
+anim_attack_elapsed = -1;
+anim_attack_length = 0;
+anim_death_started = false;
+anim_death_elapsed = 0;
+anim_prev_x = x;
+anim_prev_y = y;

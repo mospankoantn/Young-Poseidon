@@ -4,6 +4,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_giant_crab_death)) exit;
     // audio_play_sound(snd_crab_die, 1, false);
     instance_destroy();
     exit;
@@ -46,6 +47,7 @@ if (instance_exists(obj_player) && attack_cd <= 0)
         obj_player.is_damage = true;
         obj_player.alarm[0]  = room_speed;
         attack_cd = attack_cd_max;
+        enemy_anim_attack(spr_giant_crab_attack);
         // audio_play_sound(snd_crab_attack, 1, false);
     }
 }

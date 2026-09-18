@@ -29,3 +29,10 @@ attack_cd_max = 90;   // 1.5 секунди між атаками
  
 // ---- ВИЯВЛЕННЯ ГРАВЦЯ ----
 sight_range = 250;    // Радіус виявлення гравця
+anim_attack_sprite = -1;
+anim_attack_elapsed = -1;
+anim_attack_length = 0;
+anim_death_started = false;
+anim_death_elapsed = 0;
+anim_prev_x = x;
+anim_prev_y = y;

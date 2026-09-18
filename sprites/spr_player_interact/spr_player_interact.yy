@@ -70,8 +70,8 @@
   "nineSlice": null,
   "origin": 7,
   "parent": {
-    "name": "Спрайты",
-    "path": "folders/Спрайты.yy"
+    "name": "Player",
+    "path": "folders/Спрайты/Player.yy"
   },
   "preMultiplyAlpha": false,
   "resourceType": "GMSprite",

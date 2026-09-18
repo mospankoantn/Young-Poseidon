@@ -22,3 +22,10 @@ grv  = 0.5;
 // ---- АНІМАЦІЯ ----
 // Дух може бути напівпрозорим
 image_alpha = 0.85;
+anim_attack_sprite = -1;
+anim_attack_elapsed = -1;
+anim_attack_length = 0;
+anim_death_started = false;
+anim_death_elapsed = 0;
+anim_prev_x = x;
+anim_prev_y = y;

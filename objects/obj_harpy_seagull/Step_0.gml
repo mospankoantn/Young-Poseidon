@@ -5,6 +5,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_harpy_seagull_death)) exit;
     // audio_play_sound(snd_harpy_die, 1, false);
     instance_destroy();
     exit;
@@ -70,6 +71,7 @@ switch (dive_state)
             dive_target_x = obj_player.x;
             dive_target_y = obj_player.y;
             dive_state    = 2;
+            enemy_anim_attack(spr_harpy_seagull_attack);
         }
     break;
  

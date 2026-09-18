@@ -6,6 +6,7 @@ if (obj_player.weapon_unlocked[5]) { instance_destroy(); exit; }
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_war_ghost_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_sword_reward);
     instance_destroy();
@@ -98,6 +99,7 @@ switch (state)
             obj_player.is_damage = true;
             obj_player.alarm[0]  = room_speed;
             melee_cd = melee_cd_max;
+            enemy_anim_attack(spr_boss_war_ghost_attack);
         }
  
         // Через 3 секунди піднімаємо нову хвилю

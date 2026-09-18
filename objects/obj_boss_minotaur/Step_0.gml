@@ -6,6 +6,7 @@ if (obj_player.weapon_unlocked[4]) { instance_destroy(); exit; }
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_minotaur_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_oar_reward);
     instance_destroy();
@@ -56,6 +57,7 @@ if (instance_exists(_player_on_column) && column_strike_cd <= 0)
     // Б'ємо по колоні
     _player_on_column.hp--;
     column_strike_cd = column_strike_cd_max;
+    enemy_anim_attack(spr_boss_minotaur_attack);
     // audio_play_sound(snd_minotaur_strike, 1, false);
  
     // Шкода гравцю якщо він на колоні під час удару
@@ -79,4 +81,5 @@ else if (!instance_exists(_player_on_column)
     obj_player.is_damage = true;
     obj_player.alarm[0]  = room_speed;
     melee_cd = melee_cd_max;
+    enemy_anim_attack(spr_boss_minotaur_attack);
 }

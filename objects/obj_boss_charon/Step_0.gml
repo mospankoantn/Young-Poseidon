@@ -11,6 +11,7 @@ if (obj_player.weapon_unlocked[3])
 
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_charon_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_scythe_reward);
     // Знищуємо косу якщо летить
@@ -40,6 +41,7 @@ if (scythe_cd <= 0 && !instance_exists(scythe_instance))
     scythe_instance.target_x = obj_player.x;
     scythe_instance.target_y = obj_player.y;
     scythe_cd = scythe_cd_max;
+    enemy_anim_attack(spr_boss_charon_attack);
     // audio_play_sound(snd_charon_scythe, 1, false);
 }
  

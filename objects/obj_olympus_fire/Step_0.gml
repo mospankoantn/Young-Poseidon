@@ -4,6 +4,7 @@
 // ---- СМЕРТЬ ----
 if (hp <= 0 || has_attacked)
 {
+    if (!enemy_anim_death_tick(spr_olympus_fire_death)) exit;
     // audio_play_sound(snd_fire_die, 1, false);
     instance_destroy();
     exit;
@@ -40,5 +41,6 @@ if (distance_to_object(obj_player) <= attack_range && !obj_player.is_damage)
     obj_player.is_damage = true;
     obj_player.alarm[0]  = room_speed;
     has_attacked = true;   // Позначаємо — знищимось наступного кадру
+    enemy_anim_attack(spr_olympus_fire_attack);
     // audio_play_sound(snd_fire_attack, 1, false);
 }

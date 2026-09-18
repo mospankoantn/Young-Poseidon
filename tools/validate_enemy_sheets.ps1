@@ -1,0 +1,87 @@
+param([string]$ProjectRoot=(Split-Path $PSScriptRoot -Parent))
+$ErrorActionPreference='Stop'
+Add-Type -AssemblyName System.Drawing
+$project=Get-Content -LiteralPath (Join-Path $ProjectRoot 'Young Poseidon.yyp') -Raw | ConvertFrom-Json -Depth 100
+$order=Get-Content -LiteralPath (Join-Path $ProjectRoot 'Young Poseidon.resource_order') -Raw | ConvertFrom-Json -Depth 100
+if($project.resourceType -ne 'GMProject' -or $project.resourceVersion -ne '2.0') {throw 'Project format mismatch'}
+$resourceMap=@{}
+foreach($r in $project.resources) {
+    if($resourceMap.ContainsKey($r.id.name)) {throw "Duplicate project name: $($r.id.name)"}
+    $resourceMap[$r.id.name]=$r.id.path
+    if(!(Test-Path -LiteralPath (Join-Path $ProjectRoot $r.id.path))) {throw "Missing project resource: $($r.id.path)"}
+}
+$orderMap=@{}
+foreach($r in $order.ResourceOrderSettings) {
+    if($orderMap.ContainsKey($r.name)) {throw "Duplicate resource order: $($r.name)"}
+    if($r.order -isnot [int] -and $r.order -isnot [long]) {throw "Non-integer resource order: $($r.name)"}
+    $orderMap[$r.name]=$r.path
+    if(!(Test-Path -LiteralPath (Join-Path $ProjectRoot $r.path))) {throw "Missing resource-order path: $($r.path)"}
+}
+$items=@(
+    @('giant_crab','Спрайти Краба.png'),@('harpy_seagull','Sprites obj_harpy_seagull.png'),
+    @('miner_spirit','Sprites obj_miner_spirit.png'),@('hades_shadow','Sprites obj_hades_shadow.png'),
+    @('greek_warrior','Sprites obj_greek_warrior.png'),@('fallen_spirit','Sprites obj_fallen_spirit.png'),
+    @('olympus_fire','Sprites obj_olympus_fire.png'),@('boss_triton','Sprites obj_boss_triton.png'),
+    @('boss_nymph','Sprites obj_boss_nymph.png'),@('boss_uranus','Sprites obj_boss_uranus.png'),
+    @('boss_charon','Sprites obj_boss_charon.png'),@('boss_minotaur','Sprites obj_boss_minotaur.png'),
+    @('boss_war_ghost','Sprites obj_boss_war_ghost.png'),@('boss_moirai','Sprites obj_boss_moirai.png')
+)
+$seenSources=@{}
+$totalFrames=0
+foreach($item in $items) {
+    $n=$item[0]; $source=$item[1]
+    if($seenSources.ContainsKey($source)) {throw "Duplicated source mapping: $source"}
+    $seenSources[$source]=$true
+    if(!(Test-Path -LiteralPath (Join-Path $ProjectRoot ('Файли/'+$source)))) {throw "Missing source PNG: $source"}
+    $objectName='obj_'+$n
+    $object=Get-Content -LiteralPath (Join-Path $ProjectRoot ("objects/$objectName/$objectName.yy")) -Raw | ConvertFrom-Json -Depth 100
+    $idle='spr_'+$n+'_idle'
+    if($object.resourceType -ne 'GMObject' -or $object.resourceVersion -ne '2.0') {throw "Wrong object schema: $objectName"}
+    if($object.spriteId.name -ne $idle -or $object.spriteId.path -ne "sprites/$idle/$idle.yy") {throw "Wrong idle sprite: $objectName"}
+    if($object.spriteMaskId.name -ne 'spr_giant_crab' -or $object.spriteMaskId.path -ne 'sprites/spr_giant_crab/spr_giant_crab.yy') {throw "Collision mask changed: $objectName"}
+    $endSteps=@($object.eventList | Where-Object {$_.eventType -eq 3 -and $_.eventNum -eq 2})
+    if($endSteps.Count -ne 1 -or !(Test-Path -LiteralPath (Join-Path $ProjectRoot ("objects/$objectName/Step_2.gml")))) {throw "End Step missing: $objectName"}
+    foreach($state in @('idle','move','attack','death')) {
+        $name='spr_'+$n+'_'+$state
+        $relative="sprites/$name/$name.yy"
+        if($resourceMap[$name] -ne $relative -or $orderMap[$name] -ne $relative) {throw "Project registration mismatch: $name"}
+        $dir=Join-Path $ProjectRoot ('sprites/'+$name)
+        $yy=Get-Content -LiteralPath (Join-Path $dir ($name+'.yy')) -Raw | ConvertFrom-Json -Depth 100
+        $size=if($n.StartsWith('boss_')){192}else{96}
+        if($yy.name -ne $name -or $yy.resourceType -ne 'GMSprite' -or $yy.resourceVersion -ne '2.0' -or $yy.'$GMSprite' -ne 'v2') {throw "Wrong sprite schema: $name"}
+        if($yy.width -ne $size -or $yy.height -ne $size -or $yy.sequence.xorigin -ne $size/2 -or $yy.sequence.yorigin -ne $size-6) {throw "Wrong dimensions/origin: $name"}
+        if($yy.parent.path -notin $project.Folders.folderPath) {throw "Unknown sprite folder: $name"}
+        if($yy.sequence.resourceType -ne 'GMSequence' -or $yy.sequence.resourceVersion -ne '2.0' -or $yy.sequence.playbackSpeedType -ne 0) {throw "Wrong sequence: $name"}
+        if($yy.frames.Count -ne 4 -or $yy.sequence.length -ne 4 -or $yy.sequence.tracks.Count -ne 1) {throw "Wrong frame count: $name"}
+        $keys=@($yy.sequence.tracks[0].keyframes.Keyframes)
+        if($keys.Count -ne 4 -or $yy.sequence.tracks[0].resourceType -ne 'GMSpriteFramesTrack') {throw "Wrong frame track: $name"}
+        $frameIds=@{}
+        for($i=0;$i -lt 4;$i++) {
+            $frame=$yy.frames[$i]; $key=$keys[$i]
+            if($frameIds.ContainsKey($frame.name)) {throw "Repeated frame id: $name"}
+            $frameIds[$frame.name]=$true
+            if($frame.resourceType -ne 'GMSpriteFrame' -or $frame.resourceVersion -ne '2.0') {throw "Wrong frame schema: $name"}
+            if($key.Key -ne $i -or $key.Channels.'0'.Id.name -ne $frame.name -or $key.Channels.'0'.Id.path -ne $relative) {throw "Broken keyframe: $name/$i"}
+            $png=Join-Path $dir ($frame.name+'.png')
+            $layer=Join-Path $dir ('layers/'+$frame.name+'/'+$yy.layers[0].name+'.png')
+            if(!(Test-Path -LiteralPath $png) -or !(Test-Path -LiteralPath $layer)) {throw "Missing PNG: $name/$i"}
+            if((Get-FileHash -LiteralPath $png).Hash -ne (Get-FileHash -LiteralPath $layer).Hash) {throw "Layer mismatch: $name/$i"}
+            $im=[Drawing.Bitmap]::new($png)
+            try {
+                if($im.Width -ne $size -or $im.Height -ne $size) {throw "PNG size mismatch: $name/$i"}
+                $visible=0
+                for($y=0;$y -lt $size;$y+=3){for($x=0;$x -lt $size;$x+=3){if($im.GetPixel($x,$y).A -gt 16){$visible++}}}
+                if($visible -lt 10) {throw "Empty PNG: $name/$i"}
+                foreach($pt in @(@(0,0),@(($size-1),0),@(0,($size-1)),@(($size-1),($size-1)))) {
+                    if($im.GetPixel($pt[0],$pt[1]).A -gt 0) {throw "Clipped border: $name/$i"}
+                }
+            } finally {$im.Dispose()}
+            $totalFrames++
+        }
+    }
+}
+if($resourceMap['scr_enemy_animation'] -ne 'scripts/scr_enemy_animation/scr_enemy_animation.yy') {throw 'Animation script not registered'}
+if($totalFrames -ne 224) {throw "Unexpected total: $totalFrames"}
+Write-Output "PASS: 14 unique source sheets map to 14 objects and 56 sprites."
+Write-Output "PASS: 224 transparent frames, YY/YYP links, sequence tracks, collision masks and End Step events."
+

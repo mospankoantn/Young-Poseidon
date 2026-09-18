@@ -11,6 +11,7 @@ if (obj_player.weapon_unlocked[2])
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_uranus_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_pickaxe_reward);
     instance_destroy();
@@ -85,6 +86,7 @@ switch (state)
             // Завдаємо удар по завалу
             _target_barrier.hp--;
             swing_cd = swing_cd_max;
+            enemy_anim_attack(spr_boss_uranus_attack);
             // audio_play_sound(snd_uranus_swing, 1, false);
  
             // Шанс застрягнути (25% кожного удару)
@@ -129,6 +131,7 @@ switch (state)
             if (distance_to_object(obj_player) <= swing_range)
             {
                 obj_player.hp       -= atk;
+                enemy_anim_attack(spr_boss_uranus_attack);
                 var _kd = point_direction(x, y, obj_player.x, obj_player.y);
                 obj_player.hspd     = lengthdir_x(10, _kd);
                 obj_player.vspd     = -6;

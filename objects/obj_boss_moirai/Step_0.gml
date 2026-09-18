@@ -11,6 +11,7 @@ if (obj_player.has_olympus_key)
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_moirai_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_olympus_key);
     // Знищуємо всі вогні
@@ -36,6 +37,7 @@ if (hp < last_hp && wave_cd <= 0)
         // audio_play_sound(snd_moirai_wave, 1, false);
     }
     wave_cd = wave_cd_max;
+    enemy_anim_attack(spr_boss_moirai_attack);
 }
 last_hp = hp;
  

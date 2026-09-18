@@ -16,6 +16,7 @@ if (obj_player.weapon_unlocked[0]) { instance_destroy(); exit; }
  
 if (hp <= 0)
 {
+    if (!enemy_anim_death_tick(spr_boss_triton_death)) exit;
     is_dead = true;
     instance_create_layer(x, y, "Instances", obj_pickup_trident_reward);
     instance_destroy();
@@ -70,4 +71,5 @@ if (contact_cd <= 0 && distance_to_object(obj_player) < 40
     obj_player.is_damage = true;
     obj_player.alarm[0]  = room_speed;
     contact_cd = contact_cd_max;
+    enemy_anim_attack(spr_boss_triton_attack);
 }
