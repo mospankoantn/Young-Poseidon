@@ -31,7 +31,12 @@ foreach($rel in @('scripts/scr_settings/scr_settings.gml','scripts/scr_save_syst
     $p=Join-Path $project $rel
     $code=Get-Content -LiteralPath $p -Raw
     $code=$code.Replace('"young_poseidon_settings.ini"',('"'+($temp+'/settings.ini').Replace('\','/')+'"'))
-    $code=$code.Replace('"young_poseidon_save.ini"',('"'+($temp+'/save.ini').Replace('\','/')+'"'))
+    $savePrefix=($temp+'/save_').Replace('\','/')
+    $autosavePrefix=($temp+'/autosave').Replace('\','/')
+    $legacy=($temp+'/legacy.ini').Replace('\','/')
+    $code=$code.Replace('young_poseidon_save_',$savePrefix)
+    $code=$code.Replace('young_poseidon_autosave',$autosavePrefix)
+    $code=$code.Replace('"young_poseidon_save.ini"',('"'+$legacy+'"'))
     Write-Utf8 $p $code
 }
 $win=Join-Path $temp 'Young Poseidon.win'

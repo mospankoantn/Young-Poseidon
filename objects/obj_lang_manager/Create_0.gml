@@ -61,7 +61,9 @@ ds_map_add(global.lang_db, "pause_settings",  ["Налаштування",     "
 ds_map_add(global.lang_db, "pause_mainmenu",  ["Головне меню",     "Main Menu"]);
 ds_map_add(global.lang_db, "pause_quit",      ["Вийти з гри",      "Quit Game"]);
 ds_map_add(global.lang_db, "save_done",       ["Гру збережено",    "Game saved"]);
-ds_map_add(global.lang_db, "save_failed",     ["Немає гравця для збереження", "No player to save"]);
+ds_map_add(global.lang_db, "autosave_done",   ["Автозбереження виконано", "Autosave complete"]);
+ds_map_add(global.lang_db, "save_failed",     ["Не вдалося зберегти гру", "Could not save game"]);
+ds_map_add(global.lang_db, "save_unsafe_position", ["Не можна зберегтися всередині стіни або платформи", "Cannot save while inside a wall or platform"]);
 ds_map_add(global.lang_db, "load_done",       ["Гру завантажено",  "Game loaded"]);
 ds_map_add(global.lang_db, "load_missing",    ["Збереження не знайдено", "No save found"]);
 ds_map_add(global.lang_db, "load_corrupt",    ["Файл збереження пошкоджено", "Save file is corrupted"]);

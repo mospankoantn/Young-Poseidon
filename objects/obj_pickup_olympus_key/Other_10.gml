@@ -13,6 +13,8 @@ with (obj_olympus_door)
     event_user(0);   // Відкрити двері
 }
 
+autosave_game();
+
 if (instance_exists(obj_ui_controller))
     obj_ui_controller.show_hint(lc("reward_key"), 240);
 

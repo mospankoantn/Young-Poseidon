@@ -15,6 +15,7 @@ if (hp <= 0)
     is_dead = true;
     world_state_mark_boss_defeated("minotaur");
     world_state_spawn_boss_reward("minotaur", obj_pickup_oar_reward, x, y);
+    autosave_game();
     instance_destroy();
     exit;
 }

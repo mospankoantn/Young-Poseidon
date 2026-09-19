@@ -1,11 +1,57 @@
 /// Shared menu state is owned by obj_main_menu or obj_ui_controller.
+function yp_menu_refresh_slots() {
+    save_slots_migrate_legacy();
+    menu_slot_status=array_create(11,0);
+    menu_slot_room=array_create(11,-1);
+    menu_has_save=false;
+    for(var _i=0;_i<=10;_i++) {
+        menu_slot_status[_i]=save_slot_status(_i);
+        if(menu_slot_status[_i]>=1) menu_slot_room[_i]=save_slot_room(_i);
+        if(menu_slot_status[_i]!=0) menu_has_save=true;
+    }
+}
+
+function yp_menu_room_label(_room) {
+    if(_room==-1 || !room_exists(_room)) return "";
+    var _name=room_get_name(_room);
+    var _prefix="";
+    var _zone="";
+
+    if(string_pos("rm_sea_",_name)==1) { _prefix="rm_sea_"; _zone=yp_text("Море","Sea"); }
+    else if(string_pos("rm_coast_",_name)==1) { _prefix="rm_coast_"; _zone=yp_text("Узбережжя","Coast"); }
+    else if(string_pos("rm_mines_",_name)==1) { _prefix="rm_mines_"; _zone=yp_text("Шахти","Mines"); }
+    else if(string_pos("rm_hades_",_name)==1) { _prefix="rm_hades_"; _zone=yp_text("Аїд","Hades"); }
+    else if(string_pos("rm_greece_",_name)==1) { _prefix="rm_greece_"; _zone=yp_text("Греція","Greece"); }
+    else if(string_pos("rm_battlefield_",_name)==1) { _prefix="rm_battlefield_"; _zone=yp_text("Поля битви","Battlefield"); }
+    else if(string_pos("rm_olympus_",_name)==1) { _prefix="rm_olympus_"; _zone=yp_text("Олімп","Olympus"); }
+    else if(_name=="rm_test") return yp_text("Тестова кімната","Test room");
+    else return _name;
+
+    var _number=string_copy(_name,string_length(_prefix)+1,string_length(_name));
+    return _zone+" "+_number;
+}
+
+function yp_menu_save_slot(_slot) {
+    // While paused the gameplay actors are inactive. Save the snapshot captured
+    // at pause entry instead of trying to reactivate them inside the same event.
+    var _snapshot=menu_is_pause ? pause_save_snapshot : undefined;
+    var _unsafe=is_struct(_snapshot) && (_snapshot.is_dead || !_snapshot.save_position_safe);
+    var _ok=save_game(_slot,true,_snapshot);
+    yp_menu_refresh_slots();
+    menu_notice=lc(_ok ? "save_done" : (_unsafe ? "save_unsafe_position" : "save_failed"));
+    menu_notice_until=current_time+3000;
+    return _ok;
+}
+
 function yp_menu_init(_pause) {
     yp_settings_init();
     menu_is_pause=_pause; menu_page="root"; menu_tab=0; menu_selected=0;
     menu_hover=-1; menu_capture=-1; menu_drag=-1; menu_notice="";
-    menu_notice_until=0; menu_confirm=""; menu_mouse_x=-1; menu_mouse_y=-1;
-    menu_has_save=save_exists();
-    pause_surface=-1; pause_instances=[]; game_paused=false;
+    menu_notice_until=0; menu_confirm=""; menu_pending_slot=-1; menu_return_selected=0;
+    menu_mouse_x=-1; menu_mouse_y=-1;
+    menu_slot_status=array_create(11,0); menu_slot_room=array_create(11,-1); menu_has_save=false;
+    yp_menu_refresh_slots();
+    pause_surface=-1; pause_instances=[]; pause_save_snapshot=undefined; game_paused=false;
     pause_backup=-1; pause_width=0; pause_height=0;
     menu_focus=window_has_focus();
 }
@@ -20,6 +66,12 @@ function yp_pause(_enable) {
             pause_backup=buffer_create(pause_width*pause_height*4,buffer_fixed,1);
             buffer_get_surface(pause_backup,pause_surface,0);
         }
+        // Capture progress before deactivation; deactivated instances can no longer
+        // be discovered through instance_exists/instance_find.
+        pause_save_snapshot=undefined;
+        if(instance_exists(obj_player))
+            pause_save_snapshot=_save_capture_player(instance_find(obj_player,0));
+
         pause_instances=[];
         var _owner=id;
         with (all) {
@@ -28,12 +80,12 @@ function yp_pause(_enable) {
         for (var _i=0; _i<array_length(pause_instances); _i++)
             instance_deactivate_object(pause_instances[_i]);
         game_paused=true;
-        menu_page="root"; menu_selected=0; menu_has_save=save_exists();
+        menu_page="root"; menu_selected=0; yp_menu_refresh_slots();
     } else {
         // Only restore instances this menu suspended, not intentionally inactive actors.
         for (var _i=0; _i<array_length(pause_instances); _i++)
             instance_activate_object(pause_instances[_i]);
-        pause_instances=[]; game_paused=false;
+        pause_instances=[]; pause_save_snapshot=undefined; game_paused=false;
         if (surface_exists(pause_surface)) surface_free(pause_surface);
         pause_surface=-1;
         if(buffer_exists(pause_backup)) buffer_delete(pause_backup);
@@ -65,6 +117,20 @@ function yp_menu_rows() {
         {label:yp_text("Скасувати","Cancel"),key:"cancel",type:"button"},
         {label:yp_text("Підтвердити","Confirm"),key:"confirm",type:"button"}];
     if (menu_page=="about") return [{label:yp_text("Назад","Back"),key:"back",type:"button"}];
+    if (menu_page=="save_slots") {
+        var _save_rows=[];
+        for(var _slot=1;_slot<=10;_slot++)
+            array_push(_save_rows,{label:yp_text("Слот ","Slot ")+string(_slot),key:"slot_save",type:"slot",slot:_slot});
+        array_push(_save_rows,{label:yp_text("Назад","Back"),key:"back",type:"button"});
+        return _save_rows;
+    }
+    if (menu_page=="load_slots") {
+        var _load_rows=[{label:yp_text("Автозбереження","Autosave"),key:"slot_load",type:"slot",slot:0}];
+        for(var _slot=1;_slot<=10;_slot++)
+            array_push(_load_rows,{label:yp_text("Слот ","Slot ")+string(_slot),key:"slot_load",type:"slot",slot:_slot});
+        array_push(_load_rows,{label:yp_text("Назад","Back"),key:"back",type:"button"});
+        return _load_rows;
+    }
     if (menu_page=="root") {
         if (menu_is_pause) return [
             {label:lc("pause_resume"),key:"resume",type:"button"},
@@ -113,6 +179,7 @@ function yp_menu_rect(_index,_count) {
     if (global.yp_display_pending || menu_page=="confirm")
         return [230+_index*260,382,240,48];
     if(menu_page=="about") return [180,550,180,42];
+    if(menu_page=="save_slots" || menu_page=="load_slots") return [126,142+_index*34,708,30];
     if(menu_page=="root") return menu_is_pause ? [246,180+_index*44,468,40] : [56,282+_index*49,322,43];
     if(_index>=_count-2) return [126+(_index-(_count-2))*510,550,198,40];
     return [126,188+_index*34,708,32];
@@ -121,6 +188,15 @@ function yp_menu_rect(_index,_count) {
 function yp_menu_value(_row) {
     var _s=global.yp_settings;
     var _key=_row.key;
+    if(_row.type=="slot") {
+        var _status=menu_slot_status[_row.slot];
+        if(_status==0) return yp_text("Порожньо","Empty");
+        if(_status==-2) return yp_text("Несумісне","Incompatible");
+        if(_status<0) return yp_text("Пошкоджено","Corrupted");
+        var _level=yp_menu_room_label(menu_slot_room[_row.slot]);
+        if(_level=="") return yp_text("Збережено","Saved");
+        return yp_text("Рівень: ","Level: ")+_level;
+    }
     if(_row.type=="binding") return chr(_s.keys[real(_key)]);
     if(_key=="resolution") {
         var _m=global.yp_modes[_s.resolution]; return string(_m[0])+" x "+string(_m[1]);
@@ -134,6 +210,28 @@ function yp_menu_value(_row) {
 function yp_menu_action(_row,_direction) {
     var _key=_row.key;
     var _s=global.yp_settings;
+
+    if(_row.type=="slot") {
+        var _slot=_row.slot;
+        if(_key=="slot_load") {
+            if(menu_slot_status[_slot]==0) return;
+            if(menu_is_pause) yp_pause(false);
+            load_game(_slot);
+            return;
+        }
+        if(_key=="slot_save") {
+            if(menu_slot_status[_slot]!=0) {
+                menu_pending_slot=_slot;
+                menu_confirm="overwrite";
+                menu_page="confirm";
+                menu_selected=0;
+                return;
+            }
+            yp_menu_save_slot(_slot);
+            return;
+        }
+    }
+
     if(_row.type=="slider") {
         variable_struct_set(_s,_key,clamp(variable_struct_get(_s,_key)+0.05*_direction,0,1));
         yp_apply_audio(); yp_settings_save(); return;
@@ -155,33 +253,40 @@ function yp_menu_action(_row,_direction) {
         case "test_sound": audio_play_sound(snd_swing,1,false); break;
         case "keep": yp_display_finish(true); menu_selected=0; break;
         case "revert": yp_display_finish(false); menu_selected=0; break;
-        case "back": menu_page="root"; menu_selected=menu_is_pause ? 3 : 2; menu_notice=""; break;
-        case "options": menu_page="options"; menu_selected=0; menu_tab=0; break;
-        case "about": menu_page="about"; menu_selected=0; break;
+        case "back":
+            menu_page="root"; menu_selected=menu_return_selected; menu_notice=""; break;
+        case "options": menu_return_selected=menu_is_pause ? 3 : 2; menu_page="options"; menu_selected=0; menu_tab=0; break;
+        case "about": menu_return_selected=menu_is_pause ? 4 : 3; menu_page="about"; menu_selected=0; break;
         case "resume": yp_pause(false); break;
         case "save":
-            for(var _i=0;_i<array_length(pause_instances);_i++) instance_activate_object(pause_instances[_i]);
-            var _ok=save_game();
-            for(var _i=0;_i<array_length(pause_instances);_i++) instance_deactivate_object(pause_instances[_i]);
-            menu_has_save=save_exists();
-            menu_notice=lc(_ok ? "save_done" : "save_failed"); menu_notice_until=current_time+3000;
-            break;
+            menu_return_selected=1; menu_page="save_slots"; menu_selected=0; yp_menu_refresh_slots(); break;
         case "load":
             if(!menu_has_save) break;
-            if(menu_is_pause) yp_pause(false);
-            load_game(); break;
+            menu_return_selected=menu_is_pause ? 2 : 1; menu_page="load_slots"; menu_selected=0; yp_menu_refresh_slots(); break;
         case "new":
             if(!menu_has_save) { start_new_game(); break; }
             menu_confirm="new"; menu_page="confirm"; menu_selected=0; break;
         case "main":
         case "quit":
             menu_confirm=_key; menu_page="confirm"; menu_selected=0; break;
-        case "cancel": menu_page="root"; menu_selected=0; break;
+        case "cancel":
+            if(menu_confirm=="overwrite") {
+                menu_confirm=""; menu_page="save_slots"; menu_selected=max(0,menu_pending_slot-1);
+            } else {
+                menu_confirm=""; menu_page="root"; menu_selected=0;
+            }
+            break;
         case "confirm":
-            if(menu_is_pause) yp_pause(false);
-            if(menu_confirm=="quit") game_end();
-            else if(menu_confirm=="main") { with(obj_player) instance_destroy(); room_goto(rm_menu); }
-            else start_new_game();
+            if(menu_confirm=="overwrite") {
+                var _slot_to_save=menu_pending_slot;
+                menu_confirm=""; menu_page="save_slots"; menu_selected=max(0,_slot_to_save-1);
+                yp_menu_save_slot(_slot_to_save);
+            } else {
+                if(menu_is_pause) yp_pause(false);
+                if(menu_confirm=="quit") game_end();
+                else if(menu_confirm=="main") { with(obj_player) instance_destroy(); room_goto(rm_menu); }
+                else start_new_game();
+            }
             break;
         case "defaults":
             var _d=yp_defaults();
@@ -226,7 +331,13 @@ function yp_menu_step() {
     if(keyboard_check_pressed(vk_escape)) {
         if(menu_drag>=0) {menu_drag=-1; yp_settings_save();}
         if(global.yp_display_pending) yp_display_finish(false);
-        else if(menu_page!="root") { menu_page="root"; menu_selected=0; }
+        else if(menu_page!="root") {
+            if(menu_page=="confirm" && menu_confirm=="overwrite") {
+                menu_confirm=""; menu_page="save_slots"; menu_selected=max(0,menu_pending_slot-1);
+            } else {
+                menu_page="root"; menu_selected=menu_return_selected;
+            }
+        }
         else if(menu_is_pause) yp_pause(false);
         else { menu_confirm="quit"; menu_page="confirm"; menu_selected=0; }
         return;
@@ -261,6 +372,7 @@ function yp_menu_step() {
     if(_click) menu_selected=menu_hover;
     var _row=_rows[menu_selected];
     if(_row.key=="load" && !menu_has_save) return;
+    if(_row.type=="slot" && _row.key=="slot_load" && menu_slot_status[_row.slot]==0) return;
     var _dir=keyboard_check_pressed(vk_right)-keyboard_check_pressed(vk_left);
     if(_click || keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || (_dir!=0 && _row.type!="button" && _row.type!="binding")) {
         if(_click && _row.type=="slider") {
@@ -306,6 +418,8 @@ function yp_menu_draw() {
         draw_set_color(_teal); draw_rectangle(_x,64,_x+_w,67,false);
         draw_set_font(fnt_title); draw_set_color(c_white);
         var _title=menu_page=="root" ? lc("pause_title") : (menu_page=="about" ? lc("menu_about") : lc("menu_settings"));
+        if(menu_page=="save_slots") _title=yp_text("Зберегти гру","Save Game");
+        if(menu_page=="load_slots") _title=yp_text("Завантажити гру","Load Game");
         if(_modal) _title=yp_text("Підтвердження","Confirmation");
         draw_text(_x+26,100,_title);
     }
@@ -315,7 +429,8 @@ function yp_menu_draw() {
         var _message=yp_text("Вийти з гри?","Quit the game?");
         if(global.yp_display_pending) _message=yp_text("Залишити ці параметри екрана?","Keep these display settings?")
             +"\n"+yp_text("Автоматичне повернення через ","Automatic revert in ")+string(max(0,ceil((global.yp_display_deadline-current_time)/1000)))+yp_text(" с."," s.");
-        else if(menu_confirm=="new") _message=yp_text("Розпочати нову гру? Попередній файл збереження\nзалишиться до наступного ручного збереження.","Start a new game? Your previous save remains\nuntil the next manual save.");
+        else if(menu_confirm=="new") _message=yp_text("Розпочати нову гру? Попередні слоти збереження\nзалишаться без змін.","Start a new game? Existing save slots\nwill remain unchanged.");
+        else if(menu_confirm=="overwrite") _message=yp_text("Перезаписати слот ","Overwrite slot ")+string(menu_pending_slot)+"?";
         else if(menu_is_pause) _message=yp_text("Незбережений прогрес буде втрачено.\nПродовжити?","Unsaved progress will be lost.\nContinue?");
         draw_text_ext(180,232,_message,30,600);
         draw_set_valign(fa_middle);
@@ -344,7 +459,8 @@ function yp_menu_draw() {
     var _rows=yp_menu_rows(),_count=array_length(_rows);
     for(var _i=0;_i<_count;_i++) {
         var _row=_rows[_i],_r=yp_menu_rect(_i,_count),_sel=(_i==menu_selected);
-        var _disabled=_row.key=="load" && !menu_has_save;
+        var _disabled=(_row.key=="load" && !menu_has_save)
+            || (_row.type=="slot" && _row.key=="slot_load" && menu_slot_status[_row.slot]==0);
         if(_sel && !_disabled) {
             draw_set_alpha(0.2); draw_set_color(_teal);
             draw_rectangle(_r[0],_r[1],_r[0]+_r[2],_r[1]+_r[3],false); draw_set_alpha(1);

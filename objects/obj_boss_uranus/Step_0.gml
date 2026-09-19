@@ -25,6 +25,7 @@ if (hp <= 0)
         world_state_mark_instance(id, "destroyed");
         instance_destroy();
     }
+    autosave_game();
     instance_destroy();
     exit;
 }

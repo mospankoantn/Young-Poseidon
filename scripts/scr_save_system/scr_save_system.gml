@@ -1,7 +1,8 @@
-#macro YP_SAVE_FILE "young_poseidon_save.ini"
+#macro YP_SAVE_FILE "young_poseidon_save_1.ini"
+#macro YP_SAVE_LEGACY "young_poseidon_save.ini"
 #macro YP_SAVE_VERSION 2
-#macro YP_SAVE_TEMP "young_poseidon_save.tmp.ini"
-#macro YP_SAVE_BACKUP "young_poseidon_save.backup.ini"
+#macro YP_SAVE_SLOT_MIN 0
+#macro YP_SAVE_SLOT_MAX 10
 
 function world_state_ensure()
 {
@@ -499,15 +500,23 @@ function _save_notify(_key, _duration)
 
     if (instance_exists(obj_ui_controller))
     {
-        obj_ui_controller.show_hint(_text, _duration);
-        exit;
+        var _ui = instance_find(obj_ui_controller, 0);
+        if (instance_exists(_ui) && variable_instance_exists(_ui, "show_hint"))
+        {
+            _ui.show_hint(_text, _duration);
+            return;
+        }
     }
 
     if (instance_exists(obj_main_menu))
     {
-        obj_main_menu.status_text = _text;
-        obj_main_menu.status_timer = _duration;
-        exit;
+        var _menu = instance_find(obj_main_menu, 0);
+        if (instance_exists(_menu))
+        {
+            _menu.status_text = _text;
+            _menu.status_timer = _duration;
+            return;
+        }
     }
 
     global.save_notice_key = _key;
@@ -545,9 +554,88 @@ function _save_file_status(_filename)
     return _version;
 }
 
+function _save_slot_valid(_slot)
+{
+    return is_real(_slot)
+        && floor(_slot) == _slot
+        && _slot >= YP_SAVE_SLOT_MIN
+        && _slot <= YP_SAVE_SLOT_MAX;
+}
+
+function _save_slot_file(_slot)
+{
+    if (!_save_slot_valid(_slot)) return "";
+    if (_slot == 0) return "young_poseidon_autosave.ini";
+    if (_slot == 1) return YP_SAVE_FILE;
+    return "young_poseidon_save_" + string(_slot) + ".ini";
+}
+
+function _save_slot_temp(_slot)
+{
+    if (!_save_slot_valid(_slot)) return "";
+    if (_slot == 0) return "young_poseidon_autosave.tmp.ini";
+    return "young_poseidon_save_" + string(_slot) + ".tmp.ini";
+}
+
+function _save_slot_backup(_slot)
+{
+    if (!_save_slot_valid(_slot)) return "";
+    if (_slot == 0) return "young_poseidon_autosave.backup.ini";
+    return "young_poseidon_save_" + string(_slot) + ".backup.ini";
+}
+
+function save_slot_status(_slot)
+{
+    if (!_save_slot_valid(_slot)) return -1;
+    return _save_file_status(_save_slot_file(_slot));
+}
+
+// Returns the room stored in a valid save slot without applying the save.
+// Used by the save/load menus to show where the player was when the slot was written.
+function save_slot_room(_slot)
+{
+    if (!_save_slot_valid(_slot)) return -1;
+    var _file = _save_slot_file(_slot);
+    if (_save_file_status(_file) < 1) return -1;
+
+    ini_open(_file);
+    var _room_name = ini_read_string("save", "room", "");
+    ini_close();
+    return _save_room_from_name(_room_name);
+}
+
+function save_slots_migrate_legacy()
+{
+    if (!file_exists(YP_SAVE_LEGACY)) return false;
+    if (_save_file_status(YP_SAVE_LEGACY) < 1) return false;
+
+    var _slot_one = _save_slot_file(1);
+    if (file_exists(_slot_one)) return false;
+
+    file_copy(YP_SAVE_LEGACY, _slot_one);
+    if (_save_file_status(_slot_one) >= 1) return true;
+
+    if (file_exists(_slot_one)) file_delete(_slot_one);
+    return false;
+}
+
+function save_exists(_slot = -1)
+{
+    save_slots_migrate_legacy();
+
+    if (_slot != -1)
+        return _save_slot_valid(_slot) && save_slot_status(_slot) >= 1;
+
+    for (var _i = YP_SAVE_SLOT_MIN; _i <= YP_SAVE_SLOT_MAX; _i++)
+        if (save_slot_status(_i) >= 1) return true;
+
+    return false;
+}
+
 function _save_clear_runtime_load()
 {
     global.load_pending = false;
+    global.checkpoint_respawn_pending = false;
     global.save_notice_key = "";
     global.save_notice_timer = 0;
 
@@ -557,9 +645,63 @@ function _save_clear_runtime_load()
     global.came_from_room = -1;
 }
 
-function save_exists()
+// Uses the player's current collision box offsets, but tests them at a candidate point.
+// obj_platform is the parent for normal and thin platforms, so children are covered too.
+function player_position_is_safe(_player, _x, _y)
 {
-    return file_exists(YP_SAVE_FILE);
+    if (!instance_exists(_player)) return false;
+    if (!is_real(_x) || !is_real(_y) || is_nan(_x) || is_nan(_y)) return false;
+
+    var _left   = _x + (_player.bbox_left   - _player.x);
+    var _right  = _x + (_player.bbox_right  - _player.x);
+    var _top    = _y + (_player.bbox_top    - _player.y);
+    var _bottom = _y + (_player.bbox_bottom - _player.y);
+
+    if (_left < 0 || _right >= room_width || _top < 0 || _bottom >= room_height) return false;
+    return collision_rectangle(_left, _top, _right, _bottom, obj_platform, false, false) == noone;
+}
+
+function player_find_safe_position(_player, _x, _y)
+{
+    if (!instance_exists(_player)) return [false, _x, _y];
+
+    _x = clamp(_x, 0, room_width);
+    _y = clamp(_y, 0, room_height);
+    if (player_position_is_safe(_player, _x, _y)) return [true, _x, _y];
+
+    // Prefer moving sideways/upward so recovery does not bury the player in the floor.
+    for (var _radius = 8; _radius <= 192; _radius += 8)
+    {
+        var _candidates = [
+            [_x + _radius, _y],
+            [_x - _radius, _y],
+            [_x, _y - _radius],
+            [_x + _radius, _y - _radius],
+            [_x - _radius, _y - _radius]
+        ];
+
+        for (var _i = 0; _i < array_length(_candidates); _i++)
+        {
+            var _cx = _candidates[_i][0];
+            var _cy = _candidates[_i][1];
+            if (player_position_is_safe(_player, _cx, _cy)) return [true, _cx, _cy];
+        }
+    }
+
+    return [false, _x, _y];
+}
+
+function player_place_safely(_player, _x, _y)
+{
+    var _safe = player_find_safe_position(_player, _x, _y);
+    if (!_safe[0]) return false;
+
+    _player.x = _safe[1];
+    _player.y = _safe[2];
+    _player.hspd = 0;
+    _player.vspd = 0;
+    if (variable_instance_exists(_player, "drop_timer")) _player.drop_timer = 0;
+    return true;
 }
 
 function start_new_game()
@@ -577,6 +719,34 @@ function start_new_game()
 
     with (obj_player) instance_destroy();
     room_goto(rm_sea_1);
+}
+
+
+function _save_capture_player(_player)
+{
+    if (!instance_exists(_player)) return undefined;
+
+    var _weapon_count = array_length(_player.weapon_unlocked);
+    var _weapons = array_create(_weapon_count, false);
+    for (var _i = 0; _i < _weapon_count; _i++)
+        _weapons[_i] = _player.weapon_unlocked[_i];
+
+    return {
+        x: _player.x,
+        y: _player.y,
+        hp: _player.hp,
+        max_hp: _player.max_hp,
+        current_weapon: _player.current_weapon,
+        perm_spd_bonus: _player.perm_spd_bonus,
+        potion_heal_count: _player.potion_heal_count,
+        potion_strength_count: _player.potion_strength_count,
+        potion_speed_count: _player.potion_speed_count,
+        has_olympus_key: _player.has_olympus_key,
+        l_right: _player.l_right,
+        weapon_unlocked: _weapons,
+        is_dead: variable_instance_exists(_player, "is_dead") && _player.is_dead,
+        save_position_safe: player_position_is_safe(_player, _player.x, _player.y)
+    };
 }
 
 function _save_write_current(_filename, _player)
@@ -621,44 +791,87 @@ function _save_write_current(_filename, _player)
     ini_close();
 }
 
-function save_game()
+function save_game(_slot = 1, _notify = true, _snapshot = undefined)
 {
-    if (!instance_exists(obj_player))
+    if (!_save_slot_valid(_slot))
     {
-        _save_notify("save_failed", 180);
+        if (_notify) _save_notify("save_failed", 180);
         return false;
     }
 
-    if (file_exists(YP_SAVE_TEMP)) file_delete(YP_SAVE_TEMP);
-    _save_write_current(YP_SAVE_TEMP, instance_find(obj_player, 0));
-    if (_save_file_status(YP_SAVE_TEMP) != YP_SAVE_VERSION)
+    // During pause gameplay instances are deactivated. GameMaker does not make a
+    // reactivated instance active until the current event ends, so pause saves use
+    // a snapshot captured immediately before deactivation instead of toggling actors.
+    var _player = _snapshot;
+    if (!is_struct(_player))
     {
-        if (file_exists(YP_SAVE_TEMP)) file_delete(YP_SAVE_TEMP);
-        _save_notify("save_failed", 180);
+        if (!instance_exists(obj_player))
+        {
+            if (_notify) _save_notify("save_failed", 180);
+            return false;
+        }
+        _player = _save_capture_player(instance_find(obj_player, 0));
+    }
+
+    if (!is_struct(_player))
+    {
+        if (_notify) _save_notify("save_failed", 180);
         return false;
     }
 
-    if (file_exists(YP_SAVE_BACKUP)) file_delete(YP_SAVE_BACKUP);
-    if (file_exists(YP_SAVE_FILE)) file_copy(YP_SAVE_FILE, YP_SAVE_BACKUP);
-    if (file_exists(YP_SAVE_FILE)) file_delete(YP_SAVE_FILE);
-    file_copy(YP_SAVE_TEMP, YP_SAVE_FILE);
-    file_delete(YP_SAVE_TEMP);
-
-    if (_save_file_status(YP_SAVE_FILE) != YP_SAVE_VERSION)
+    if (_player.is_dead || !_player.save_position_safe)
     {
-        if (file_exists(YP_SAVE_FILE)) file_delete(YP_SAVE_FILE);
-        if (file_exists(YP_SAVE_BACKUP)) file_copy(YP_SAVE_BACKUP, YP_SAVE_FILE);
-        _save_notify("save_failed", 180);
+        if (_notify) _save_notify("save_unsafe_position", 240);
         return false;
     }
 
-    _save_notify("save_done", 180);
+    var _file = _save_slot_file(_slot);
+    var _temp = _save_slot_temp(_slot);
+    var _backup = _save_slot_backup(_slot);
+
+    if (file_exists(_temp)) file_delete(_temp);
+    _save_write_current(_temp, _player);
+    if (_save_file_status(_temp) != YP_SAVE_VERSION)
+    {
+        if (file_exists(_temp)) file_delete(_temp);
+        if (_notify) _save_notify("save_failed", 180);
+        return false;
+    }
+
+    if (file_exists(_backup)) file_delete(_backup);
+    if (file_exists(_file)) file_copy(_file, _backup);
+    if (file_exists(_file)) file_delete(_file);
+    file_copy(_temp, _file);
+    file_delete(_temp);
+
+    if (_save_file_status(_file) != YP_SAVE_VERSION)
+    {
+        if (file_exists(_file)) file_delete(_file);
+        if (file_exists(_backup)) file_copy(_backup, _file);
+        if (_notify) _save_notify("save_failed", 180);
+        return false;
+    }
+
+    if (_notify) _save_notify(_slot == 0 ? "autosave_done" : "save_done", 180);
     return true;
 }
 
-function load_game()
+function autosave_game()
 {
-    var _status = _save_file_status(YP_SAVE_FILE);
+    return save_game(0, false);
+}
+
+function load_game(_slot = 1)
+{
+    if (!_save_slot_valid(_slot))
+    {
+        _save_notify("load_missing", 180);
+        return false;
+    }
+
+    save_slots_migrate_legacy();
+    var _file = _save_slot_file(_slot);
+    var _status = _save_file_status(_file);
     if (_status == 0)
     {
         _save_notify("load_missing", 180);
@@ -675,7 +888,7 @@ function load_game()
         return false;
     }
 
-    ini_open(YP_SAVE_FILE);
+    ini_open(_file);
     var _room_name = ini_read_string("save", "room", "");
     var _target_room = _save_room_from_name(_room_name);
     var _load_x = _save_real("player", "x", 96, 0, 100000);
@@ -739,6 +952,7 @@ function load_game()
     if (_status == 1) _world_state_migrate_v1(_weapons, _has_key);
 
     global.load_pending = true;
+    global.load_source_slot = _slot;
     global.load_room = _target_room;
     global.load_x = _load_x;
     global.load_y = _load_y;
@@ -757,6 +971,7 @@ function load_game()
     global.load_checkpoint_x = _checkpoint_x;
     global.load_checkpoint_y = _checkpoint_y;
 
+    global.checkpoint_respawn_pending = false;
     global.spawn_from_tag = "";
     global.spawn_x_manual = -1;
     global.spawn_y_manual = -1;
@@ -775,13 +990,29 @@ function apply_pending_load_to_player()
     if (!instance_exists(obj_player)) return false;
 
     var _p = instance_find(obj_player, 0);
+    var _fallback_x = _p.xstart;
+    var _fallback_y = _p.ystart;
 
-    _p.x = clamp(global.load_x, 0, room_width);
-    _p.y = clamp(global.load_y, 0, room_height);
-    _p.hspd = 0;
-    _p.vspd = 0;
+    var _placed = player_place_safely(_p,
+        clamp(global.load_x, 0, room_width),
+        clamp(global.load_y, 0, room_height));
+
+    // A save made by an older build can contain a checkpoint/player position in a wall.
+    // Recover around that point first, then around the checkpoint, then the room spawn.
+    if (!_placed && global.load_checkpoint_exists && global.load_checkpoint_room == room)
+        _placed = player_place_safely(_p, global.load_checkpoint_x, global.load_checkpoint_y);
+    if (!_placed)
+        _placed = player_place_safely(_p, _fallback_x, _fallback_y);
+    if (!_placed)
+    {
+        _p.x = _fallback_x;
+        _p.y = _fallback_y;
+        _p.hspd = 0;
+        _p.vspd = 0;
+        show_debug_message("[Save] No collision-free load point was found; using room spawn.");
+    }
+
     _p.drop_timer = 0;
-
     _p.max_hp = max(1, global.load_max_hp);
     _p.hp = clamp(global.load_hp, 1, _p.max_hp);
     _p.current_weapon = global.load_current_weapon;
@@ -834,12 +1065,28 @@ function apply_pending_load_to_player()
         global.checkpoint_room = global.load_checkpoint_room;
         global.checkpoint_x = global.load_checkpoint_x;
         global.checkpoint_y = global.load_checkpoint_y;
+
+        // Repair bad checkpoint coordinates immediately when their room is loaded.
+        if (global.checkpoint_room == room)
+        {
+            var _safe_checkpoint = player_find_safe_position(_p, global.checkpoint_x, global.checkpoint_y);
+            if (_safe_checkpoint[0])
+            {
+                global.checkpoint_x = _safe_checkpoint[1];
+                global.checkpoint_y = _safe_checkpoint[2];
+            }
+            else
+            {
+                global.checkpoint_x = _p.x;
+                global.checkpoint_y = _p.y;
+            }
+        }
     }
     else
     {
         global.checkpoint_room = global.load_room;
-        global.checkpoint_x = global.load_x;
-        global.checkpoint_y = global.load_y;
+        global.checkpoint_x = _p.x;
+        global.checkpoint_y = _p.y;
     }
 
     _p.trident_instance = instance_find(obj_trident, 0);
@@ -861,6 +1108,29 @@ function apply_pending_load_to_player()
     global.load_pending = false;
     _p._reset_player_animation();
     _save_notify("load_done", 180);
+    return true;
+}
 
+function apply_pending_checkpoint_respawn_to_player()
+{
+    if (!variable_global_exists("checkpoint_respawn_pending") || !global.checkpoint_respawn_pending) return false;
+    if (!instance_exists(obj_player) || !variable_global_exists("checkpoint_room")) return false;
+    if (global.checkpoint_room != room) return false;
+
+    var _p = instance_find(obj_player, 0);
+    var _placed = player_place_safely(_p, global.checkpoint_x, global.checkpoint_y);
+    if (!_placed) _placed = player_place_safely(_p, _p.xstart, _p.ystart);
+    if (!_placed)
+    {
+        _p.x = _p.xstart;
+        _p.y = _p.ystart;
+        _p.hspd = 0;
+        _p.vspd = 0;
+    }
+
+    global.checkpoint_x = _p.x;
+    global.checkpoint_y = _p.y;
+    global.checkpoint_respawn_pending = false;
+    _p._reset_player_animation();
     return true;
 }

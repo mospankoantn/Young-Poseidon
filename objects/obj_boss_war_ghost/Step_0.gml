@@ -15,6 +15,7 @@ if (hp <= 0)
     is_dead = true;
     world_state_mark_boss_defeated("war_ghost");
     world_state_spawn_boss_reward("war_ghost", obj_pickup_sword_reward, x, y);
+    autosave_game();
     instance_destroy();
     exit;
 }

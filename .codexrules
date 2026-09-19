@@ -39,7 +39,7 @@
 
 ## Gameplay Contracts
 - scr_save_system owns progression saves, permanent world state and automatic room routes; scr_settings owns persistent options.
-- Keep young_poseidon_save.ini separate from young_poseidon_settings.ini.
+- Keep progression files (`young_poseidon_autosave.ini`, `young_poseidon_save_1.ini` ... `young_poseidon_save_10.ini`, plus legacy `young_poseidon_save.ini`) separate from `young_poseidon_settings.ini`.
 - Persistent world changes must use the world_state_* helpers. The default key is based on kind, room,
   object and authored xstart/ystart; set a unique world_state_id in Instance Creation Code when that identity
   could change or two authored instances would otherwise share a key.

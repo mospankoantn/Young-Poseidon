@@ -111,18 +111,30 @@ _begin_player_death = function()
 
 _respawn_player = function()
 {
-    // Preserve the existing checkpoint and no-checkpoint branches.
     hp = max_hp;
+
     if (variable_global_exists("checkpoint_room") && global.checkpoint_room == room)
     {
-        x = global.checkpoint_x;
-        y = global.checkpoint_y;
-        vspd = 0; hspd = 0;
+        if (!player_place_safely(id, global.checkpoint_x, global.checkpoint_y))
+            player_place_safely(id, xstart, ystart);
+
+        global.checkpoint_x = x;
+        global.checkpoint_y = y;
     }
     else if (variable_global_exists("checkpoint_room"))
+    {
+        global.checkpoint_respawn_pending = true;
+        global.spawn_from_tag = "";
+        global.spawn_x_manual = -1;
+        global.spawn_y_manual = -1;
+        global.came_from_room = -1;
         room_goto(global.checkpoint_room);
+    }
     else
+    {
         game_restart();
+    }
+
     is_damage = alarm[0] > 0;
     _reset_player_animation();
 };
@@ -221,5 +233,4 @@ _switch_weapon = function(_delta)
     }
 };
 
-apply_pending_load_to_player();
 _reset_player_animation();

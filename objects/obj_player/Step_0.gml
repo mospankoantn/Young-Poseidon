@@ -291,26 +291,35 @@ if (y > room_height + _margin
     }
     // audio_play_sound(snd_fall, 1, false);
 
-    // Телепорт на чекпоінт
+    // Телепорт на безпечну позицію чекпоінта
     if (variable_global_exists("checkpoint_room")
         && global.checkpoint_room == room)
     {
-        x    = global.checkpoint_x;
-        y    = global.checkpoint_y;
-        hspd = 0;
-        vspd = 0;
+        if (!player_place_safely(id, global.checkpoint_x, global.checkpoint_y))
+            player_place_safely(id, xstart, ystart);
+
+        global.checkpoint_x = x;
+        global.checkpoint_y = y;
     }
     else if (variable_global_exists("checkpoint_room"))
     {
+        global.checkpoint_respawn_pending = true;
+        global.spawn_from_tag = "";
+        global.spawn_x_manual = -1;
+        global.spawn_y_manual = -1;
+        global.came_from_room = -1;
         room_goto(global.checkpoint_room);
     }
     else
     {
-        // Немає чекпоінту — повертаємо на стартову позицію
-        x    = xstart;
-        y    = ystart;
-        hspd = 0;
-        vspd = 0;
+        // Немає чекпоінту — повертаємо на стартову безпечну позицію
+        if (!player_place_safely(id, xstart, ystart))
+        {
+            x = xstart;
+            y = ystart;
+            hspd = 0;
+            vspd = 0;
+        }
     }
 
     // Короткочасна невразливість після падіння

@@ -81,17 +81,17 @@ switch(tick) {
         break;
     case 232: screenshot="09-pause.png"; break;
     case 236:
-        with(obj_ui_controller) {
-            for(var _i=0;_i<array_length(pause_instances);_i++) instance_activate_object(pause_instances[_i]);
-        }
         check(p.x==px && p.y==py && p.hp==php && p.image_index==pf,"pause freezes physics HP animation");
+        check(is_struct(obj_ui_controller.pause_save_snapshot),"pause captures a save snapshot before deactivation");
         with(obj_ui_controller) {
-            for(var _i=0;_i<array_length(pause_instances);_i++) instance_deactivate_object(pause_instances[_i]);
             yp_menu_action({key:"save",type:"button"},1);
+            other.check(menu_page=="save_slots","pause save opens manual slot menu");
+            yp_menu_action({key:"slot_save",type:"slot",slot:1},1);
+            yp_menu_action({key:"back",type:"button"},1);
             yp_menu_action({key:"about",type:"button"},1);
         }
         instance_activate_object(id);
-        check(save_exists(),"save works while actors are suspended");
+        check(save_exists(1),"manual slot 1 saves while actors are suspended");
         break;
     case 248: screenshot="10-pause-about.png"; break;
     case 252:
@@ -107,6 +107,8 @@ switch(tick) {
         with(obj_ui_controller) {
             yp_menu_action({key:"back",type:"button"},1);
             yp_menu_action({key:"load",type:"button"},1);
+            other.check(menu_page=="load_slots","pause load opens slot menu");
+            yp_menu_action({key:"slot_load",type:"slot",slot:1},1);
         }
         break;
     case 288:

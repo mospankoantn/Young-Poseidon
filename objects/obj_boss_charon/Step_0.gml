@@ -18,6 +18,7 @@ if (hp <= 0)
     world_state_spawn_boss_reward("charon", obj_pickup_scythe_reward, x, y);
     // Знищуємо косу якщо летить
     if (instance_exists(scythe_instance)) instance_destroy(scythe_instance);
+    autosave_game();
     instance_destroy();
     exit;
 }
