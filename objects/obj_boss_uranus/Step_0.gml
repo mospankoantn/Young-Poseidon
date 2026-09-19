@@ -2,9 +2,14 @@
 /// obj_boss_uranus — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
-if (obj_player.weapon_unlocked[2])
+if (world_state_boss_defeated("uranus"))
 {
-    with (obj_uranus_barrier) instance_destroy();
+    world_state_spawn_boss_reward("uranus", obj_pickup_pickaxe_reward, x, y);
+    with (obj_uranus_barrier)
+    {
+        world_state_mark_instance(id, "destroyed");
+        instance_destroy();
+    }
     instance_destroy();
     exit;
 }
@@ -13,7 +18,13 @@ if (hp <= 0)
 {
     if (!enemy_anim_death_tick(spr_boss_uranus_death)) exit;
     is_dead = true;
-    instance_create_layer(x, y, "Instances", obj_pickup_pickaxe_reward);
+    world_state_mark_boss_defeated("uranus");
+    world_state_spawn_boss_reward("uranus", obj_pickup_pickaxe_reward, x, y);
+    with (obj_uranus_barrier)
+    {
+        world_state_mark_instance(id, "destroyed");
+        instance_destroy();
+    }
     instance_destroy();
     exit;
 }
@@ -103,6 +114,7 @@ switch (state)
             // Якщо завал зруйновано
             if (_target_barrier.hp <= 0)
             {
+                world_state_mark_instance(_target_barrier, "destroyed");
                 instance_destroy(_target_barrier);
                 state = 0;
                 action_cd = room_speed;

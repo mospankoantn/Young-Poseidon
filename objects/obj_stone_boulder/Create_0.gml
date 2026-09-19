@@ -13,3 +13,4 @@ image_speed = 0;
 // ---- ХИТ-ЕФЕКТ ----
 hit_flash   = 0;   // Лічильник спалаху при ударі
 hit_cd = 0;
+if (world_state_restore_instance(id, "destroyed")) exit;

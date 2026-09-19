@@ -2,13 +2,19 @@
 /// obj_boss_minotaur — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
-if (obj_player.weapon_unlocked[4]) { instance_destroy(); exit; }
+if (world_state_boss_defeated("minotaur"))
+{
+    world_state_spawn_boss_reward("minotaur", obj_pickup_oar_reward, x, y);
+    instance_destroy();
+    exit;
+}
 
 if (hp <= 0)
 {
     if (!enemy_anim_death_tick(spr_boss_minotaur_death)) exit;
     is_dead = true;
-    instance_create_layer(x, y, "Instances", obj_pickup_oar_reward);
+    world_state_mark_boss_defeated("minotaur");
+    world_state_spawn_boss_reward("minotaur", obj_pickup_oar_reward, x, y);
     instance_destroy();
     exit;
 }

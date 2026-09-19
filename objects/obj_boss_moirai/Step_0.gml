@@ -2,8 +2,9 @@
 /// obj_boss_moirai — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
-if (obj_player.has_olympus_key)
+if (world_state_boss_defeated("moirai"))
 {
+    world_state_spawn_boss_reward("moirai", obj_pickup_olympus_key, x, y);
     with (obj_olympus_fire) instance_destroy();
     instance_destroy();
     exit;
@@ -13,7 +14,8 @@ if (hp <= 0)
 {
     if (!enemy_anim_death_tick(spr_boss_moirai_death)) exit;
     is_dead = true;
-    instance_create_layer(x, y, "Instances", obj_pickup_olympus_key);
+    world_state_mark_boss_defeated("moirai");
+    world_state_spawn_boss_reward("moirai", obj_pickup_olympus_key, x, y);
     // Знищуємо всі вогні
     with (obj_olympus_fire) instance_destroy();
     instance_destroy();

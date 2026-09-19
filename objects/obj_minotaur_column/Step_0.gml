@@ -3,6 +3,7 @@
 
 if (hp <= 0)
 {
+    world_state_mark_instance(id, "destroyed");
     // Колона руйнується — гравець падає вниз
     instance_destroy();
     exit;

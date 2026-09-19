@@ -33,6 +33,7 @@ press_button = function() {
     }
     if(!_ok) return false;
     is_pressed=true;image_index=1;
+    if(one_time_use) world_state_mark_instance(id,"activated");
     if(!one_time_use) alarm[0]=max(1,round(room_speed*0.25));
     return true;
 };

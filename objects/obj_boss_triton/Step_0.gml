@@ -2,7 +2,12 @@
 /// obj_boss_triton — Step Event
 
 if (is_dead || !instance_exists(obj_player)) exit;
-if (obj_player.weapon_unlocked[0]) { instance_destroy(); exit; }
+if (world_state_boss_defeated("triton"))
+{
+    world_state_spawn_boss_reward("triton", obj_pickup_trident_reward, x, y);
+    instance_destroy();
+    exit;
+}
  
  if (!boss_intro_shown)
 {
@@ -18,7 +23,8 @@ if (hp <= 0)
 {
     if (!enemy_anim_death_tick(spr_boss_triton_death)) exit;
     is_dead = true;
-    instance_create_layer(x, y, "Instances", obj_pickup_trident_reward);
+    world_state_mark_boss_defeated("triton");
+    world_state_spawn_boss_reward("triton", obj_pickup_trident_reward, x, y);
     instance_destroy();
     exit;
 }

@@ -1,6 +1,7 @@
 /// @description
 /// obj_pickup_olympus_key — User Event 0
 
+world_state_mark_instance(id, "pickup");
 with (obj_player)
 {
     has_olympus_key = true;

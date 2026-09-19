@@ -64,6 +64,8 @@ ds_map_add(global.lang_db, "save_done",       ["Гру збережено",    "
 ds_map_add(global.lang_db, "save_failed",     ["Немає гравця для збереження", "No player to save"]);
 ds_map_add(global.lang_db, "load_done",       ["Гру завантажено",  "Game loaded"]);
 ds_map_add(global.lang_db, "load_missing",    ["Збереження не знайдено", "No save found"]);
+ds_map_add(global.lang_db, "load_corrupt",    ["Файл збереження пошкоджено", "Save file is corrupted"]);
+ds_map_add(global.lang_db, "load_incompatible",["Збереження створено новішою версією гри", "Save belongs to a newer game version"]);
  
 // ─────────────────────────────────────
 // НАЗВИ ЗОН

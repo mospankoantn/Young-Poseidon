@@ -1,5 +1,114 @@
 #macro YP_SAVE_FILE "young_poseidon_save.ini"
-#macro YP_SAVE_VERSION 1
+#macro YP_SAVE_VERSION 2
+#macro YP_SAVE_TEMP "young_poseidon_save.tmp.ini"
+#macro YP_SAVE_BACKUP "young_poseidon_save.backup.ini"
+
+function world_state_ensure()
+{
+    if (!variable_global_exists("world_state") || !is_struct(global.world_state))
+        global.world_state = {};
+}
+
+function world_state_reset()
+{
+    global.world_state = {};
+}
+
+function _world_state_key_valid(_key)
+{
+    return is_string(_key) && string_length(_key) > 0 && string_length(_key) <= 256;
+}
+
+function world_state_has(_key)
+{
+    world_state_ensure();
+    return _world_state_key_valid(_key) && variable_struct_exists(global.world_state, _key);
+}
+
+function world_state_mark(_key)
+{
+    if (!_world_state_key_valid(_key)) return false;
+    world_state_ensure();
+    variable_struct_set(global.world_state, _key, true);
+    return true;
+}
+
+function world_state_instance_key(_instance, _kind)
+{
+    if (!instance_exists(_instance)) return "";
+    if (variable_instance_exists(_instance, "world_state_id"))
+    {
+        var _manual = variable_instance_get(_instance, "world_state_id");
+        if (_world_state_key_valid(_manual)) return _manual;
+    }
+
+    return _kind + "|" + room_get_name(room) + "|"
+        + object_get_name(_instance.object_index) + "|"
+        + string(round(_instance.xstart)) + "|" + string(round(_instance.ystart));
+}
+
+function world_state_bind(_instance, _key, _kind)
+{
+    if (!instance_exists(_instance)) return false;
+    if (_world_state_key_valid(_key)) variable_instance_set(_instance, "world_state_id", _key);
+    var _resolved = world_state_instance_key(_instance, _kind);
+    if (!world_state_has(_resolved)) return false;
+    with (_instance) instance_destroy();
+    return true;
+}
+
+function world_state_restore_instance(_instance, _kind)
+{
+    return world_state_bind(_instance, "", _kind);
+}
+
+function world_state_mark_instance(_instance, _kind)
+{
+    return world_state_mark(world_state_instance_key(_instance, _kind));
+}
+
+function world_state_boss_key(_boss_id)
+{
+    return "boss|" + _boss_id + "|defeated";
+}
+
+function world_state_reward_key(_boss_id)
+{
+    return "reward|" + _boss_id + "|collected";
+}
+
+function world_state_boss_defeated(_boss_id)
+{
+    return world_state_has(world_state_boss_key(_boss_id));
+}
+
+function world_state_mark_boss_defeated(_boss_id)
+{
+    return world_state_mark(world_state_boss_key(_boss_id));
+}
+
+function world_state_spawn_boss_reward(_boss_id, _reward_object, _x, _y)
+{
+    if (world_state_has(world_state_reward_key(_boss_id))) return noone;
+    if (instance_exists(_reward_object)) return instance_find(_reward_object, 0);
+    return instance_create_layer(_x, _y, "Instances", _reward_object);
+}
+
+function _world_state_migrate_v1(_weapons, _has_key)
+{
+    var _bosses = ["triton", "nymph", "uranus", "charon", "minotaur", "war_ghost"];
+    for (var _i = 0; _i < min(array_length(_weapons), array_length(_bosses)); _i++)
+    {
+        if (!_weapons[_i]) continue;
+        world_state_mark_boss_defeated(_bosses[_i]);
+        world_state_mark(world_state_reward_key(_bosses[_i]));
+    }
+    if (_has_key)
+    {
+        world_state_mark_boss_defeated("moirai");
+        world_state_mark(world_state_reward_key("moirai"));
+    }
+}
 
 function _room_route_exit_color(_dir)
 {
@@ -408,9 +517,32 @@ function _save_notify(_key, _duration)
 
 function _save_room_from_name(_name)
 {
+    if (!is_string(_name) || string_length(_name) <= 0 || string_length(_name) > 64) return -1;
     var _room = asset_get_index(_name);
-    if (_room == -1) return rm_sea_1;
+    if (_room == -1 || !room_exists(_room) || _room == rm_menu) return -1;
     return _room;
+}
+
+function _save_real(_section, _key, _default, _minimum, _maximum)
+{
+    var _value = ini_read_real(_section, _key, _default);
+    if (!is_real(_value) || is_nan(_value) || is_infinity(_value)) return _default;
+    return clamp(_value, _minimum, _maximum);
+}
+
+function _save_file_status(_filename)
+{
+    if (!file_exists(_filename)) return 0;
+
+    ini_open(_filename);
+    var _exists = floor(ini_read_real("save", "exists", 0));
+    var _version = floor(ini_read_real("save", "version", -1));
+    var _room = _save_room_from_name(ini_read_string("save", "room", ""));
+    ini_close();
+
+    if (_exists != 1 || _version < 1 || _room == -1) return -1;
+    if (_version > YP_SAVE_VERSION) return -2;
+    return _version;
 }
 
 function _save_clear_runtime_load()
@@ -427,18 +559,13 @@ function _save_clear_runtime_load()
 
 function save_exists()
 {
-    if (!file_exists(YP_SAVE_FILE)) return false;
-
-    ini_open(YP_SAVE_FILE);
-    var _exists = (ini_read_real("save", "exists", 0) == 1);
-    ini_close();
-
-    return _exists;
+    return file_exists(YP_SAVE_FILE);
 }
 
 function start_new_game()
 {
     _save_clear_runtime_load();
+    world_state_reset();
 
     global.checkpoint_room = rm_sea_1;
     global.checkpoint_x = 96;
@@ -452,41 +579,33 @@ function start_new_game()
     room_goto(rm_sea_1);
 }
 
-function save_game()
+function _save_write_current(_filename, _player)
 {
-    if (!instance_exists(obj_player))
-    {
-        _save_notify("save_failed", 180);
-        return false;
-    }
-
-    var _p = instance_find(obj_player, 0);
-    var _weapon_count = array_length(_p.weapon_unlocked);
+    world_state_ensure();
+    var _weapon_count = array_length(_player.weapon_unlocked);
     var _has_checkpoint = variable_global_exists("checkpoint_room");
+    var _world_keys = variable_struct_get_names(global.world_state);
 
-    ini_open(YP_SAVE_FILE);
-
+    ini_open(_filename);
     ini_write_real("save", "exists", 1);
     ini_write_real("save", "version", YP_SAVE_VERSION);
     ini_write_string("save", "room", room_get_name(room));
 
-    ini_write_real("player", "x", _p.x);
-    ini_write_real("player", "y", _p.y);
-    ini_write_real("player", "hp", _p.hp);
-    ini_write_real("player", "max_hp", _p.max_hp);
-    ini_write_real("player", "current_weapon", _p.current_weapon);
-    ini_write_real("player", "perm_spd_bonus", _p.perm_spd_bonus);
-    ini_write_real("player", "potion_heal_count", _p.potion_heal_count);
-    ini_write_real("player", "potion_strength_count", _p.potion_strength_count);
-    ini_write_real("player", "potion_speed_count", _p.potion_speed_count);
-    ini_write_real("player", "has_olympus_key", _p.has_olympus_key ? 1 : 0);
-    ini_write_real("player", "l_right", _p.l_right ? 1 : 0);
+    ini_write_real("player", "x", _player.x);
+    ini_write_real("player", "y", _player.y);
+    ini_write_real("player", "hp", _player.hp);
+    ini_write_real("player", "max_hp", _player.max_hp);
+    ini_write_real("player", "current_weapon", _player.current_weapon);
+    ini_write_real("player", "perm_spd_bonus", _player.perm_spd_bonus);
+    ini_write_real("player", "potion_heal_count", _player.potion_heal_count);
+    ini_write_real("player", "potion_strength_count", _player.potion_strength_count);
+    ini_write_real("player", "potion_speed_count", _player.potion_speed_count);
+    ini_write_real("player", "has_olympus_key", _player.has_olympus_key ? 1 : 0);
+    ini_write_real("player", "l_right", _player.l_right ? 1 : 0);
 
     ini_write_real("weapons", "count", _weapon_count);
     for (var _i = 0; _i < _weapon_count; _i++)
-    {
-        ini_write_real("weapons", "weapon_" + string(_i), _p.weapon_unlocked[_i] ? 1 : 0);
-    }
+        ini_write_real("weapons", "weapon_" + string(_i), _player.weapon_unlocked[_i] ? 1 : 0);
 
     ini_write_real("checkpoint", "exists", _has_checkpoint ? 1 : 0);
     if (_has_checkpoint)
@@ -496,7 +615,42 @@ function save_game()
         ini_write_real("checkpoint", "y", global.checkpoint_y);
     }
 
+    ini_write_real("world_state", "count", array_length(_world_keys));
+    for (var _i = 0; _i < array_length(_world_keys); _i++)
+        ini_write_string("world_state", "entry_" + string(_i), _world_keys[_i]);
     ini_close();
+}
+
+function save_game()
+{
+    if (!instance_exists(obj_player))
+    {
+        _save_notify("save_failed", 180);
+        return false;
+    }
+
+    if (file_exists(YP_SAVE_TEMP)) file_delete(YP_SAVE_TEMP);
+    _save_write_current(YP_SAVE_TEMP, instance_find(obj_player, 0));
+    if (_save_file_status(YP_SAVE_TEMP) != YP_SAVE_VERSION)
+    {
+        if (file_exists(YP_SAVE_TEMP)) file_delete(YP_SAVE_TEMP);
+        _save_notify("save_failed", 180);
+        return false;
+    }
+
+    if (file_exists(YP_SAVE_BACKUP)) file_delete(YP_SAVE_BACKUP);
+    if (file_exists(YP_SAVE_FILE)) file_copy(YP_SAVE_FILE, YP_SAVE_BACKUP);
+    if (file_exists(YP_SAVE_FILE)) file_delete(YP_SAVE_FILE);
+    file_copy(YP_SAVE_TEMP, YP_SAVE_FILE);
+    file_delete(YP_SAVE_TEMP);
+
+    if (_save_file_status(YP_SAVE_FILE) != YP_SAVE_VERSION)
+    {
+        if (file_exists(YP_SAVE_FILE)) file_delete(YP_SAVE_FILE);
+        if (file_exists(YP_SAVE_BACKUP)) file_copy(YP_SAVE_BACKUP, YP_SAVE_FILE);
+        _save_notify("save_failed", 180);
+        return false;
+    }
 
     _save_notify("save_done", 180);
     return true;
@@ -504,44 +658,104 @@ function save_game()
 
 function load_game()
 {
-    if (!save_exists())
+    var _status = _save_file_status(YP_SAVE_FILE);
+    if (_status == 0)
     {
         _save_notify("load_missing", 180);
         return false;
     }
+    if (_status == -2)
+    {
+        _save_notify("load_incompatible", 240);
+        return false;
+    }
+    if (_status < 1)
+    {
+        _save_notify("load_corrupt", 240);
+        return false;
+    }
 
     ini_open(YP_SAVE_FILE);
-
-    var _room_name = ini_read_string("save", "room", "rm_sea_1");
+    var _room_name = ini_read_string("save", "room", "");
     var _target_room = _save_room_from_name(_room_name);
+    var _load_x = _save_real("player", "x", 96, 0, 100000);
+    var _load_y = _save_real("player", "y", 544, 0, 100000);
+    var _max_hp = floor(_save_real("player", "max_hp", 5, 1, 999));
+    var _hp = floor(_save_real("player", "hp", _max_hp, 1, _max_hp));
+    var _current_weapon = floor(_save_real("player", "current_weapon", -1, -1, 5));
+    var _perm_spd = _save_real("player", "perm_spd_bonus", 0, 0, 100);
+    var _heal = floor(_save_real("player", "potion_heal_count", 0, 0, 999));
+    var _strength = floor(_save_real("player", "potion_strength_count", 0, 0, 999));
+    var _speed = floor(_save_real("player", "potion_speed_count", 0, 0, 999));
+    var _has_key = (ini_read_real("player", "has_olympus_key", 0) == 1);
+    var _right = (ini_read_real("player", "l_right", 1) == 1);
+
+    var _weapon_count = floor(ini_read_real("weapons", "count", -1));
+    var _corrupt = (_weapon_count < 0 || _weapon_count > 6);
+    _weapon_count = clamp(_weapon_count, 0, 6);
+    var _weapons = array_create(6, false);
+    for (var _i = 0; _i < _weapon_count; _i++)
+        _weapons[_i] = (ini_read_real("weapons", "weapon_" + string(_i), 0) == 1);
+
+    var _checkpoint_exists = (ini_read_real("checkpoint", "exists", 0) == 1);
+    var _checkpoint_room = _target_room;
+    var _checkpoint_x = _load_x;
+    var _checkpoint_y = _load_y;
+    if (_checkpoint_exists)
+    {
+        _checkpoint_room = _save_room_from_name(ini_read_string("checkpoint", "room", ""));
+        if (_checkpoint_room == -1) _corrupt = true;
+        else
+        {
+            _checkpoint_x = _save_real("checkpoint", "x", _load_x, 0, 100000);
+            _checkpoint_y = _save_real("checkpoint", "y", _load_y, 0, 100000);
+        }
+    }
+
+    var _loaded_world = {};
+    if (_status >= 2)
+    {
+        var _world_count = floor(ini_read_real("world_state", "count", -1));
+        if (_world_count < 0 || _world_count > 10000) _corrupt = true;
+        else
+        {
+            for (var _i = 0; _i < _world_count; _i++)
+            {
+                var _key = ini_read_string("world_state", "entry_" + string(_i), "");
+                if (!_world_state_key_valid(_key)) { _corrupt = true; break; }
+                variable_struct_set(_loaded_world, _key, true);
+            }
+        }
+    }
+    ini_close();
+
+    if (_corrupt)
+    {
+        _save_notify("load_corrupt", 240);
+        return false;
+    }
+
+    global.world_state = _loaded_world;
+    if (_status == 1) _world_state_migrate_v1(_weapons, _has_key);
 
     global.load_pending = true;
     global.load_room = _target_room;
-    global.load_x = ini_read_real("player", "x", 96);
-    global.load_y = ini_read_real("player", "y", 544);
-    global.load_hp = ini_read_real("player", "hp", 5);
-    global.load_max_hp = ini_read_real("player", "max_hp", 5);
-    global.load_current_weapon = floor(ini_read_real("player", "current_weapon", -1));
-    global.load_perm_spd_bonus = ini_read_real("player", "perm_spd_bonus", 0);
-    global.load_potion_heal_count = ini_read_real("player", "potion_heal_count", 0);
-    global.load_potion_strength_count = ini_read_real("player", "potion_strength_count", 0);
-    global.load_potion_speed_count = ini_read_real("player", "potion_speed_count", 0);
-    global.load_has_olympus_key = (ini_read_real("player", "has_olympus_key", 0) == 1);
-    global.load_l_right = (ini_read_real("player", "l_right", 1) == 1);
-
-    var _weapon_count = max(0, floor(ini_read_real("weapons", "count", 6)));
-    global.load_weapon_unlocked = array_create(_weapon_count, false);
-    for (var _i = 0; _i < _weapon_count; _i++)
-    {
-        global.load_weapon_unlocked[_i] = (ini_read_real("weapons", "weapon_" + string(_i), 0) == 1);
-    }
-
-    global.load_checkpoint_exists = (ini_read_real("checkpoint", "exists", 0) == 1);
-    global.load_checkpoint_room = _save_room_from_name(ini_read_string("checkpoint", "room", _room_name));
-    global.load_checkpoint_x = ini_read_real("checkpoint", "x", global.load_x);
-    global.load_checkpoint_y = ini_read_real("checkpoint", "y", global.load_y);
-
-    ini_close();
+    global.load_x = _load_x;
+    global.load_y = _load_y;
+    global.load_hp = _hp;
+    global.load_max_hp = _max_hp;
+    global.load_current_weapon = _current_weapon;
+    global.load_perm_spd_bonus = _perm_spd;
+    global.load_potion_heal_count = _heal;
+    global.load_potion_strength_count = _strength;
+    global.load_potion_speed_count = _speed;
+    global.load_has_olympus_key = _has_key;
+    global.load_l_right = _right;
+    global.load_weapon_unlocked = _weapons;
+    global.load_checkpoint_exists = _checkpoint_exists;
+    global.load_checkpoint_room = _checkpoint_room;
+    global.load_checkpoint_x = _checkpoint_x;
+    global.load_checkpoint_y = _checkpoint_y;
 
     global.spawn_from_tag = "";
     global.spawn_x_manual = -1;
@@ -562,8 +776,8 @@ function apply_pending_load_to_player()
 
     var _p = instance_find(obj_player, 0);
 
-    _p.x = global.load_x;
-    _p.y = global.load_y;
+    _p.x = clamp(global.load_x, 0, room_width);
+    _p.y = clamp(global.load_y, 0, room_height);
     _p.hspd = 0;
     _p.vspd = 0;
     _p.drop_timer = 0;

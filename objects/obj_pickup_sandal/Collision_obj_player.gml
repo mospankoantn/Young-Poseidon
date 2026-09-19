@@ -3,6 +3,7 @@
 
 if (can_pickup)
 {
+    world_state_mark_instance(id, "pickup");
     with (other)
     {
         perm_spd_bonus += 1;   // +1 з документу (було 0.3)

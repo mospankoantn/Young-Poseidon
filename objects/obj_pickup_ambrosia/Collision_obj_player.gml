@@ -3,6 +3,7 @@
 
 if (can_pickup)
 {
+    world_state_mark_instance(id, "pickup");
     with (other)  // other = obj_player
     {
         max_hp += 1;

@@ -1,7 +1,12 @@
 /// @description
 /// obj_stalactite — Step Event
 
-if (stones_left <= 0) { instance_destroy(); exit; }
+if (stones_left <= 0)
+{
+    world_state_mark_instance(id, "destroyed");
+    instance_destroy();
+    exit;
+}
 if (hit_cd > 0) hit_cd--;
 
 // Гравець б'є кайлом (E або F) поблизу

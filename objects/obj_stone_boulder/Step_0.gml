@@ -36,6 +36,7 @@ if (_dist <= interact_range && hit_cd<=0
  
     if (hp <= 0)
     {
+        world_state_mark_instance(id, "destroyed");
         // Брила зруйнована
         // audio_play_sound(snd_boulder_break, 1, false);
         // Можна створити частинки каміння:

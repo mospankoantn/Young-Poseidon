@@ -1,0 +1,33 @@
+persistent=true;
+report_path="__REPORT__";
+tick=0;stage=0;p=noone;
+check=function(_ok,_message){
+    var _f=file_text_open_append(report_path);
+    file_text_write_string(_f,(_ok?"PASS: ":"FAIL: ")+_message);
+    file_text_writeln(_f);file_text_close(_f);
+    if(!_ok) game_end();
+};
+write_test_save=function(_version,_room_name,_weapon0){
+    if(file_exists(YP_SAVE_FILE)) file_delete(YP_SAVE_FILE);
+    ini_open(YP_SAVE_FILE);
+    ini_write_real("save","exists",1);
+    ini_write_real("save","version",_version);
+    ini_write_string("save","room",_room_name);
+    ini_write_real("player","x",120);
+    ini_write_real("player","y",300);
+    ini_write_real("player","hp",5);
+    ini_write_real("player","max_hp",5);
+    ini_write_real("player","current_weapon",_weapon0?0:-1);
+    ini_write_real("player","perm_spd_bonus",0);
+    ini_write_real("player","potion_heal_count",0);
+    ini_write_real("player","potion_strength_count",0);
+    ini_write_real("player","potion_speed_count",0);
+    ini_write_real("player","has_olympus_key",0);
+    ini_write_real("player","l_right",1);
+    ini_write_real("weapons","count",6);
+    for(var _i=0;_i<6;_i++) ini_write_real("weapons","weapon_"+string(_i),(_i==0&&_weapon0)?1:0);
+    ini_write_real("checkpoint","exists",0);
+    if(_version>=2) ini_write_real("world_state","count",0);
+    ini_close();
+};
+room_goto(rm_sea_1);

@@ -38,11 +38,17 @@
 - Import/build/place tools mutate resources. Do not run them as if they were read-only validators.
 
 ## Gameplay Contracts
-- scr_save_system owns progression saves and automatic room routes; scr_settings owns persistent options.
+- scr_save_system owns progression saves, permanent world state and automatic room routes; scr_settings owns persistent options.
 - Keep young_poseidon_save.ini separate from young_poseidon_settings.ini.
+- Persistent world changes must use the world_state_* helpers. The default key is based on kind, room,
+  object and authored xstart/ystart; set a unique world_state_id in Instance Creation Code when that identity
+  could change or two authored instances would otherwise share a key.
+- Mark permanent state before destroying or removing an instance. New games must call world_state_reset;
+  loads must validate all data before replacing the active world state.
 - Respect manually placed exits and blocks_auto_routes/blocks_auto_direction overrides.
 - A placed boss is not proof of a complete arena or a verified playthrough.
-- Bosses can remove themselves when their reward weapon/key is already owned; consider this during debug teleports.
+- Boss victory and reward collection are separate explicit world-state records. Never infer a defeated boss only
+  from an unlocked weapon/key; debug rewards must not silently complete fights.
 - Do not change checkpoint coordinates, item-gated routes or save semantics as an unrelated fix.
 
 ## Verification and Reporting
@@ -50,7 +56,7 @@
 - Available validators: validate_player_animations.ps1, validate_enemy_sheets.ps1,
   validate_weapon_visuals.ps1, validate_level_tilesets.ps1, validate_interactive_props.ps1 (all in tools).
 - Runtime tests: test_player_death.ps1, test_enemy_animations.ps1, test_weapon_visuals.ps1,
-  test_menu_settings.ps1, test_interactive_props.ps1 (all in tools).
+  test_menu_settings.ps1, test_interactive_props.ps1, test_world_state.ps1 (all in tools).
 - Runtime tests build temporary copies with GameMaker; do not overwrite authored rooms with fixtures.
 - After art changes, inspect a preview or Runner screenshot in addition to metadata checks.
 - After room edits, verify actual instance placement and traversal; isolated tests do not prove the campaign is completable.

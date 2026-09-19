@@ -6,3 +6,4 @@ col_width  = 40;
 col_height = 120;
 image_index = 0;
 image_speed = 0;
+if (world_state_restore_instance(id, "destroyed")) exit;

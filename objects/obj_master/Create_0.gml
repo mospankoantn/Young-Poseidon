@@ -18,13 +18,18 @@ if (!variable_global_exists("game_initialized"))
     // ---- ЗБРОЯ ГРАВЦЯ ----
     // Масив true/false: чи розблокована зброя
     // Індекси: 0=Тризубець, 1=Спис, 2=Кайло, 3=Коса, 4=Весло, 5=Меч
-    global.weapon_unlocked = [true, false, false, false, false, false];
+    global.weapon_unlocked = [false, false, false, false, false, false];
+    world_state_reset();
  
     // ---- СТАТИСТИКА (опціонально) ----
     global.enemies_killed = 0;
     global.deaths         = 0;
  
     show_debug_message("[Master] Global variables initialized.");
+}
+else
+{
+    world_state_ensure();
 }
 
 // Spawn-дані для переходів між кімнатами

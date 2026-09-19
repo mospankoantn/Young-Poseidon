@@ -198,6 +198,13 @@ _unlock_weapon = function(_index)
     if (_index < 0 || _index >= array_length(weapon_unlocked)) exit;
 
     weapon_unlocked[_index] = true;
+    if (!variable_global_exists("weapon_unlocked")
+        || !is_array(global.weapon_unlocked)
+        || array_length(global.weapon_unlocked) != array_length(weapon_unlocked))
+    {
+        global.weapon_unlocked = array_create(array_length(weapon_unlocked), false);
+    }
+    global.weapon_unlocked[_index] = true;
     current_weapon          = _index;
     _play_weapon_action("pickup");
 };
