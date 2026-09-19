@@ -55,6 +55,7 @@ if (tick == 1)
 if (tick == 3)
 {
     check(t.visual_weapon == 1, "spear throw appearance: weapon=" + string(p.current_weapon) + " thrown=" + string(t.thrown));
+    check(t.damage == p.weapon_atk[1], "spear projectile damage");
     check(p.anim_action_sprite == spr_player_spear_cast, "cast input");
     check(t.mask_index == spr_weapon_collision, "throw mask");
     global.test_recall_pressed = true;
@@ -81,6 +82,23 @@ if (tick == 5)
         check(proj.sprite_index == sprs[i], "projectile sprite " + string(i));
         check(proj.mask_index == masks[i], "projectile mask " + string(i));
     }
+    // All four hand-held melee weapons must apply their configured ATK.
+    for (var mw = 2; mw <= 5; mw++)
+    {
+        var dummy = instance_create_layer(p.x + 32, p.y, "Instances", obj_giant_crab);
+        dummy.hp = 100;
+        dummy.spd = 0;
+        dummy.grv = 0;
+        p.current_weapon = mw;
+        p.l_right = true;
+        p.image_xscale = 1;
+        var before_hp = dummy.hp;
+        var melee_hit = p._damage_weapon_melee(mw);
+        check(instance_exists(melee_hit), "melee target " + string(mw));
+        check(dummy.hp == before_hp - p.weapon_atk[mw], "melee damage " + string(mw));
+        if (instance_exists(dummy)) instance_destroy(dummy);
+    }
+
     p.current_weapon = 2;
     p._play_weapon_action("special");
 }
@@ -90,7 +108,7 @@ if (tick == 45)
 {
     check(p.anim_action_timer <= 0 && p.sprite_index == spr_player_pickaxe_idle, "action did not finish");
     var f = file_text_open_write(report_path);
-    file_text_write_string(f, "PASS: weapon visuals: six pickups, idle/run, facing, actions, switching, hurt priority, throw/recall, key, ledge and six projectile masks.");
+    file_text_write_string(f, "PASS: weapon visuals: six pickups, idle/run, facing, actions, switching, hurt priority, throw/recall, correct spear damage, melee damage for pickaxe/scythe/oar/sword, key, ledge and six projectile masks.");
     file_text_close(f);
     game_end();
 }

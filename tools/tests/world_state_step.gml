@@ -37,8 +37,12 @@ if(stage==0 && room==rm_sea_1 && tick>3){
     check(world_state_has(world_state_reward_key("triton"))&&p.weapon_unlocked[0],"boss reward collection persists");
     check(global.weapon_unlocked[0],"boss reward synchronizes fallback weapon state");
 
-    check(save_game()&&_save_file_status(YP_SAVE_FILE)==2,"version 2 save validates");
-    check(file_exists(YP_SAVE_FILE),"atomic save creates final file");
+    check(save_slot_status(0)==2,"boss reward creates a valid autosave in slot 0");
+    check(save_game(1,false)&&save_slot_status(1)==2,"version 2 manual slot 1 validates");
+    check(file_exists(_save_slot_file(1)),"atomic save creates slot 1 final file");
+    check(save_game(2,false)&&save_slot_status(2)==2,"manual slot 2 validates independently");
+    check(save_game(10,false)&&save_slot_status(10)==2,"manual slot 10 validates at the upper boundary");
+    check(save_slot_room(10)==room,"save slot exposes its stored room for the slot menu");
     world_state_reset();
     stage=1;
     check(load_game(),"version 2 save starts loading");
@@ -49,10 +53,12 @@ if(stage==1 && room==rm_sea_1 && tick>8){
     apply_pending_load_to_player();
     check(world_state_has("boss|triton|defeated"),"boss state survives reload");
     check(world_state_has("reward|triton|collected"),"reward state survives reload");
+    check(save_slot_status(0)==2&&save_slot_status(2)==2&&save_slot_status(10)==2,"loading slot 1 leaves autosave and other manual slots intact");
 
     var _before=variable_struct_get_names(global.world_state);
     write_test_save(2,"not_a_room",false);
     check(!load_game()&&array_length(variable_struct_get_names(global.world_state))==array_length(_before),"corrupt room is rejected without replacing state");
+    check(save_slot_status(2)==2,"corrupt slot 1 does not damage slot 2");
 
     write_test_save(YP_SAVE_VERSION+1,"rm_sea_1",false);
     check(!load_game(),"newer save version is rejected");
@@ -68,6 +74,12 @@ if(stage==2 && room==rm_sea_1 && tick>13){
     check(world_state_boss_defeated("triton"),"legacy weapon migrates to defeated boss");
     check(world_state_has(world_state_reward_key("triton")),"legacy weapon migrates to collected reward");
     check(p.weapon_unlocked[0],"legacy weapon remains unlocked");
+
+    if(file_exists(YP_SAVE_LEGACY)) file_delete(YP_SAVE_LEGACY);
+    file_copy(_save_slot_file(1),YP_SAVE_LEGACY);
+    file_delete(_save_slot_file(1));
+    check(save_slots_migrate_legacy()&&save_slot_status(1)==1,"legacy single save migrates into manual slot 1");
+    check(file_exists(YP_SAVE_LEGACY),"legacy single save remains available after migration");
 
     world_state_mark("test|must_reset");
     stage=3;

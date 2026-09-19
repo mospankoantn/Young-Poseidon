@@ -25,6 +25,7 @@ if (hp <= 0)
     is_dead = true;
     world_state_mark_boss_defeated("triton");
     world_state_spawn_boss_reward("triton", obj_pickup_trident_reward, x, y);
+    autosave_game();
     instance_destroy();
     exit;
 }

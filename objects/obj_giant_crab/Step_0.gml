@@ -21,16 +21,26 @@ if (place_meeting(x, y + vspd, obj_platform))
 y += vspd;
  
 // ---- ПАТРУЛЬ (ходить між двома точками) ----
-x += spd * move_dir;
- 
-// Розворот на межах
+// Перевіряємо наступну горизонтальну позицію ДО переміщення.
+// Маска краба торкається підлоги нижнім краєм, тому звичайний
+// place_meeting(next_x, y, obj_platform) може прийняти підлогу за стіну
+// і розвертати краба щокадру. Піднімаємо тільки тест стіни на 2 px.
+var _next_x = x + spd * move_dir;
+var _wall_ahead = place_meeting(_next_x, y - 2, obj_platform);
+
+if (_wall_ahead)
+{
+    move_dir *= -1;
+}
+else
+{
+    x = _next_x;
+}
+
+// Розворот на межах патруля.
 if (x <= left_bound)  { move_dir =  1; x = left_bound;  }
 if (x >= right_bound) { move_dir = -1; x = right_bound; }
- 
-// Розворот якщо перед ним стіна
-if (place_meeting(x + spd * move_dir, y, obj_platform))
-    move_dir *= -1;
- 
+
 image_xscale = move_dir;
  
 // ---- АТАКА ДОТИКом ----

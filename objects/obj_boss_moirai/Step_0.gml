@@ -18,6 +18,7 @@ if (hp <= 0)
     world_state_spawn_boss_reward("moirai", obj_pickup_olympus_key, x, y);
     // Знищуємо всі вогні
     with (obj_olympus_fire) instance_destroy();
+    autosave_game();
     instance_destroy();
     exit;
 }

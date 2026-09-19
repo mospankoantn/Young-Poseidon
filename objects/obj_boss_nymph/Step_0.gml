@@ -15,6 +15,7 @@ if (hp <= 0)
     is_dead = true;
     world_state_mark_boss_defeated("nymph");
     world_state_spawn_boss_reward("nymph", obj_pickup_spear_reward, x, y);
+    autosave_game();
     instance_destroy();
     exit;
 }

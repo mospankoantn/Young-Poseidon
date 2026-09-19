@@ -80,8 +80,8 @@
     "path": "sprites/spr_giant_crab_idle/spr_giant_crab_idle.yy"
   },
   "spriteMaskId": {
-    "name": "spr_giant_crab",
-    "path": "sprites/spr_giant_crab/spr_giant_crab.yy"
+    "name": "spr_giant_crab_mask",
+    "path": "sprites/spr_giant_crab_mask/spr_giant_crab_mask.yy"
   },
   "visible": true
 }

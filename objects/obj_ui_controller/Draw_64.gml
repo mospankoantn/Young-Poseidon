@@ -1,8 +1,8 @@
 /// @description Clean gameplay HUD
 /// obj_ui_controller - Draw GUI Event
 
-if (game_paused) { yp_menu_draw(); exit; }
-if (!instance_exists(obj_player)) exit;
+if (game_paused) { yp_menu_draw(); yp_draw_cursor(); exit; }
+if (!instance_exists(obj_player)) { yp_draw_cursor(); exit; }
 yp_capture_world();
 var _p = obj_player;
 
@@ -283,3 +283,6 @@ draw_set_color(c_white);
 draw_set_alpha(1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
+
+// Курсор малюється останнім у цьому GUI, щоб HUD/меню його не перекривали.
+yp_draw_cursor();

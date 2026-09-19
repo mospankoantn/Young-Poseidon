@@ -191,6 +191,7 @@ if (_can_throw && instance_exists(trident_instance))
             _t.invisible_time = false;
             _t.image_xscale = image_xscale;
             _t.visual_weapon = current_weapon;
+            _t.damage        = weapon_atk[current_weapon];
             _play_weapon_action("cast");
         }
     }
@@ -214,19 +215,18 @@ if (_can_throw && instance_exists(trident_instance))
     }
 }
 
-// Меч — випад (E при current_weapon == 5)
-if (current_weapon == 5 && _e_pressed)
+// Кайло / коса / весло / меч — звичайна ближня атака.
+// Спеціальні взаємодії інструментів із брилами/хащами/плотом залишаються в їхніх об'єктах.
+if (_e_pressed && current_weapon >= 2 && current_weapon <= 5)
 {
     _play_weapon_action("attack");
-    hspd = image_xscale * 18;
-    var _hit = instance_place(x + image_xscale * 40, y, obj_enemy);
-    if (instance_exists(_hit))
-        with (_hit) hp -= (obj_player.weapon_atk[5] + obj_player.temp_atk_buff);
-}
 
-// Tool swings are visual only; obstacle scripts retain their existing effects.
-if (_e_pressed && current_weapon >= 2 && current_weapon <= 4)
-    _play_weapon_action("attack");
+    // Меч зберігає свій швидкий випад уперед.
+    if (current_weapon == 5)
+        hspd = image_xscale * 18;
+
+    _damage_weapon_melee(current_weapon);
+}
 
 // ════════════════════════════════════════
 // БЛОК 7: СМЕРТЬ
@@ -291,26 +291,35 @@ if (y > room_height + _margin
     }
     // audio_play_sound(snd_fall, 1, false);
 
-    // Телепорт на чекпоінт
+    // Телепорт на безпечну позицію чекпоінта
     if (variable_global_exists("checkpoint_room")
         && global.checkpoint_room == room)
     {
-        x    = global.checkpoint_x;
-        y    = global.checkpoint_y;
-        hspd = 0;
-        vspd = 0;
+        if (!player_place_safely(id, global.checkpoint_x, global.checkpoint_y))
+            player_place_safely(id, xstart, ystart);
+
+        global.checkpoint_x = x;
+        global.checkpoint_y = y;
     }
     else if (variable_global_exists("checkpoint_room"))
     {
+        global.checkpoint_respawn_pending = true;
+        global.spawn_from_tag = "";
+        global.spawn_x_manual = -1;
+        global.spawn_y_manual = -1;
+        global.came_from_room = -1;
         room_goto(global.checkpoint_room);
     }
     else
     {
-        // Немає чекпоінту — повертаємо на стартову позицію
-        x    = xstart;
-        y    = ystart;
-        hspd = 0;
-        vspd = 0;
+        // Немає чекпоінту — повертаємо на стартову безпечну позицію
+        if (!player_place_safely(id, xstart, ystart))
+        {
+            x = xstart;
+            y = ystart;
+            hspd = 0;
+            vspd = 0;
+        }
     }
 
     // Короткочасна невразливість після падіння

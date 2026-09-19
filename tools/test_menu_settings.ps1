@@ -1,6 +1,20 @@
 param([string]$Runtime='C:/ProgramData/GameMakerStudio2-LTS2026/Cache/runtimes/runtime-2026.0.0.23')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
+# Static cursor contract: native Windows cursor is hidden and the project provides its own sprite.
+$cursorPath=Join-Path $root 'sprites/spr_cursor_poseidon/spr_cursor_poseidon.yy'
+if(!(Test-Path -LiteralPath $cursorPath)) {throw 'Missing custom cursor sprite'}
+$cursor=Get-Content -LiteralPath $cursorPath -Raw | ConvertFrom-Json -Depth 100
+if($cursor.width -ne 24 -or $cursor.height -ne 24 -or $cursor.sequence.xorigin -ne 0 -or $cursor.sequence.yorigin -ne 0) {throw 'Custom cursor size/origin mismatch'}
+$winOptions=Get-Content -LiteralPath (Join-Path $root 'options/windows/options_windows.yy') -Raw | ConvertFrom-Json -Depth 100
+if($winOptions.option_windows_display_cursor -ne $false) {throw 'Native Windows cursor is still enabled'}
+$menuScript=Get-Content -LiteralPath (Join-Path $root 'scripts/scr_menu_system/scr_menu_system.gml') -Raw
+if($menuScript -notmatch 'function yp_draw_cursor\(\)' -or $menuScript -notmatch 'spr_cursor_poseidon') {throw 'Shared custom cursor draw helper missing'}
+$mainMenuDraw=Get-Content -LiteralPath (Join-Path $root 'objects/obj_main_menu/Draw_64.gml') -Raw
+$hudDraw=Get-Content -LiteralPath (Join-Path $root 'objects/obj_ui_controller/Draw_64.gml') -Raw
+if($mainMenuDraw -notmatch 'yp_menu_draw\(\);[\s\S]*yp_draw_cursor\(\);') {throw 'Main menu does not draw the cursor after the menu'}
+if($hudDraw -notmatch 'yp_menu_draw\(\); yp_draw_cursor\(\); exit;' -or $hudDraw -notmatch 'yp_draw_cursor\(\);\s*$') {throw 'HUD/pause does not draw cursor last'}
+
 $temp=Join-Path $env:TEMP ('yp-menu-test-'+[guid]::NewGuid().ToString('N'))
 $project=Join-Path $temp 'project'
 [IO.Directory]::CreateDirectory($project)|Out-Null
@@ -31,7 +45,12 @@ foreach($rel in @('scripts/scr_settings/scr_settings.gml','scripts/scr_save_syst
     $p=Join-Path $project $rel
     $code=Get-Content -LiteralPath $p -Raw
     $code=$code.Replace('"young_poseidon_settings.ini"',('"'+($temp+'/settings.ini').Replace('\','/')+'"'))
-    $code=$code.Replace('"young_poseidon_save.ini"',('"'+($temp+'/save.ini').Replace('\','/')+'"'))
+    $savePrefix=($temp+'/save_').Replace('\','/')
+    $autosavePrefix=($temp+'/autosave').Replace('\','/')
+    $legacy=($temp+'/legacy.ini').Replace('\','/')
+    $code=$code.Replace('young_poseidon_save_',$savePrefix)
+    $code=$code.Replace('young_poseidon_autosave',$autosavePrefix)
+    $code=$code.Replace('"young_poseidon_save.ini"',('"'+$legacy+'"'))
     Write-Utf8 $p $code
 }
 $win=Join-Path $temp 'Young Poseidon.win'

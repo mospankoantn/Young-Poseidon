@@ -508,3 +508,6 @@ draw_set_alpha(1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_font(-1);
+
+// Debug GUI is allowed to sit above the HUD, so keep the cursor on top of it too.
+if (is_open) yp_draw_cursor();

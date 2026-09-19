@@ -111,18 +111,30 @@ _begin_player_death = function()
 
 _respawn_player = function()
 {
-    // Preserve the existing checkpoint and no-checkpoint branches.
     hp = max_hp;
+
     if (variable_global_exists("checkpoint_room") && global.checkpoint_room == room)
     {
-        x = global.checkpoint_x;
-        y = global.checkpoint_y;
-        vspd = 0; hspd = 0;
+        if (!player_place_safely(id, global.checkpoint_x, global.checkpoint_y))
+            player_place_safely(id, xstart, ystart);
+
+        global.checkpoint_x = x;
+        global.checkpoint_y = y;
     }
     else if (variable_global_exists("checkpoint_room"))
+    {
+        global.checkpoint_respawn_pending = true;
+        global.spawn_from_tag = "";
+        global.spawn_x_manual = -1;
+        global.spawn_y_manual = -1;
+        global.came_from_room = -1;
         room_goto(global.checkpoint_room);
+    }
     else
+    {
         game_restart();
+    }
+
     is_damage = alarm[0] > 0;
     _reset_player_animation();
 };
@@ -144,6 +156,31 @@ weapon_sprites  = [spr_weapon_trident, spr_weapon_spear,
 // ATK і множник SPD — точно з дизайн-документу
 weapon_atk      = [1, 2, 5, 3, 4, 10];
 weapon_spd_mult = [1.0, 2.0, 0.25, 1.0, 0.5, 2.0];
+
+// Радіус звичайної ближньої атаки. Тризубець/спис (0/1) наносять шкоду снарядом.
+weapon_melee_range = [0, 0, 48, 58, 62, 54];
+
+_damage_weapon_melee = function(_weapon_index)
+{
+    if (_weapon_index < 2 || _weapon_index > 5) return noone;
+
+    var _range  = weapon_melee_range[_weapon_index];
+    var _near_x = x + image_xscale * 8;
+    var _far_x  = x + image_xscale * _range;
+    var _x1 = min(_near_x, _far_x);
+    var _x2 = max(_near_x, _far_x);
+    var _y1 = bbox_top + 4;
+    var _y2 = bbox_bottom - 4;
+
+    var _target = collision_rectangle(_x1, _y1, _x2, _y2, obj_enemy, false, true);
+    if (instance_exists(_target) && variable_instance_exists(_target, "hp"))
+    {
+        _target.hp -= weapon_atk[_weapon_index] + temp_atk_buff;
+        return _target;
+    }
+
+    return noone;
+};
 
 // Розблокована зброя (false = ще не отримана)
 weapon_unlocked = [false, false, false, false, false, false];
@@ -221,5 +258,4 @@ _switch_weapon = function(_delta)
     }
 };
 
-apply_pending_load_to_player();
 _reset_player_animation();

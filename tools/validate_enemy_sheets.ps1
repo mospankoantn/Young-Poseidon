@@ -38,7 +38,9 @@ foreach($item in $items) {
     $idle='spr_'+$n+'_idle'
     if($object.resourceType -ne 'GMObject' -or $object.resourceVersion -ne '2.0') {throw "Wrong object schema: $objectName"}
     if($object.spriteId.name -ne $idle -or $object.spriteId.path -ne "sprites/$idle/$idle.yy") {throw "Wrong idle sprite: $objectName"}
-    if($object.spriteMaskId.name -ne 'spr_giant_crab' -or $object.spriteMaskId.path -ne 'sprites/spr_giant_crab/spr_giant_crab.yy') {throw "Collision mask changed: $objectName"}
+    $expectedMask=if($n -eq 'giant_crab'){'spr_giant_crab_mask'}else{'spr_giant_crab'}
+    $expectedMaskPath="sprites/$expectedMask/$expectedMask.yy"
+    if($object.spriteMaskId.name -ne $expectedMask -or $object.spriteMaskId.path -ne $expectedMaskPath) {throw "Collision mask changed: $objectName"}
     $endSteps=@($object.eventList | Where-Object {$_.eventType -eq 3 -and $_.eventNum -eq 2})
     if($endSteps.Count -ne 1 -or !(Test-Path -LiteralPath (Join-Path $ProjectRoot ("objects/$objectName/Step_2.gml")))) {throw "End Step missing: $objectName"}
     foreach($state in @('idle','move','attack','death')) {
@@ -80,6 +82,14 @@ foreach($item in $items) {
         }
     }
 }
+$crabMaskName='spr_giant_crab_mask'
+$crabMaskPath="sprites/$crabMaskName/$crabMaskName.yy"
+if($resourceMap[$crabMaskName] -ne $crabMaskPath -or $orderMap[$crabMaskName] -ne $crabMaskPath) {throw 'Crab mask is not registered'}
+$crabMask=Get-Content -LiteralPath (Join-Path $ProjectRoot $crabMaskPath) -Raw | ConvertFrom-Json -Depth 100
+if($crabMask.width -ne 96 -or $crabMask.height -ne 96 -or $crabMask.sequence.xorigin -ne 48 -or $crabMask.sequence.yorigin -ne 90) {throw 'Crab mask dimensions/origin mismatch'}
+if($crabMask.bbox_left -ne 12 -or $crabMask.bbox_right -ne 84 -or $crabMask.bbox_top -ne 48 -or $crabMask.bbox_bottom -ne 90) {throw 'Crab hitbox bounds mismatch'}
+$crabStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_giant_crab/Step_0.gml') -Raw
+if($crabStep -notmatch 'place_meeting\(_next_x, y - 2, obj_platform\)' -or $crabStep -notmatch 'x = _next_x') {throw 'Crab patrol wall probe can regress into floor jitter'}
 if($resourceMap['scr_enemy_animation'] -ne 'scripts/scr_enemy_animation/scr_enemy_animation.yy') {throw 'Animation script not registered'}
 if($totalFrames -ne 224) {throw "Unexpected total: $totalFrames"}
 Write-Output "PASS: 14 unique source sheets map to 14 objects and 56 sprites."

@@ -10,5 +10,6 @@ if (!instance_exists(trident_instance))
     trident_instance = instance_create_layer(x + 32, y, "Instances", obj_trident);
 }
 
-apply_pending_load_to_player();
+if (!apply_pending_load_to_player())
+    apply_pending_checkpoint_respawn_to_player();
 _reset_player_animation();

@@ -10,6 +10,11 @@ if (instance_number(obj_master) > 1)
     exit;
 }
 
+// Кастомний курсор у стилі Young Poseidon замість системної стрілки Windows.
+window_set_cursor(cr_none);
+// Менеджер не має world-графіки; малий depth гарантує, що Draw GUI курсора йде поверх UI.
+depth = -1000000;
+
 // Ініціалізуємо глобальні змінні тільки один раз
 if (!variable_global_exists("game_initialized"))
 {
