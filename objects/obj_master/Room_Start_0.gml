@@ -1,13 +1,12 @@
-/// @description Ініціалізація на старті кімнати
+/// @description Legacy helper retained for compatibility.
+/// Projectile ownership is initialized by obj_player Room Start.
 
-// Переконуємось, що тризубець ініціалізується правильно
 if (instance_exists(obj_player))
 {
-	// Знаходимо або створюємо тризубець
-	var _trident = instance_find(obj_trident, 0);
-	if (!instance_exists(_trident))
-	{
-		_trident = instance_create_layer(obj_player.x + 30, obj_player.y, "Instances", obj_trident);
-	}
-	obj_player.trident_instance = _trident;
+    var _p = instance_find(obj_player, 0);
+    if (variable_instance_exists(_p, "throwable_instances"))
+    {
+        for (var _wi = 0; _wi < 2; _wi++)
+            if (_p.weapon_unlocked[_wi]) _p._find_throwable(_wi, true);
+    }
 }

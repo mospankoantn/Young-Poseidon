@@ -21,6 +21,13 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "e38bd54c-debb-4e55-af31-78836bfed77c",
+      "name": "e38bd54c-debb-4e55-af31-78836bfed77c",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "e08bf0fc-a0a0-4a89-8700-830d33b11210",
       "name": "e08bf0fc-a0a0-4a89-8700-830d33b11210",
       "resourceType": "GMSpriteFrame",
@@ -28,8 +35,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "81a7c15e-e612-47cb-9abd-69abcb628e7d",
+      "name": "81a7c15e-e612-47cb-9abd-69abcb628e7d",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "8fd9842b-2250-40c0-9ae3-daae1abdaa28",
       "name": "8fd9842b-2250-40c0-9ae3-daae1abdaa28",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "f5d3b3f4-2114-48a8-88eb-9fb77aeab750",
+      "name": "f5d3b3f4-2114-48a8-88eb-9fb77aeab750",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     },
@@ -87,7 +108,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 4.0,
+    "length": 7.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -97,7 +118,7 @@
     },
     "name": "spr_player_trident_attack",
     "playback": 1,
-    "playbackSpeed": 14.0,
+    "playbackSpeed": 24.5,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -129,9 +150,31 @@
                 }
               },
               "Disabled": false,
-              "id": "3095cf6d-9e18-4842-848b-f79642995a1e",
+              "id": "3ef0c338-16f2-4a60-a2c2-db197b223220",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "e38bd54c-debb-4e55-af31-78836bfed77c",
+                    "path": "sprites/spr_player_trident_attack/spr_player_trident_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "fb898c52-55fc-47fa-b8db-4c23624c8786",
+              "IsCreationKey": false,
+              "Key": 1.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -151,9 +194,31 @@
                 }
               },
               "Disabled": false,
-              "id": "27ea6551-d9e1-4c39-89a2-ecbae0af5152",
+              "id": "55f437bc-f9aa-4d53-bf94-190eaf7fff0e",
               "IsCreationKey": false,
-              "Key": 1.0,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "81a7c15e-e612-47cb-9abd-69abcb628e7d",
+                    "path": "sprites/spr_player_trident_attack/spr_player_trident_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "49bfb16e-a438-45c1-bb3b-c31309bcb45d",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -173,9 +238,31 @@
                 }
               },
               "Disabled": false,
-              "id": "07f686fa-17ef-4521-91c4-28f13a025b24",
+              "id": "9d326773-6994-4226-90b9-d34136ca23ea",
               "IsCreationKey": false,
-              "Key": 2.0,
+              "Key": 4.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "f5d3b3f4-2114-48a8-88eb-9fb77aeab750",
+                    "path": "sprites/spr_player_trident_attack/spr_player_trident_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "979ba51b-7958-4c7f-b033-a999bd465ebe",
+              "IsCreationKey": false,
+              "Key": 5.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -195,9 +282,9 @@
                 }
               },
               "Disabled": false,
-              "id": "0b64394c-f49a-4129-9a04-ec248c7a7eda",
+              "id": "a0638329-4bab-4d36-8da5-2ea39607aa28",
               "IsCreationKey": false,
-              "Key": 3.0,
+              "Key": 6.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

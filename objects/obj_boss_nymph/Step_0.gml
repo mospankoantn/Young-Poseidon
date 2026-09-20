@@ -102,6 +102,7 @@ switch (state)
                     var _arr      = instance_create_layer(_ax, y - 50,
                                         "Instances", obj_arrow);
                     _arr.direction_x = 0;    // Летять вниз
+                    _arr.direction_y = 1;
                     _arr.fly_speed   = 8;
                     _arr.damage      = atk;
                     _arr.image_angle = 270;  // Стріла летить вниз

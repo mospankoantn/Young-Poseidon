@@ -1,9 +1,11 @@
 /// @description
 /// obj_checkpoint — Step Event
 
+if (activation_fx_timer > 0) activation_fx_timer--;
+
 if (is_activated || !instance_exists(obj_player)) exit;
-if(obj_player.is_dead || obj_player.hp<=0) exit;
- 
+if (obj_player.is_dead || obj_player.hp <= 0) exit;
+
 if (place_meeting(x, y, obj_player))
 {
     var _player = instance_find(obj_player, 0);
@@ -11,14 +13,14 @@ if (place_meeting(x, y, obj_player))
     if (!_safe[0]) exit;
 
     is_activated = true;
-    image_index  = 1;
+    activation_fx_timer = activation_fx_length;
 
-    // Зберігаємо реальну безпечну позицію гравця, а не origin самого чекпоінта.
-    global.checkpoint_x    = _safe[1];
-    global.checkpoint_y    = _safe[2];
+    // Store the player's real safe position, not the checkpoint origin.
+    global.checkpoint_x = _safe[1];
+    global.checkpoint_y = _safe[2];
     global.checkpoint_room = room;
 
-    // Слот 0 зарезервований для автозбереження.
+    // Slot 0 is reserved for autosave.
     autosave_game();
 
     // audio_play_sound(snd_checkpoint, 1, false);

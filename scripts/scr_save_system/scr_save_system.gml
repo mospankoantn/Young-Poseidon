@@ -1089,20 +1089,52 @@ function apply_pending_load_to_player()
         global.checkpoint_y = _p.y;
     }
 
-    _p.trident_instance = instance_find(obj_trident, 0);
-    if (!instance_exists(_p.trident_instance))
-        _p.trident_instance = instance_create_layer(_p.x + 32, _p.y, "Instances", obj_trident);
-
-    if (instance_exists(_p.trident_instance))
+    // Rebuild the two throwable weapons independently after load.
+    // A save never resumes a mid-flight/stuck projectile; both unlocked items
+    // safely return to the player's hand.
+    if (variable_instance_exists(_p, "throwable_instances"))
     {
-        _p.trident_instance.x = _p.x + 32;
-        _p.trident_instance.y = _p.y;
-        _p.trident_instance.hspd = 0;
-        _p.trident_instance.vspd = 0;
-        _p.trident_instance.thrown = false;
-        _p.trident_instance.stuck = false;
-        _p.trident_instance.timer = 0;
-        _p.trident_instance.image_angle = 0;
+        _p.throwable_instances[0] = noone;
+        _p.throwable_instances[1] = noone;
+
+        var _throw_count = instance_number(obj_trident);
+        for (var _ti = _throw_count - 1; _ti >= 0; _ti--)
+        {
+            var _old_throwable = instance_find(obj_trident, _ti);
+            if (instance_exists(_old_throwable)) instance_destroy(_old_throwable);
+        }
+
+        var _platform_count = instance_number(obj_trident_platform);
+        for (var _pi = _platform_count - 1; _pi >= 0; _pi--)
+        {
+            var _old_platform = instance_find(obj_trident_platform, _pi);
+            if (instance_exists(_old_platform)) instance_destroy(_old_platform);
+        }
+
+        for (var _wi = 0; _wi < 2; _wi++)
+        {
+            if (_p.weapon_unlocked[_wi])
+            {
+                var _throwable = _p._find_throwable(_wi, true);
+                if (instance_exists(_throwable))
+                {
+                    _throwable.x = _p.x;
+                    _throwable.y = _p.y;
+                    _throwable.thrown = false;
+                    _throwable.stuck = false;
+                    _throwable.timer = 0;
+                    _throwable.image_angle = 0;
+                    _throwable.platform_instance = noone;
+                    _throwable.damage = _p.weapon_atk[_wi];
+                    _throwable.visual_weapon = _wi;
+                }
+            }
+        }
+
+        if (_p.current_weapon >= 0 && _p.current_weapon <= 1)
+            _p.trident_instance = _p._find_throwable(_p.current_weapon, false);
+        else
+            _p.trident_instance = noone;
     }
 
     global.load_pending = false;

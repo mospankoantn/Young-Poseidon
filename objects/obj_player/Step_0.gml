@@ -52,7 +52,13 @@ for (var _ki = 0; _ki < 6; _ki++)
     if (keyboard_check_pressed(ord(string(_ki + 1))))
     {
         if (weapon_unlocked[_ki])
+        {
             current_weapon = _ki;
+            if (current_weapon <= 1)
+                trident_instance = _find_throwable(current_weapon, false);
+            else
+                trident_instance = noone;
+        }
     }
 }
 
@@ -157,58 +163,53 @@ if (place_meeting(x, y + vspd, obj_platform))
 y += vspd;
 
 // ════════════════════════════════════════
-// БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДія)
+// БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДІЯ)
 // ════════════════════════════════════════
 var _can_throw = (current_weapon == 0 || current_weapon == 1);
 
-if (_can_throw && instance_exists(trident_instance))
+if (_can_throw)
 {
-    var _t = trident_instance;
+    // Тризубець і спис більше не ділять один екземпляр.
+    var _t = _find_throwable(current_weapon, true);
+    trident_instance = _t; // compatibility alias for UI/legacy helpers
 
-    // E — кинути зброю
-    if (_e_pressed)
+    if (instance_exists(_t))
     {
-        if (_t.stuck)
+        // E — кинути поточно вибрану метальну зброю.
+        if (_e_pressed)
         {
-            // Знімаємо зі стіни і кидаємо знову
+            // Якщо саме ЦЯ зброя була платформою у стіні, знімаємо лише її.
+            if (_t.stuck)
+            {
+                _destroy_throwable_platform(_t);
+                _t.stuck = false;
+            }
+
+            if (!_t.thrown && !_t.stuck)
+            {
+                if (audio_exists(snd_swing)) audio_play_sound(snd_swing, 1, false);
+
+                _t.thrown = true;
+                _t.timer = 0;
+                _t.x = x + image_xscale * 24;
+                _t.y = bbox_top + (bbox_bottom - bbox_top) * 0.5;
+                _t.image_angle = 0;
+                _t.invisible_time = false;
+                _t.image_xscale = image_xscale;
+                _t.visual_weapon = current_weapon;
+                _t.damage = weapon_atk[current_weapon];
+                _t.owner_player = id;
+                _play_weapon_action("cast");
+            }
+        }
+
+        // F повертає тільки поточно вибраний тризубець/спис.
+        // Другий метальний предмет може залишатися встромленим у стіну.
+        if (_f_pressed && (_t.stuck || _t.thrown))
+        {
+            _destroy_throwable_platform(_t);
             _t.stuck = false;
-            var _n   = instance_number(obj_trident_platform);
-            for (var _i = _n - 1; _i >= 0; _i--)
-            {
-                var _pl = instance_find(obj_trident_platform, _i);
-                if (instance_exists(_pl)) instance_destroy(_pl);
-            }
-        }
-        if (!_t.thrown && !_t.stuck)
-        {
-			audio_play_sound(snd_swing, 1, false);
-            _t.thrown       = true;
-            _t.timer        = 0;
-            _t.x            = x + image_xscale * 24;
-            // The player origin is at the feet; launch from chest/hand height.
-            _t.y            = bbox_top + (bbox_bottom - bbox_top) * 0.5;
-            _t.image_angle  = 0;
-            _t.invisible_time = false;
-            _t.image_xscale = image_xscale;
-            _t.visual_weapon = current_weapon;
-            _t.damage        = weapon_atk[current_weapon];
-            _play_weapon_action("cast");
-        }
-    }
-
-    // Повернення використовує перепризначувану дію F. Цифри 1-6 тільки вибирають слот.
-    if (_f_pressed)
-    {
-        if (_t.stuck || _t.thrown)
-        {
-            var _n = instance_number(obj_trident_platform);
-            for (var _i = _n - 1; _i >= 0; _i--)
-            {
-                var _pl = instance_find(obj_trident_platform, _i);
-                if (instance_exists(_pl)) instance_destroy(_pl);
-            }
-            _t.stuck       = false;
-            _t.thrown      = false;
+            _t.thrown = false;
             _t.image_angle = 0;
             _play_weapon_action("recall");
         }

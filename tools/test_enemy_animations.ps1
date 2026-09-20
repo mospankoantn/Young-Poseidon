@@ -3,6 +3,7 @@ param(
     [string]$UserDir=(Join-Path $env:APPDATA 'GameMakerStudio2-LTS2026/unknownUser_unknownUserID')
 )
 $ErrorActionPreference='Stop'
+& (Join-Path $PSScriptRoot 'validate_enemy_sheets.ps1')
 $root=Split-Path $PSScriptRoot -Parent
 $temp=Join-Path ([IO.Path]::GetTempPath()) ('yp-enemy-test-'+[guid]::NewGuid().ToString('N'))
 $projectDir=Join-Path $temp 'project'

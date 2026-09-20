@@ -21,6 +21,13 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "d1a3965e-47d3-4bb1-8076-165080953b51",
+      "name": "d1a3965e-47d3-4bb1-8076-165080953b51",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "f90ef445-6605-40dd-bd95-2fe8268b54f1",
       "name": "f90ef445-6605-40dd-bd95-2fe8268b54f1",
       "resourceType": "GMSpriteFrame",
@@ -28,8 +35,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "ca5285d9-64fa-4332-a408-6d903da3b99f",
+      "name": "ca5285d9-64fa-4332-a408-6d903da3b99f",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "909f4bb2-c6f7-4632-a992-b975897809e4",
       "name": "909f4bb2-c6f7-4632-a992-b975897809e4",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "2d83859a-651b-4541-ac74-4f256351ad7b",
+      "name": "2d83859a-651b-4541-ac74-4f256351ad7b",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     },
@@ -87,7 +108,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 4.0,
+    "length": 7.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -97,7 +118,7 @@
     },
     "name": "spr_player_sword_attack",
     "playback": 1,
-    "playbackSpeed": 14.0,
+    "playbackSpeed": 24.5,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -129,9 +150,31 @@
                 }
               },
               "Disabled": false,
-              "id": "f4943e24-7505-4f90-b605-8b7e03eba753",
+              "id": "46be42dd-a949-4466-a9d1-d2c2edbf00ff",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "d1a3965e-47d3-4bb1-8076-165080953b51",
+                    "path": "sprites/spr_player_sword_attack/spr_player_sword_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "0f705f50-c027-4560-94d6-6e743c1de4f4",
+              "IsCreationKey": false,
+              "Key": 1.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -151,9 +194,31 @@
                 }
               },
               "Disabled": false,
-              "id": "08c57e2e-20e0-4583-a462-12a0ba869bf2",
+              "id": "07c6b788-8be8-4234-98ec-e1a7bd01d5ec",
               "IsCreationKey": false,
-              "Key": 1.0,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "ca5285d9-64fa-4332-a408-6d903da3b99f",
+                    "path": "sprites/spr_player_sword_attack/spr_player_sword_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "7ac0da9f-3652-4bb3-a5a5-7796e7be7ced",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -173,9 +238,31 @@
                 }
               },
               "Disabled": false,
-              "id": "31362174-bab0-4de8-82a5-edc2a6c0f5d5",
+              "id": "31d07520-65c9-49c6-b9c6-3794aa2d46d0",
               "IsCreationKey": false,
-              "Key": 2.0,
+              "Key": 4.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "2d83859a-651b-4541-ac74-4f256351ad7b",
+                    "path": "sprites/spr_player_sword_attack/spr_player_sword_attack.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "80b06fca-bb2d-4ede-b1e1-64f178dabb0e",
+              "IsCreationKey": false,
+              "Key": 5.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -195,9 +282,9 @@
                 }
               },
               "Disabled": false,
-              "id": "aa7e1369-aca0-498e-a1d2-f37cc47bcd3d",
+              "id": "c202e4c3-9081-4e92-800a-2db83c419869",
               "IsCreationKey": false,
-              "Key": 3.0,
+              "Key": 6.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

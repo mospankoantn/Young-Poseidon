@@ -31,7 +31,7 @@ foreach($state in @('idle','run','jump','land','attack','hurt','death')) {
     if($yy.resourceType -ne 'GMSprite' -or $yy.'$GMSprite' -ne 'v2') {throw "Wrong sprite schema: $name"}
     if($yy.width -ne 128 -or $yy.height -ne 96 -or $yy.sequence.xorigin -ne 64 -or $yy.sequence.yorigin -ne 88) {throw "Misaligned sprite: $name"}
     $seq=$yy.sequence
-    if($state -eq 'run' -and $yy.frames.Count -ne 8) {throw 'Reimport revised run/death sheet after the base sheet'}
+    if($state -eq 'run' -and $yy.frames.Count -ne 16) {throw 'Run animation should contain 16 smoothed frames'}
     if($state -eq 'death' -and $yy.frames.Count -ne 4) {throw 'Death must have four frames'}
     if($seq.resourceType -ne 'GMSequence' -or $seq.resourceVersion -ne '2.0' -or $seq.playbackSpeedType -ne 0 -or $seq.playbackSpeed -le 0) {throw "Invalid sequence: $name"}
     $keys=$seq.tracks[0].keyframes.Keyframes

@@ -6,8 +6,19 @@ $cursorPath=Join-Path $root 'sprites/spr_cursor_poseidon/spr_cursor_poseidon.yy'
 if(!(Test-Path -LiteralPath $cursorPath)) {throw 'Missing custom cursor sprite'}
 $cursor=Get-Content -LiteralPath $cursorPath -Raw | ConvertFrom-Json -Depth 100
 if($cursor.width -ne 24 -or $cursor.height -ne 24 -or $cursor.sequence.xorigin -ne 0 -or $cursor.sequence.yorigin -ne 0) {throw 'Custom cursor size/origin mismatch'}
+
+$cursorFrame=$cursor.frames[0].name
+$cursorLayer=$cursor.layers[0].name
+if(!(Test-Path -LiteralPath (Join-Path $root "sprites/spr_cursor_poseidon/layers/$cursorFrame/$cursorLayer.png"))) {throw 'Custom cursor layer PNG missing'}
+
 $winOptions=Get-Content -LiteralPath (Join-Path $root 'options/windows/options_windows.yy') -Raw | ConvertFrom-Json -Depth 100
 if($winOptions.option_windows_display_cursor -ne $false) {throw 'Native Windows cursor is still enabled'}
+
+$iconPath=Join-Path $root 'options/windows/icons/icon.ico'
+if(!(Test-Path -LiteralPath $iconPath) -or (Get-Item -LiteralPath $iconPath).Length -lt 1024) {throw 'Custom Windows game icon missing'}
+$templateIcon=Join-Path $root 'options/main/template_icon.png'
+if(!(Test-Path -LiteralPath $templateIcon) -or (Get-Item -LiteralPath $templateIcon).Length -lt 1024) {throw 'Template icon preview missing'}
+
 $menuScript=Get-Content -LiteralPath (Join-Path $root 'scripts/scr_menu_system/scr_menu_system.gml') -Raw
 if($menuScript -notmatch 'function yp_draw_cursor\(\)' -or $menuScript -notmatch 'spr_cursor_poseidon') {throw 'Shared custom cursor draw helper missing'}
 $mainMenuDraw=Get-Content -LiteralPath (Join-Path $root 'objects/obj_main_menu/Draw_64.gml') -Raw

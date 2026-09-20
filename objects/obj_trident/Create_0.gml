@@ -1,18 +1,20 @@
 /// @description
 /// obj_trident Create Event
+/// Shared projectile object used by BOTH throwable weapons. visual_weapon:
+/// 0 = trident, 1 = spear. Each weapon owns a separate instance.
 
-// ---- ХАРАКТЕРИСТИКИ ----
-damage           = 1;               // Резервне значення; при кидку береться weapon_atk активного тризубця/списа
-fly_speed        = 12;              // Швидкість польоту (НЕ "speed" — вбудована змінна!)
-flight_duration  = room_speed * 2;  // Максимальний час польоту (2 секунди)
- 
-// ---- СТАН ----
-thrown        = false;   // Зараз летить?
-stuck         = false;   // Застряг у стіні?
-invisible_time= false;   // Короткочасне ігнорування зіткнень після повернення
-timer         = 0;       // Лічильник кадрів польоту
- 
-// Вимикаємо вбудовану фізику GameMaker щоб не заважала нашому ручному руху
-friction    = 0;
-gravity     = 0;
+damage = 1;
+fly_speed = 12;
+flight_duration = room_speed * 2;
+
+thrown = false;
+stuck = false;
+invisible_time = false;
+timer = 0;
+
+friction = 0;
+gravity = 0;
+
 visual_weapon = 0;
+owner_player = noone;
+platform_instance = noone;

@@ -21,8 +21,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "488316dc-b5a5-44e3-997e-ef26564e57d9",
+      "name": "488316dc-b5a5-44e3-997e-ef26564e57d9",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "5fd09194-7433-4173-921c-294692124664",
       "name": "5fd09194-7433-4173-921c-294692124664",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "d0d5fff7-acaf-41dd-9a21-8f1a55c0f26a",
+      "name": "d0d5fff7-acaf-41dd-9a21-8f1a55c0f26a",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     },
@@ -35,8 +49,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "887d6c4d-6cc6-4f92-b1a6-8029f9e417ec",
+      "name": "887d6c4d-6cc6-4f92-b1a6-8029f9e417ec",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "83967b56-d4d2-43c3-8739-297623c71035",
       "name": "83967b56-d4d2-43c3-8739-297623c71035",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "e4954e11-a47b-42bd-81e0-0965f9e69da4",
+      "name": "e4954e11-a47b-42bd-81e0-0965f9e69da4",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     }
@@ -87,7 +115,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 4.0,
+    "length": 8.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -97,7 +125,7 @@
     },
     "name": "spr_player_pickaxe_run",
     "playback": 1,
-    "playbackSpeed": 12.0,
+    "playbackSpeed": 24.0,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -129,9 +157,31 @@
                 }
               },
               "Disabled": false,
-              "id": "a9d8b531-3f2a-43ec-a47c-267211730e0f",
+              "id": "f5464dd2-e6c3-4ca0-9f06-dbc93359a389",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "488316dc-b5a5-44e3-997e-ef26564e57d9",
+                    "path": "sprites/spr_player_pickaxe_run/spr_player_pickaxe_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "49048003-bf54-4952-a66a-891d24a02e65",
+              "IsCreationKey": false,
+              "Key": 1.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -151,9 +201,31 @@
                 }
               },
               "Disabled": false,
-              "id": "1777adb6-0ad1-4c51-9064-8114608e9ac3",
+              "id": "5a0c7aa3-c938-4117-85e0-da8f20a1a17f",
               "IsCreationKey": false,
-              "Key": 1.0,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "d0d5fff7-acaf-41dd-9a21-8f1a55c0f26a",
+                    "path": "sprites/spr_player_pickaxe_run/spr_player_pickaxe_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "063d41f5-890c-4378-b302-ce9fcf59d7ab",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -173,9 +245,31 @@
                 }
               },
               "Disabled": false,
-              "id": "b8c44f2e-772c-4e49-9682-8d9773da7dca",
+              "id": "810b7876-052e-4ca5-8b87-3ca9c555c195",
               "IsCreationKey": false,
-              "Key": 2.0,
+              "Key": 4.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "887d6c4d-6cc6-4f92-b1a6-8029f9e417ec",
+                    "path": "sprites/spr_player_pickaxe_run/spr_player_pickaxe_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "2dc26d6d-2519-44eb-8df5-adab6d7f3c4e",
+              "IsCreationKey": false,
+              "Key": 5.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -195,9 +289,31 @@
                 }
               },
               "Disabled": false,
-              "id": "7d48802f-7a20-42da-bc51-5ad63fc204b2",
+              "id": "8e451922-69a2-47be-8a16-abf6aa885ff5",
               "IsCreationKey": false,
-              "Key": 3.0,
+              "Key": 6.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "e4954e11-a47b-42bd-81e0-0965f9e69da4",
+                    "path": "sprites/spr_player_pickaxe_run/spr_player_pickaxe_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "21f976c2-fe72-453e-9d4d-9a290e5d1f27",
+              "IsCreationKey": false,
+              "Key": 7.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

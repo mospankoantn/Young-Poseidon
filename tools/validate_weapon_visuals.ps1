@@ -57,4 +57,46 @@ foreach($item in $manifest){
     $obj=Read-Json "objects/obj_pickup_$($item.weapon)_reward/obj_pickup_$($item.weapon)_reward.yy"
     if($obj.spriteId.name -ne "spr_weapon_$($item.weapon)" -or $obj.spriteMaskId.name -ne 'spr_weapon_collision'){throw 'Reward mapping'}
 }
+
+# Gameplay animation density / armed-jump contract.
+foreach($weapon in @('trident','spear','pickaxe','scythe','oar','sword')) {
+    $expected=@{
+        idle=4
+        run=8
+        pickup=5
+        attack=7
+    }
+    foreach($kind in $expected.Keys) {
+        $spriteName="spr_player_${weapon}_${kind}"
+        $yy=Read-Json "sprites/$spriteName/$spriteName.yy"
+        if($yy.frames.Count -lt $expected[$kind]) {throw "Too few frames: $spriteName"}
+    }
+}
+foreach($spriteName in @(
+    'spr_player_trident_cast','spr_player_spear_cast',
+    'spr_player_pickaxe_special','spr_player_scythe_special',
+    'spr_player_oar_special','spr_player_sword_special'
+)) {
+    $yy=Read-Json "sprites/$spriteName/$spriteName.yy"
+    if($yy.frames.Count -lt 5) {throw "Too few frames: $spriteName"}
+}
+$playerDraw=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_player/Draw_0.gml') -Raw
+if($playerDraw -notmatch 'sprite_index == spr_player_jump' -or $playerDraw -notmatch 'weapon_sprites\[current_weapon\]') {
+    throw 'Armed jump overlay is missing'
+}
+$playerCreate=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_player/Create_0.gml') -Raw
+if($playerCreate -notmatch 'throwable_instances = \[noone, noone\]' -or $playerCreate -notmatch '_find_throwable') {
+    throw 'Independent trident/spear instances are missing'
+}
+$tridentPlatform=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_trident_platform/Step_0.gml') -Raw
+if($tridentPlatform -notmatch 'source_throwable') {throw 'Throwable platform ownership is missing'}
+
+
+$tridentStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_trident/Step_0.gml') -Raw
+$tridentDraw=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_trident/Draw_0.gml') -Raw
+$playerStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_player/Step_0.gml') -Raw
+if($tridentStep -notmatch 'repeat \(_steps\)' -or $tridentStep -notmatch 'place_meeting\(x \+ _step_x, y, obj_platform\)') {throw 'Pixel-step wall contact is missing'}
+if($tridentDraw -notmatch 'stuck && visual_weapon == 0' -or $tridentDraw -notmatch '_draw_x') {throw 'Trident stuck visual offset is missing'}
+if($playerStep -notmatch '_find_throwable\(current_weapon, true\)' -or $playerStep -notmatch '_destroy_throwable_platform\(_t\)') {throw 'Independent throwable selection/recall is missing'}
+
 Write-Output "PASS: six source sheets, $($selected.Count) sprites, $total frames; formats, registrations, object references, tracks, layers, transparency and frame borders."

@@ -21,8 +21,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "230e3651-683f-4d2d-8bf7-b0351576c2aa",
+      "name": "230e3651-683f-4d2d-8bf7-b0351576c2aa",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "be092be0-7df4-4055-a3ec-a064dca06c75",
       "name": "be092be0-7df4-4055-a3ec-a064dca06c75",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "5de0ad81-868f-4c55-a96e-ea84a8a24936",
+      "name": "5de0ad81-868f-4c55-a96e-ea84a8a24936",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     },
@@ -80,7 +94,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 3.0,
+    "length": 5.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -90,7 +104,7 @@
     },
     "name": "spr_player_trident_cast",
     "playback": 1,
-    "playbackSpeed": 12.0,
+    "playbackSpeed": 20.0,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -122,9 +136,31 @@
                 }
               },
               "Disabled": false,
-              "id": "3c1f3a16-e53e-4979-b52b-437e8b567385",
+              "id": "85cf3f8c-ab52-448f-abdf-cc5354db1a17",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "230e3651-683f-4d2d-8bf7-b0351576c2aa",
+                    "path": "sprites/spr_player_trident_cast/spr_player_trident_cast.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "800c12ff-a6d9-4399-a9a5-582a4dcd5990",
+              "IsCreationKey": false,
+              "Key": 1.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -144,9 +180,31 @@
                 }
               },
               "Disabled": false,
-              "id": "8da8a39d-1a79-4aab-8990-f160842ede86",
+              "id": "e8c7373b-88aa-4c44-bc34-690b1086ea78",
               "IsCreationKey": false,
-              "Key": 1.0,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "5de0ad81-868f-4c55-a96e-ea84a8a24936",
+                    "path": "sprites/spr_player_trident_cast/spr_player_trident_cast.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "f60f00b6-7d16-4914-8975-051473a99bff",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -166,9 +224,9 @@
                 }
               },
               "Disabled": false,
-              "id": "0b2645c4-f28c-4bd9-86e7-f905b4da0ab5",
+              "id": "17cfd111-2c5b-4523-ba70-69d853c6b6e1",
               "IsCreationKey": false,
-              "Key": 2.0,
+              "Key": 4.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

@@ -37,21 +37,14 @@ The importer is specific to the reviewed 1254x1254 source, not an arbitrary
 grid slicer. It preserves existing frame identifiers where possible,
 writes composite and layer PNGs, and updates sequence metadata.
 The overlapping attack illustration is omitted: five attack frames and
-six frames for idle/jump/land/hurt. The second importer replaces run with
-eight frames and death with four: 41 active frames total.
+six frames for idle/jump/land/hurt. The second importer originally replaced run with eight frames and death with four. The current package further smooths the base run to 16 frames while keeping the same overall run-cycle duration; death remains four frames.
 
-All active frames are 128x96 with origin (64,88). Idle is 8 FPS, run 12,
-landing 20, attack/hurt 18, death 6. Jump is selected by vertical velocity rather
+All active base frames are 128x96 with origin (64,88). Idle is 8 FPS; the current 16-frame run uses 24 FPS to preserve roughly the previous cycle duration; landing 20, attack/hurt 18, death 6. Jump is selected by vertical velocity rather
 than looping. Other imported poses are not connected to gameplay.
 
 Validation covers YY/YYP parsing, resource links and versions, sprite
 sequences, frame alpha, origins and End Step event registration.
-The final project also passed GameMaker runtime-2026.0.0.23 Windows VM
-compilation (successful load/link). The isolated GameMaker Runner test
-checks every death frame, non-looping playback, input lock, facing, mask,
-same-room and cross-room respawn, and game_restart without a checkpoint.
-It copies the project to a fresh temporary directory and never edits
-production rooms or saves.
+An earlier project state passed GameMaker runtime-2026.0.0.23 Windows VM compilation and the isolated Runner death test. The current package contains later animation/weapon changes and has only been statically validated in this environment; rerun the supplied PowerShell/Runner tests locally before treating runtime behaviour as confirmed. The test copies the project to a fresh temporary directory and never edits production rooms or saves.
 
 ## Revised run and death artwork
 

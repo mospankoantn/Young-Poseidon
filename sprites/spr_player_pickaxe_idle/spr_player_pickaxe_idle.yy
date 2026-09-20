@@ -18,6 +18,27 @@
       "name": "c0e8745e-541e-41c8-9b84-04b9ed973e9a",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "ce840e1a-9f7b-4c89-b39f-67bf803855e3",
+      "name": "ce840e1a-9f7b-4c89-b39f-67bf803855e3",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "6279fa4a-eb82-4739-97da-935176c9224a",
+      "name": "6279fa4a-eb82-4739-97da-935176c9224a",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "51f99098-d6ff-487b-b1f4-0278e2bf25ca",
+      "name": "51f99098-d6ff-487b-b1f4-0278e2bf25ca",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
     }
   ],
   "gridX": 0,
@@ -66,7 +87,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 1.0,
+    "length": 4.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -108,9 +129,75 @@
                 }
               },
               "Disabled": false,
-              "id": "3f044095-82bf-4f08-9af8-73187bfd60bc",
+              "id": "701e0ce1-f68b-4f11-8853-5f0b012d93bc",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "ce840e1a-9f7b-4c89-b39f-67bf803855e3",
+                    "path": "sprites/spr_player_pickaxe_idle/spr_player_pickaxe_idle.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "583a478b-876e-4c3c-a063-84a21aa24d5a",
+              "IsCreationKey": false,
+              "Key": 1.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "6279fa4a-eb82-4739-97da-935176c9224a",
+                    "path": "sprites/spr_player_pickaxe_idle/spr_player_pickaxe_idle.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "6689b848-1ee7-482e-9bdc-6a8a64b4748e",
+              "IsCreationKey": false,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "51f99098-d6ff-487b-b1f4-0278e2bf25ca",
+                    "path": "sprites/spr_player_pickaxe_idle/spr_player_pickaxe_idle.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "6abefca7-1e57-485b-9603-a90649acbd2c",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

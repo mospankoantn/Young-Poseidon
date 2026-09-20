@@ -1,6 +1,6 @@
 # Меню та налаштування Young Poseidon
 
-Оновлення: 19 вересня 2026 року.
+Оновлення: 20 вересня 2026 року.
 
 ## Реалізація
 
@@ -48,14 +48,15 @@ obj_ui_controller у Begin Step деактивує активні ігрові �
 - Step споживачів керування: obj_player, obj_comment_zone, obj_interactive_button, obj_mine_cart, obj_olympus_door, obj_raft, obj_room_exit, obj_stalactite, obj_stone_boulder, obj_thicket_platform, obj_weapon_selector.
 - Menu_bg: збережено наявні frame/layer GUID, замінено PNG і розміри 1536x1024. Нового дубля спрайта немає.
 - Young Poseidon.yyp і resource_order: два нових скрипти; obj_ui_controller.yy: реєстрація двох Events.
-- options/windows: назва Young Poseidon, автор Олег Табович.
+- options/windows: назва Young Poseidon, автор Олег Табович, вимкнений системний курсор і власна багаторозмірна Windows-іконка `options/windows/icons/icon.ico`; `options/main/template_icon.png` також оновлено.
+- `spr_cursor_poseidon`: власний 24×24 курсор; composite і layer PNG присутні, а спільний `yp_draw_cursor()` малює його поверх GUI.
 - README.md, FIXES_APPLIED.txt, Що треба зробити.md: лише актуалізація пунктів цього оновлення.
 - tools/import_menu_background.ps1, test_menu_settings.ps1, tests/menu_*: імпорт і перевірки.
 - Регресійний тест зброї: test_player_death.ps1 і tests/weapon_visuals_* подають сигнали атаки/повернення лише у тимчасовій копії замість нестабільної емуляції системної клавіатури. У робочому коді тестових гачків немає.
 
 ## Перевірка
 
-Runtime: GameMaker 2026.0.0.23, Windows VM. test_menu_settings.ps1 компілює ізольовану копію та запускає Runner двічі з власними абсолютними шляхами до INI; збереження користувача не змінюються.
+`test_menu_settings.ps1` розрахований на GameMaker 2026.0.0.23 Windows VM: він компілює ізольовану копію та запускає Runner двічі з власними абсолютними шляхами до INI; збереження користувача не змінюються. У поточному середовищі GameMaker Runner недоступний, тому після змін курсора/іконки цей тест потрібно повторити локально.
 
 Перевіряються відкриття екранів, призначення/конфлікти клавіш, відкат екрана, підтверджений розмір після зміни кімнати, заморожування позиції/HP/анімації, збереження й завантаження з паузи, повернення зі вкладених екранів, перезапуск процесу та некоректні INI. Створюються скриншоти UA/EN, віконного й повноекранного режимів; окрема перевірка пікселів відхиляє порожній фон.
 

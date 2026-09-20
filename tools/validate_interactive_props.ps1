@@ -52,5 +52,15 @@ foreach($prop in $props){
 }
 CheckNodes (ReadJ 'scripts/scr_interactive_props/scr_interactive_props.yy')
 foreach($o in Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'objects') -Filter '*.yy' -Recurse){CheckNodes (ReadJ ([IO.Path]::GetRelativePath($ProjectRoot,$o.FullName)))}
+
+
+# Checkpoint visual activation contract.
+$checkpointCreate=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_checkpoint/Create_0.gml') -Raw
+$checkpointStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_checkpoint/Step_0.gml') -Raw
+$checkpointDraw=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_checkpoint/Draw_0.gml') -Raw
+if($checkpointCreate -notmatch 'activation_fx_timer' -or $checkpointCreate -notmatch 'activation_fx_length') {throw 'Checkpoint activation FX state missing'}
+if($checkpointStep -notmatch 'activation_fx_timer = activation_fx_length' -or $checkpointStep -notmatch 'autosave_game\(\)') {throw 'Checkpoint activation/autosave contract missing'}
+if($checkpointDraw -notmatch 'bm_add' -or $checkpointDraw -notmatch 'is_activated \?' -or $checkpointDraw -notmatch 'activation_fx_timer > 0') {throw 'Checkpoint active/activation visual contract missing'}
+
 Write-Output "PASS: 13 interactive sprites, $frames transparent frames, layers, sequences, schema versions and all object references."
 

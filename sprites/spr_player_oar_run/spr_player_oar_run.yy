@@ -21,8 +21,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "911b0670-b363-4202-8844-a2c6e9a6f132",
+      "name": "911b0670-b363-4202-8844-a2c6e9a6f132",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "346094ca-5eaa-405d-b493-62382a67893d",
       "name": "346094ca-5eaa-405d-b493-62382a67893d",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "8b75d4e5-025f-4013-846b-f009b0aff785",
+      "name": "8b75d4e5-025f-4013-846b-f009b0aff785",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     },
@@ -35,8 +49,22 @@
     },
     {
       "$GMSpriteFrame": "v1",
+      "%Name": "354f37fb-f863-4700-8ab5-37e804e004bd",
+      "name": "354f37fb-f863-4700-8ab5-37e804e004bd",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
       "%Name": "bb61fc57-9b12-429a-bce8-4e02e59041bc",
       "name": "bb61fc57-9b12-429a-bce8-4e02e59041bc",
+      "resourceType": "GMSpriteFrame",
+      "resourceVersion": "2.0"
+    },
+    {
+      "$GMSpriteFrame": "v1",
+      "%Name": "8e240d90-921a-4a1d-8d27-1a09fb54b7a6",
+      "name": "8e240d90-921a-4a1d-8d27-1a09fb54b7a6",
       "resourceType": "GMSpriteFrame",
       "resourceVersion": "2.0"
     }
@@ -87,7 +115,7 @@
     },
     "eventStubScript": null,
     "eventToFunction": {},
-    "length": 4.0,
+    "length": 8.0,
     "lockOrigin": false,
     "moments": {
       "$KeyframeStore<MomentsEventKeyframe>": "",
@@ -97,7 +125,7 @@
     },
     "name": "spr_player_oar_run",
     "playback": 1,
-    "playbackSpeed": 12.0,
+    "playbackSpeed": 24.0,
     "playbackSpeedType": 0,
     "resourceType": "GMSequence",
     "resourceVersion": "2.0",
@@ -129,9 +157,31 @@
                 }
               },
               "Disabled": false,
-              "id": "4a307c69-b43f-4e40-97b3-26e106a6e108",
+              "id": "e022e0f4-41a7-4bd0-86ba-fef4c797fa13",
               "IsCreationKey": false,
               "Key": 0.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "911b0670-b363-4202-8844-a2c6e9a6f132",
+                    "path": "sprites/spr_player_oar_run/spr_player_oar_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "82aefd48-fdae-4cb0-b8f5-508148902890",
+              "IsCreationKey": false,
+              "Key": 1.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -151,9 +201,31 @@
                 }
               },
               "Disabled": false,
-              "id": "592122ac-58f3-4506-9d0e-02d46ebc15b0",
+              "id": "a870fafb-41c3-44ac-b74f-549af51cfb47",
               "IsCreationKey": false,
-              "Key": 1.0,
+              "Key": 2.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "8b75d4e5-025f-4013-846b-f009b0aff785",
+                    "path": "sprites/spr_player_oar_run/spr_player_oar_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "5ef414b6-a0bb-402c-ab18-1d3c88ee2316",
+              "IsCreationKey": false,
+              "Key": 3.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -173,9 +245,31 @@
                 }
               },
               "Disabled": false,
-              "id": "ab319251-75fc-4895-a656-b944527051f5",
+              "id": "5b09b7f8-7ca3-4025-9b12-5c229468eae0",
               "IsCreationKey": false,
-              "Key": 2.0,
+              "Key": 4.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "354f37fb-f863-4700-8ab5-37e804e004bd",
+                    "path": "sprites/spr_player_oar_run/spr_player_oar_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "4b5216ac-2f0b-4e69-a699-1ab59478d06a",
+              "IsCreationKey": false,
+              "Key": 5.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",
@@ -195,9 +289,31 @@
                 }
               },
               "Disabled": false,
-              "id": "08e7e65a-3d4b-474f-a840-7876ebf3149b",
+              "id": "b63fa0f6-dca0-4a1d-8318-0ef730496336",
               "IsCreationKey": false,
-              "Key": 3.0,
+              "Key": 6.0,
+              "Length": 1.0,
+              "resourceType": "Keyframe<SpriteFrameKeyframe>",
+              "resourceVersion": "2.0",
+              "Stretch": false
+            },
+            {
+              "$Keyframe<SpriteFrameKeyframe>": "",
+              "Channels": {
+                "0": {
+                  "$SpriteFrameKeyframe": "",
+                  "Id": {
+                    "name": "8e240d90-921a-4a1d-8d27-1a09fb54b7a6",
+                    "path": "sprites/spr_player_oar_run/spr_player_oar_run.yy"
+                  },
+                  "resourceType": "SpriteFrameKeyframe",
+                  "resourceVersion": "2.0"
+                }
+              },
+              "Disabled": false,
+              "id": "ac2dd7ad-b543-4630-975e-b8984d559e1c",
+              "IsCreationKey": false,
+              "Key": 7.0,
               "Length": 1.0,
               "resourceType": "Keyframe<SpriteFrameKeyframe>",
               "resourceVersion": "2.0",

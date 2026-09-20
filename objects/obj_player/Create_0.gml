@@ -189,7 +189,60 @@ weapon_unlocked = [false, false, false, false, false, false];
 current_weapon = -1;  // -1 = немає зброї
 
 // ════ ТРИЗУБЕЦЬ / СПИС ════
+// Кожна метальна зброя має ВЛАСНИЙ obj_trident-екземпляр.
+// Це дозволяє одночасно встромити у стіну і тризубець, і спис.
+throwable_instances = [noone, noone];
+// Сумісність зі старим кодом: alias на поточно вибраний метальний екземпляр.
 trident_instance = noone;
+
+_find_throwable = function(_weapon_index, _create_if_missing = false)
+{
+    if (_weapon_index < 0 || _weapon_index > 1) return noone;
+
+    var _inst = throwable_instances[_weapon_index];
+    if (instance_exists(_inst) && _inst.visual_weapon == _weapon_index)
+        return _inst;
+
+    _inst = noone;
+    var _count = instance_number(obj_trident);
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _candidate = instance_find(obj_trident, _i);
+        if (instance_exists(_candidate)
+            && variable_instance_exists(_candidate, "visual_weapon")
+            && _candidate.visual_weapon == _weapon_index)
+        {
+            _inst = _candidate;
+            break;
+        }
+    }
+
+    if (!instance_exists(_inst) && _create_if_missing)
+    {
+        _inst = instance_create_layer(x, y, "Instances", obj_trident);
+        _inst.visual_weapon = _weapon_index;
+        _inst.damage = weapon_atk[_weapon_index];
+        _inst.owner_player = id;
+        _inst.image_xscale = image_xscale;
+    }
+
+    throwable_instances[_weapon_index] = _inst;
+    if (current_weapon == _weapon_index)
+        trident_instance = _inst;
+
+    return _inst;
+};
+
+_destroy_throwable_platform = function(_throwable)
+{
+    if (!instance_exists(_throwable)) return;
+    if (variable_instance_exists(_throwable, "platform_instance")
+        && instance_exists(_throwable.platform_instance))
+    {
+        instance_destroy(_throwable.platform_instance);
+    }
+    _throwable.platform_instance = noone;
+};
 
 // ════ КЛЮЧ ОЛІМПУ ════
 has_olympus_key = false;
@@ -207,11 +260,15 @@ weapon_animations = [
 _weapon_in_hand = function()
 {
     if (current_weapon < 0 || current_weapon >= array_length(weapon_animations)) return false;
-    if (current_weapon <= 1 && instance_exists(trident_instance))
+
+    if (current_weapon <= 1)
     {
-        var _t = trident_instance;
-        if (_t.thrown || _t.stuck || point_distance(x, y, _t.x, _t.y) >= 20) return false;
+        var _t = _find_throwable(current_weapon, false);
+        if (instance_exists(_t)
+            && (_t.thrown || _t.stuck || point_distance(x, y, _t.x, _t.y) >= 20))
+            return false;
     }
+
     return true;
 };
 
@@ -242,7 +299,13 @@ _unlock_weapon = function(_index)
         global.weapon_unlocked = array_create(array_length(weapon_unlocked), false);
     }
     global.weapon_unlocked[_index] = true;
-    current_weapon          = _index;
+    current_weapon = _index;
+
+    if (_index <= 1)
+        trident_instance = _find_throwable(_index, true);
+    else
+        trident_instance = noone;
+
     _play_weapon_action("pickup");
 };
 
@@ -256,6 +319,11 @@ _switch_weapon = function(_delta)
         _next = (_next + _delta + _n) mod _n;
         if (weapon_unlocked[_next]) { current_weapon = _next; break; }
     }
+
+    if (current_weapon >= 0 && current_weapon <= 1)
+        trident_instance = _find_throwable(current_weapon, false);
+    else
+        trident_instance = noone;
 };
 
 _reset_player_animation();

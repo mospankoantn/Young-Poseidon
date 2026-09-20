@@ -1,97 +1,114 @@
-/// @description 
-/// obj_trident Step Event
+/// @description Independent trident/spear projectile behaviour.
 
-// Якщо гравця немає — нічого не робимо
 if (!instance_exists(obj_player)) exit;
- 
+
+var _player = instance_find(obj_player, 0);
+owner_player = _player;
+
 // ============================================================
-// СТАН 1: ЗАСТРЯГ У СТІНІ
-// Тризубець нерухомий, чекає команди повернення
+// STUCK IN WALL
 // ============================================================
 if (stuck)
 {
-    // Нічого не рухаємо, просто чекаємо
+    // Re-create only this weapon's invisible standing platform if an external
+    // room operation removed it while the projectile is still stuck.
+    if (!instance_exists(platform_instance))
+    {
+        platform_instance = instance_create_layer(x, y, "Instances", obj_trident_platform);
+        platform_instance.source_throwable = id;
+        platform_instance.image_xscale = image_xscale;
+    }
     exit;
 }
- 
+
 // ============================================================
-// СТАН 2: ЛЕТИТЬ
+// FLYING
 // ============================================================
 if (thrown && !invisible_time)
 {
-    var _fly_dir = (image_xscale > 0) ? 0 : 180;
- 
-    // Рухаємо тризубець
-    x += lengthdir_x(fly_speed, _fly_dir);
-    y += lengthdir_y(fly_speed, _fly_dir);
- 
-    // Обертання для візуального ефекту
-    // Flip the collision mask once; Draw handles the visual rotation separately.
-    image_angle = 0;
- 
-    timer++;
- 
-    // --- Зіткнення зі стіною ---
-    if (place_meeting(x, y, obj_platform))
+    var _step_x = (image_xscale > 0) ? 1 : -1;
+    var _steps = max(1, round(fly_speed));
+    var _hit_wall = false;
+
+    // Move pixel-by-pixel. The old code jumped a full 12 px and then moved the
+    // projectile a full 12 px back, leaving the shorter trident visibly
+    // floating away from the wall.
+    repeat (_steps)
     {
-        // Відступаємо назад щоб не провалитись у стіну
-        x -= lengthdir_x(fly_speed, _fly_dir);
-        y -= lengthdir_y(fly_speed, _fly_dir);
- 
-        stuck  = true;
+        if (place_meeting(x + _step_x, y, obj_platform))
+        {
+            _hit_wall = true;
+            break;
+        }
+        x += _step_x;
+    }
+
+    image_angle = 0;
+    timer++;
+
+    if (_hit_wall)
+    {
+        stuck = true;
         thrown = false;
-        timer  = 0;
- 
-        // Створюємо платформу на місці застрягання
-        var _plat        = instance_create_layer(x, y, "Instances", obj_trident_platform);
-        _plat.image_xscale = image_xscale;
+        timer = 0;
+
+        if (instance_exists(platform_instance))
+            instance_destroy(platform_instance);
+
+        platform_instance = instance_create_layer(x, y, "Instances", obj_trident_platform);
+        platform_instance.source_throwable = id;
+        platform_instance.image_xscale = image_xscale;
         exit;
     }
- 
-    // --- Зіткнення з ворогом ---
+
+    // Enemy hit.
     var _hit = instance_place(x, y, obj_enemy);
     if (instance_exists(_hit))
     {
-        with (_hit)
-        {
-            hp -= (other.damage + obj_player.temp_atk_buff);
-        }
+        var _bonus = variable_instance_exists(_player, "temp_atk_buff")
+            ? _player.temp_atk_buff : 0;
+        if (variable_instance_exists(_hit, "hp"))
+            _hit.hp -= damage + _bonus;
+
         thrown = false;
-        timer  = 0;
-        // Після влучання тризубець повертається до гравця
+        timer = 0;
     }
- 
-    // --- Вихід за межі кімнати або час вийшов ---
+
     var _out = (x < -100 || x > room_width + 100
                 || y < -100 || y > room_height + 100);
     if (_out || timer >= flight_duration)
     {
         thrown = false;
-        timer  = 0;
+        timer = 0;
     }
- 
+
     exit;
 }
- 
+
 // ============================================================
-// СТАН 3: ПОВЕРНЕННЯ ДО ГРАВЦЯ
-// (thrown=false, stuck=false)
+// RETURNING / HELD
 // ============================================================
-var _dist = point_distance(x, y, obj_player.x, obj_player.y);
- 
+var _dist = point_distance(x, y, _player.x, _player.y);
+
 if (_dist > fly_speed)
 {
-    // Летимо до гравця
-    var _dir  = point_direction(x, y, obj_player.x, obj_player.y);
-    x        += lengthdir_x(fly_speed, _dir);
-    y        += lengthdir_y(fly_speed, _dir);
+    var _dir = point_direction(x, y, _player.x, _player.y);
+    x += lengthdir_x(fly_speed, _dir);
+    y += lengthdir_y(fly_speed, _dir);
     image_angle = _dir;
 }
 else
 {
-    // Прийшли до гравця — "беремо в руки"
-    x = obj_player.x;
-    y = obj_player.y;
-    image_angle           = 0;
-    obj_player.trident_instance = self;
+    x = _player.x;
+    y = _player.y;
+    image_angle = 0;
+
+    if (variable_instance_exists(_player, "throwable_instances")
+        && visual_weapon >= 0 && visual_weapon <= 1)
+    {
+        _player.throwable_instances[visual_weapon] = id;
+    }
+
+    if (_player.current_weapon == visual_weapon)
+        _player.trident_instance = id;
 }

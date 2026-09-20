@@ -88,9 +88,26 @@ if($resourceMap[$crabMaskName] -ne $crabMaskPath -or $orderMap[$crabMaskName] -n
 $crabMask=Get-Content -LiteralPath (Join-Path $ProjectRoot $crabMaskPath) -Raw | ConvertFrom-Json -Depth 100
 if($crabMask.width -ne 96 -or $crabMask.height -ne 96 -or $crabMask.sequence.xorigin -ne 48 -or $crabMask.sequence.yorigin -ne 90) {throw 'Crab mask dimensions/origin mismatch'}
 if($crabMask.bbox_left -ne 12 -or $crabMask.bbox_right -ne 84 -or $crabMask.bbox_top -ne 48 -or $crabMask.bbox_bottom -ne 90) {throw 'Crab hitbox bounds mismatch'}
+
+$crabMaskFrame=$crabMask.frames[0].name
+$crabMaskLayer=$crabMask.layers[0].name
+$crabMaskDir=Join-Path $ProjectRoot 'sprites/spr_giant_crab_mask'
+if(!(Test-Path -LiteralPath (Join-Path $crabMaskDir ($crabMaskFrame+'.png'))) -or
+   !(Test-Path -LiteralPath (Join-Path $crabMaskDir ("layers/"+$crabMaskFrame+"/"+$crabMaskLayer+".png")))) {
+    throw 'Crab mask frame/layer PNG missing'
+}
+
 $crabStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_giant_crab/Step_0.gml') -Raw
 if($crabStep -notmatch 'place_meeting\(_next_x, y - 2, obj_platform\)' -or $crabStep -notmatch 'x = _next_x') {throw 'Crab patrol wall probe can regress into floor jitter'}
 if($resourceMap['scr_enemy_animation'] -ne 'scripts/scr_enemy_animation/scr_enemy_animation.yy') {throw 'Animation script not registered'}
 if($totalFrames -ne 224) {throw "Unexpected total: $totalFrames"}
-Write-Output "PASS: 14 unique source sheets map to 14 objects and 56 sprites."
+
+# Nymph arrow direction/damage contract.
+$nymphStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_boss_nymph/Step_0.gml') -Raw
+$arrowCreate=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_arrow/Create_0.gml') -Raw
+$arrowStep=Get-Content -LiteralPath (Join-Path $ProjectRoot 'objects/obj_arrow/Step_0.gml') -Raw
+if($arrowCreate -notmatch 'direction_y\s*=\s*0') {throw 'obj_arrow direction_y default missing'}
+if($nymphStep -notmatch '_arr\.direction_x\s*=\s*0' -or $nymphStep -notmatch '_arr\.direction_y\s*=\s*1' -or $nymphStep -notmatch '_arr\.damage\s*=\s*atk') {throw 'Nymph arrow direction/damage contract missing'}
+if($arrowStep -notmatch 'point_distance\(0, 0, _dx, _dy\)' -or $arrowStep -notmatch '_p\.hp\s*-=\s*damage') {throw 'obj_arrow 2D movement or player damage missing'}
+
 Write-Output "PASS: 224 transparent frames, YY/YYP links, sequence tracks, collision masks and End Step events."
