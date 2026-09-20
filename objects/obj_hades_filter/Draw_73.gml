@@ -4,99 +4,101 @@ var _vx = camera_get_view_x(view_camera[0]);
 var _vy = camera_get_view_y(view_camera[0]);
 var _vw = camera_get_view_width(view_camera[0]);
 var _vh = camera_get_view_height(view_camera[0]);
- 
-fog_offset    += fog_speed;
-shadow_offset += 0.007;
-pulse_offset  += 0.02;
- 
-// ── 1. БАЗОВИЙ КОЛІР АЇДА ──
-// Темно-фіолетово-зелений — колір смерті і болота
-for (var _si = 0; _si < 16; _si++)
+var _dt = clamp(delta_time * 0.000001, 0, 0.05);
+fx_time += _dt;
+
+// 1. Холодний градієнт глибини.
+for (var _s = 0; _s < 10; _s++)
 {
-    var _t  = _si / 15.0;
-    var _t2 = _t * _t;
-    var _r  = lerp(5,   15,  _t2);
-    var _g  = lerp(20,  35,  _t2);
-    var _b  = lerp(25,  15,  _t2);
-    var _a  = lerp(0.05, 0.45, _t2);
+    var _t = _s / 9.0;
+    var _a = lerp(0.045, 0.22, _t * _t);
     draw_set_alpha(_a);
-    draw_set_color(make_color_rgb(_r, _g, _b));
-    draw_rectangle(_vx, _vy + _si * (_vh/16.0),
-                   _vx + _vw, _vy + (_si+1)*(_vh/16.0), false);
+    draw_set_color(make_color_rgb(lerp(25, 12, _t), lerp(18, 45, _t), lerp(45, 25, _t)));
+    draw_rectangle(_vx, _vy + _s * (_vh / 10.0), _vx + _vw, _vy + (_s + 1) * (_vh / 10.0), false);
 }
-draw_set_alpha(1);
- 
-// ── 2. ЗЕЛЕНИЙ ТУМАН БІЛЯ ЗЕМЛІ ──
-var _fog_base = _vy + _vh * 0.65;
-for (var _fi = 0; _fi < 12; _fi++)
+
+// 2. Болотно-зелений туман біля землі — широкі хвилі з різною фазою.
+var _fog_y = _vy + _vh * 0.67;
+for (var _f = 0; _f < 8; _f++)
 {
-    var _ft     = _fi / 11.0;
-    var _fshift = sin(fog_offset + _fi * 0.6) * 15;
-    var _fa     = (0.08 + sin(fog_offset * 0.7 + _fi) * 0.03) * (1 - _ft * 0.6);
- 
+    var _cy = _fog_y + _f * (_vh * 0.035) + sin(fx_time * 0.32 + _f * 0.75) * 8;
+    var _fa = 0.030 + 0.028 * (1 - _f / 8.0);
     draw_set_alpha(_fa);
-    draw_set_color(make_color_rgb(20, 80, 40));
-    draw_rectangle(_vx, _fog_base + _fi * 8 + _fshift,
-                   _vx + _vw, _fog_base + (_fi+1) * 8 + _fshift + 12, false);
+    draw_set_color(make_color_rgb(35, 95, 58));
+    draw_ellipse(_vx - 50, _cy - 20, _vx + _vw + 50, _cy + 24, false);
 }
-draw_set_alpha(1);
- 
-// ── 3. ФІОЛЕТОВИЙ ТУМАН ВГОРІ ──
-for (var _fi = 0; _fi < 8; _fi++)
+
+// 3. Фіолетовий серпанок угорі.
+for (var _f2 = 0; _f2 < 5; _f2++)
 {
-    var _ft  = _fi / 7.0;
-    var _fa  = 0.06 * (1 - _ft) * (0.7 + sin(fog_offset * 1.3 + _fi) * 0.3);
-    draw_set_alpha(_fa);
-    draw_set_color(make_color_rgb(60, 10, 80));
-    draw_rectangle(_vx, _vy + _fi * (_vh * 0.05),
-                   _vx + _vw, _vy + (_fi+1) * (_vh * 0.05), false);
+    var _a2 = 0.022 * (1 - _f2 / 5.0) * (0.75 + 0.25 * sin(fx_time * 0.4 + _f2));
+    draw_set_alpha(_a2);
+    draw_set_color(make_color_rgb(80, 25, 105));
+    draw_rectangle(_vx, _vy + _f2 * _vh * 0.055, _vx + _vw, _vy + (_f2 + 1) * _vh * 0.070, false);
 }
-draw_set_alpha(1);
- 
-// ── 4. ВОГНИКИ МЕРТВИХ ──
-for (var _wi = 0; _wi < wisp_count; _wi++)
+
+// 4. Блуждаючі вогні. Additive blend робить їх схожими на справжнє світіння.
+gpu_set_blendmode(bm_add);
+for (var _w = 0; _w < wisp_count; _w++)
 {
-    wisp_x[@ _wi]     += wisp_spd[_wi] * sin(wisp_phase[_wi] * 0.3) * 0.5;
-    wisp_y[@ _wi]     += wisp_spd[_wi] * cos(wisp_phase[_wi] * 0.4) * 0.3;
-    wisp_phase[@ _wi] += 0.03;
- 
-    if (wisp_x[_wi] < 0)    wisp_x[@ _wi] = _vw;
-    if (wisp_x[_wi] > _vw)  wisp_x[@ _wi] = 0;
-    if (wisp_y[_wi] < 0)    wisp_y[@ _wi] = _vh;
-    if (wisp_y[_wi] > _vh)  wisp_y[@ _wi] = 0;
- 
-    var _wa = 0.3 + sin(wisp_phase[_wi] * 2.1) * 0.15;
- 
-    // Зовнішнє сяяння
-    draw_set_alpha(_wa * 0.12);
-    draw_set_color(make_color_rgb(80, 255, 120));
-    draw_circle(_vx + wisp_x[_wi], _vy + wisp_y[_wi], 18, false);
- 
-    // Ядро вогника
-    draw_set_alpha(_wa * 0.6);
-    draw_set_color(make_color_rgb(160, 255, 180));
-    draw_circle(_vx + wisp_x[_wi], _vy + wisp_y[_wi], 4, false);
+    wisp_phase[@ _w] += _dt * (0.9 + _w * 0.025);
+    wisp_x[@ _w] += sin(wisp_phase[_w] * 0.7) * wisp_spd[_w] * _dt;
+    wisp_y[@ _w] -= (wisp_spd[_w] * 0.38) * _dt;
+    if (wisp_y[_w] < -0.04)
+    {
+        wisp_y[@ _w] = 1.04;
+        wisp_x[@ _w] = random(1);
+    }
+    if (wisp_x[_w] < -0.04) wisp_x[@ _w] = 1.04;
+    if (wisp_x[_w] > 1.04)  wisp_x[@ _w] = -0.04;
+
+    var _wx = _vx + wisp_x[_w] * _vw;
+    var _wy = _vy + wisp_y[_w] * _vh;
+    var _pulse = 0.55 + 0.45 * sin(wisp_phase[_w] * 2.1);
+    draw_set_alpha(0.035 + 0.055 * _pulse);
+    draw_set_color(make_color_rgb(80, 255, 145));
+    draw_circle(_wx, _wy, 12 + wisp_size[_w] * 2.2, false);
+    draw_set_alpha(0.24 + 0.22 * _pulse);
+    draw_set_color(make_color_rgb(175, 255, 200));
+    draw_circle(_wx, _wy, wisp_size[_w], false);
 }
-draw_set_alpha(1);
- 
-// ── 5. ПУЛЬСАЦІЯ ТЕМРЯВИ ──
-// Аїд "дихає" — темрява то наступає то відступає
-var _pulse_a = 0.08 + sin(pulse_offset) * 0.04;
-draw_set_alpha(_pulse_a);
-draw_set_color(make_color_rgb(0, 0, 10));
+
+// 5. Маленькі частинки душ підіймаються повільніше за вогники.
+for (var _q = 0; _q < soul_count; _q++)
+{
+    soul_phase[@ _q] += _dt * 0.8;
+    soul_y[@ _q] -= soul_spd[_q] * _dt;
+    if (soul_y[_q] < -0.02)
+    {
+        soul_y[@ _q] = 1.02;
+        soul_x[@ _q] = random(1);
+    }
+    var _qx = _vx + (soul_x[_q] + sin(soul_phase[_q]) * 0.010) * _vw;
+    var _qy = _vy + soul_y[_q] * _vh;
+    draw_set_alpha(0.04 + 0.07 * max(0, sin(soul_phase[_q] * 1.7)));
+    draw_set_color(make_color_rgb(110, 190, 135));
+    draw_circle(_qx, _qy, 1.0, false);
+}
+gpu_set_blendmode(bm_normal);
+
+// 6. Аїд "дихає": м'яка, повільна пульсація темряви.
+var _breath = 0.035 + 0.018 * sin(fx_time * 0.72);
+draw_set_alpha(_breath);
+draw_set_color(make_color_rgb(2, 2, 12));
 draw_rectangle(_vx, _vy, _vx + _vw, _vy + _vh, false);
-draw_set_alpha(1);
- 
-// ── 6. КУТИ ──
-for (var _ci = 0; _ci < 10; _ci++)
+
+// 7. Глибока віньєтка, сильніша знизу.
+for (var _v = 0; _v < 8; _v++)
 {
-    var _cp = 1 - _ci / 10.0;
-    var _cw = 80 * _cp;
-    draw_set_alpha(0.02 * _cp * _cp);
-    draw_set_color(make_color_rgb(0, 5, 0));
-    draw_rectangle(_vx,             _vy, _vx + _cw,     _vy + _vh, false);
-    draw_rectangle(_vx + _vw - _cw, _vy, _vx + _vw,     _vy + _vh, false);
-    draw_rectangle(_vx, _vy + _vh - _cw, _vx + _vw, _vy + _vh,    false);
+    var _p = 1 - _v / 8.0;
+    var _w2 = 78 * _p;
+    draw_set_alpha(0.020 * _p * _p);
+    draw_set_color(make_color_rgb(0, 7, 4));
+    draw_rectangle(_vx, _vy, _vx + _w2, _vy + _vh, false);
+    draw_rectangle(_vx + _vw - _w2, _vy, _vx + _vw, _vy + _vh, false);
+    draw_rectangle(_vx, _vy + _vh - _w2, _vx + _vw, _vy + _vh, false);
 }
+
+gpu_set_blendmode(bm_normal);
 draw_set_alpha(1);
 draw_set_color(c_white);

@@ -4,111 +4,87 @@ var _vx = camera_get_view_x(view_camera[0]);
 var _vy = camera_get_view_y(view_camera[0]);
 var _vw = camera_get_view_width(view_camera[0]);
 var _vh = camera_get_view_height(view_camera[0]);
- 
-sun_offset += sun_speed;
- 
-// ── 1. ТЕПЛЕ ЗОЛОТЕ ПОВІТРЯ ──
-// Греція = яскрава і тепла, майже без тіней
-for (var _si = 0; _si < 10; _si++)
+var _dt = clamp(delta_time * 0.000001, 0, 0.05);
+fx_time += _dt;
+
+// 1. Чисте золоте повітря — тепле знизу, майже прозоре вгорі.
+for (var _s = 0; _s < 8; _s++)
 {
-    var _t  = _si / 9.0;
-    // Верх холодніший (небо), низ теплий (земля нагріта)
-    var _r  = lerp(0,  40,  _t * _t);
-    var _g  = lerp(0,  15,  _t * _t);
-    var _b  = lerp(0,  0,   _t);
-    var _a  = lerp(0.0, 0.1, _t * _t);
-    draw_set_alpha(_a);
-    draw_set_color(make_color_rgb(_r, _g, _b));
-    draw_rectangle(_vx, _vy + _si * (_vh/10.0),
-                   _vx + _vw, _vy + (_si+1)*(_vh/10.0), false);
+    var _t = _s / 7.0;
+    draw_set_alpha(0.008 + 0.052 * _t * _t);
+    draw_set_color(make_color_rgb(255, 225, 155));
+    draw_rectangle(_vx, _vy + _s * (_vh / 8.0), _vx + _vw, _vy + (_s + 1) * (_vh / 8.0), false);
 }
-draw_set_alpha(1);
- 
-// ── 2. СОНЯЧНІ ПРОМЕНІ (від кута) ──
-var _sun_x = _vx + _vw * 0.75;
-var _sun_y = _vy - 50;
- 
-for (var _ri = 0; _ri < 6; _ri++)
+
+// 2. Сонячні промені з верхнього правого кута.
+gpu_set_blendmode(bm_add);
+var _sx = _vx + _vw * 0.82;
+var _sy = _vy - 12;
+for (var _r = 0; _r < 5; _r++)
 {
-    var _angle  = -60 + _ri * 30;
-    var _rlen   = _vh * 1.5;
-    var _rw_top = 20 + _ri * 8;
-    var _rw_bot = 80 + _ri * 40;
-    var _ra     = (0.03 + sin(sun_offset * 0.8 + _ri) * 0.012)
-                  * (1 - abs(_ri - 2.5) * 0.15);
- 
-    var _end_x  = _sun_x + lengthdir_x(_rlen, _angle + 90);
-    var _end_y  = _sun_y + lengthdir_y(_rlen, _angle + 90);
- 
-    draw_set_alpha(max(0, _ra));
-    draw_set_color(make_color_rgb(255, 240, 180));
-    draw_triangle(
-        _sun_x - _rw_top, _sun_y,
-        _sun_x + _rw_top, _sun_y,
-        _end_x  + _rw_bot, _end_y,
-        false
-    );
-    draw_triangle(
-        _sun_x - _rw_top, _sun_y,
-        _end_x  - _rw_bot, _end_y,
-        _end_x  + _rw_bot, _end_y,
-        false
-    );
+    var _bx = _vx + _vw * (0.10 + _r * 0.20) + sin(fx_time * 0.18 + _r) * 22;
+    draw_set_alpha(0.018 + 0.006 * sin(fx_time * 0.5 + _r));
+    draw_set_color(make_color_rgb(255, 238, 180));
+    draw_triangle(_sx - 7, _sy, _sx + 7, _sy, _bx + _vw * 0.10, _vy + _vh, false);
+    draw_triangle(_sx - 7, _sy, _bx - _vw * 0.10, _vy + _vh, _bx + _vw * 0.10, _vy + _vh, false);
 }
-draw_set_alpha(1);
- 
-// ── 3. ТІНІ ВІД ХМАР ──
-for (var _ci = 0; _ci < cloud_count; _ci++)
+gpu_set_blendmode(bm_normal);
+
+// 3. Повільні хмарні тіні. Нормалізовані координати не залежать від розміру вікна.
+for (var _c = 0; _c < cloud_count; _c++)
 {
-    cloud_x[@ _ci] += cloud_spd[_ci];
-    if (cloud_x[_ci] > _vw + cloud_w[_ci])
-        cloud_x[@ _ci] = -cloud_w[_ci];
- 
-    var _shadow_y  = _vy;
-    var _shadow_h  = _vh;
-    var _cx        = _vx + cloud_x[_ci];
- 
-    draw_set_alpha(cloud_alpha[_ci]);
-    draw_set_color(make_color_rgb(30, 40, 60));
-    // М'яка тінь через кілька смуг
-    for (var _csi = 0; _csi < 5; _csi++)
+    cloud_x[@ _c] += cloud_spd[_c] * _dt;
+    if (cloud_x[_c] > 1.25) cloud_x[@ _c] = -cloud_w[_c] - 0.10;
+    var _cx = _vx + cloud_x[_c] * _vw;
+    var _cw = cloud_w[_c] * _vw;
+    for (var _l = 0; _l < 3; _l++)
     {
-        var _csf = 1 - _csi / 5.0;
-        draw_set_alpha(cloud_alpha[_ci] * _csf);
-        draw_rectangle(_cx - _csi * 15, _shadow_y,
-                       _cx + cloud_w[_ci] + _csi * 15, _shadow_y + _shadow_h, false);
+        var _expand = _l * 18;
+        draw_set_alpha(cloud_alpha[_c] * (1 - _l * 0.28));
+        draw_set_color(make_color_rgb(45, 55, 65));
+        draw_rectangle(_cx - _expand, _vy, _cx + _cw + _expand, _vy + _vh, false);
     }
 }
-draw_set_alpha(1);
- 
-// ── 4. ЛИСТЯ НА ВІТРІ ──
-for (var _li = 0; _li < leaf_count; _li++)
+
+// 4. Оливкове листя у теплому вітрі.
+for (var _i = 0; _i < leaf_count; _i++)
 {
-    leaf_x[@ _li]     += leaf_spd[_li];
-    leaf_y[@ _li]     += sin(leaf_phase[_li]) * 0.4;
-    leaf_phase[@ _li] += 0.04;
- 
-    if (leaf_x[_li] > _vw + 10)
+    leaf_x[@ _i] += leaf_spd[_i] * _dt;
+    leaf_phase[@ _i] += _dt * 2.2;
+    leaf_y[@ _i] += sin(leaf_phase[_i]) * _dt * 0.010;
+    if (leaf_x[_i] > 1.03)
     {
-        leaf_x[@ _li] = -10;
-        leaf_y[@ _li] = random(_vh);
+        leaf_x[@ _i] = -0.03;
+        leaf_y[@ _i] = random(1);
     }
- 
-    var _la = 0.2 + sin(leaf_phase[_li] * 1.5) * 0.08;
-    draw_set_alpha(_la);
-    draw_set_color(make_color_rgb(80, 140, 50));
-    // Маленький ромб = листочок
-    var _lx = _vx + leaf_x[_li];
-    var _ly = _vy + leaf_y[_li];
-    draw_triangle(_lx, _ly - 4, _lx - 3, _ly, _lx, _ly + 4, false);
-    draw_triangle(_lx, _ly - 4, _lx + 3, _ly, _lx, _ly + 4, false);
+    var _lx = _vx + leaf_x[_i] * _vw;
+    var _ly = _vy + leaf_y[_i] * _vh;
+    var _sz = leaf_size[_i];
+    draw_set_alpha(0.11 + 0.07 * (0.5 + 0.5 * sin(leaf_phase[_i])));
+    draw_set_color(make_color_rgb(85, 135, 55));
+    draw_triangle(_lx, _ly - _sz, _lx - _sz * 0.65, _ly, _lx, _ly + _sz, false);
+    draw_triangle(_lx, _ly - _sz, _lx + _sz * 0.65, _ly, _lx, _ly + _sz, false);
 }
-draw_set_alpha(1);
- 
-// ── 5. БЛИСК МАРМУРУ (спалахи на білих поверхнях) ──
-var _glow_a = 0.04 + sin(sun_offset * 2.1) * 0.015;
-draw_set_alpha(_glow_a);
+
+// 5. Золотий пилок — дуже дрібний, додає життя без шуму.
+gpu_set_blendmode(bm_add);
+for (var _p = 0; _p < pollen_count; _p++)
+{
+    pollen_phase[@ _p] += _dt * (0.45 + 0.02 * _p);
+    var _px = _vx + (pollen_x[_p] + sin(pollen_phase[_p]) * 0.006) * _vw;
+    var _py = _vy + (pollen_y[_p] + cos(pollen_phase[_p] * 0.8) * 0.008) * _vh;
+    var _pa = 0.04 + 0.08 * max(0, sin(pollen_phase[_p] * 1.3));
+    draw_set_alpha(_pa);
+    draw_set_color(make_color_rgb(255, 230, 145));
+    draw_circle(_px, _py, 1.0, false);
+}
+gpu_set_blendmode(bm_normal);
+
+// 6. Ледь помітний сонячний блиск мармуру.
+draw_set_alpha(0.018 + 0.010 * sin(fx_time * 0.65));
 draw_set_color(make_color_rgb(255, 250, 230));
 draw_rectangle(_vx, _vy, _vx + _vw, _vy + _vh, false);
+
+gpu_set_blendmode(bm_normal);
 draw_set_alpha(1);
 draw_set_color(c_white);

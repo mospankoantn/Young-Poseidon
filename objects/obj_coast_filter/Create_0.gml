@@ -1,30 +1,31 @@
 /// obj_coast_filter — Create Event
+/// Узбережжя: тепле повітря, морський серпанок, сіль і сонячні відблиски.
 
-// Хвилі тепла (марево)
-heat_offset  = 0;
-heat_speed   = 0.012;
-heat_count   = 8;
- 
-// Туман на горизонті
-fog_alpha    = 0;
-fog_target   = 0.18;
- 
-// Пил
-dust_count = 20;
-dust_x     = array_create(dust_count);
-dust_y     = array_create(dust_count);
-dust_spd   = array_create(dust_count);
-dust_phase = array_create(dust_count);
-dust_size  = array_create(dust_count);
- 
-for (var _i = 0; _i < dust_count; _i++)
+fx_time = 0;
+
+mote_count = 28;
+mote_x     = array_create(mote_count);
+mote_y     = array_create(mote_count);
+mote_spd   = array_create(mote_count);
+mote_phase = array_create(mote_count);
+mote_size  = array_create(mote_count);
+for (var _i = 0; _i < mote_count; _i++)
 {
-    dust_x[_i]     = random(1920);
-    dust_y[_i]     = random(1080);
-    dust_spd[_i]   = random_range(0.3, 1.2);
-    dust_phase[_i] = random(pi * 2);
-    dust_size[_i]  = random_range(1, 3);
+    mote_x[_i]     = random(1);
+    mote_y[_i]     = random(1);
+    mote_spd[_i]   = random_range(0.018, 0.055);
+    mote_phase[_i] = random(pi * 2);
+    mote_size[_i]  = random_range(0.7, 1.8);
 }
- 
-// Сонячний відблиск
-sun_pulse = 0;
+
+// Короткі блиски солі/водяного пилу.
+glint_count = 8;
+glint_x     = array_create(glint_count);
+glint_y     = array_create(glint_count);
+glint_phase = array_create(glint_count);
+for (var _g = 0; _g < glint_count; _g++)
+{
+    glint_x[_g]     = random(1);
+    glint_y[_g]     = random_range(0.10, 0.70);
+    glint_phase[_g] = random(pi * 2);
+}
