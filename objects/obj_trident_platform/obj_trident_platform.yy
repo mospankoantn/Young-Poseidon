@@ -12,8 +12,8 @@
     "path":"folders/Объекты/Weapon.yy",
   },
   "parentObjectId":{
-    "name":"obj_platform",
-    "path":"objects/obj_platform/obj_platform.yy",
+    "name":"obj_thin_platform",
+    "path":"objects/obj_thin_platform/obj_thin_platform.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,

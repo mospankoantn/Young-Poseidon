@@ -92,75 +92,180 @@ if (_move > 0) { l_right = true;  image_xscale =  1; }
 if (_move < 0) { l_right = false; image_xscale = -1; }
 
 // ════════════════════════════════════════
-// БЛОК 4: ГРАВІТАЦІЯ
+// БЛОК 4-5: ГРАВІТАЦІЯ ТА ПЛАТФОРМИ
 // ════════════════════════════════════════
-vspd += grv;
-if (vspd > 20) vspd = 20;
+// Гравітацію НЕ додаємо до того, як визначили опору. Інакше персонаж,
+// що стоїть на платформі, кожен кадр отримує +0.8 vspd, трохи занурюється,
+// а наступного кадру знову "приземляється". Саме це викликало циклічне
+// jump/land на thin-платформах і нестабільний ground-state на solid.
 
-// ════════════════════════════════════════
-// БЛОК 5: ЗІТКНЕННЯ З ПЛАТФОРМАМИ
-// ════════════════════════════════════════
-var _on_ground = place_meeting(x, y + 1, obj_platform);
-
-// --- S: Проскочити крізь тонку платформу ---
-// (лише якщо платформа є obj_thin_platform — нащадок obj_platform)
-if (_drop && place_meeting(x, y + 1, obj_thin_platform) && vspd >= 0)
-{
-    drop_timer = 20;   // ігноруємо тонку 20 кадрів (~0.3 сек)
-}
 if (drop_timer > 0) drop_timer--;
 
+// --- Опора до горизонтального руху ---
+var _on_solid = false;
+var _on_thin  = false;
 
-// Горизонталь
-var _total_hspd = _move_hspd + hspd;
-if (place_meeting(x + _total_hspd, y, obj_platform))
+// Опора може існувати лише коли герой не летить угору.
+if (vspd >= 0)
 {
-    while (!place_meeting(x + sign(_total_hspd), y, obj_platform))
-        x += sign(_total_hspd);
-    _total_hspd = 0;
-    hspd        = 0;
+    var _solid_support_y = _find_platform_support_y(false);
+    if (!is_undefined(_solid_support_y))
+    {
+        y = _solid_support_y;
+        vspd = 0;
+        _on_solid = true;
+    }
+    else if (drop_timer <= 0)
+    {
+        var _thin_support_y = _find_platform_support_y(true);
+        if (!is_undefined(_thin_support_y))
+        {
+            y = _thin_support_y;
+            vspd = 0;
+            _on_thin = true;
+        }
+    }
 }
-x += _total_hspd;
+
+var _on_ground = _on_solid || _on_thin;
+
+// --- S: проскочити крізь thin ---
+// Solid має безумовний пріоритет. На стику thin+solid drop-through не
+// запускається, тому герой не може зануритися в сусідню тверду геометрію.
+if (_drop && _on_thin && !_on_solid)
+{
+    drop_timer = 20;
+    _on_thin = false;
+    _on_ground = false;
+}
+
+// --- Горизонталь ---
+// Thin-платформи навмисно не беруть участі в горизонтальній колізії:
+// герой може зайти/застрибнути на них збоку.
+var _total_hspd = _move_hspd + hspd;
+
+if (_total_hspd != 0)
+{
+    var _h_steps = max(1, ceil(abs(_total_hspd)));
+    var _h_step  = _total_hspd / _h_steps;
+    var _h_blocked = false;
+
+    repeat (_h_steps)
+    {
+        if (_meets_solid_platform(x + _h_step, y))
+        {
+            _h_blocked = true;
+            break;
+        }
+
+        x += _h_step;
+    }
+
+    if (_h_blocked) hspd = 0;
+}
 
 hspd *= 0.75;
 if (abs(hspd) < 0.5) hspd = 0;
 
-// Стрибок
-if (_on_ground && _jump)
+// Після горизонтального руху перевіряємо опору ще раз. Це не залишає
+// "фантомної землі" на один кадр, коли герой щойно зійшов із краю.
+if (vspd >= 0 && drop_timer <= 0)
 {
-    vspd = -12;
-    if (audio_exists(snd_jump)) audio_play_sound(snd_jump, 1, false);
-}
+    _on_solid = false;
+    _on_thin = false;
 
-// Вертикаль
-if (place_meeting(x, y + vspd, obj_platform))
-{
-    var _only_thin = place_meeting(x, y + vspd, obj_thin_platform);
-
-    // Ігноруємо тонку платформу якщо:
-    // 1. Летимо ВГОРУ (стрибок)
-    // 2. Провалюємося (drop_timer > 0)
-    // 3. Вже знаходимося всередині неї (застрягли)
-    var _ignore_thin = (vspd < 0)
-                       || (drop_timer > 0)
-                       || place_meeting(x, y, obj_thin_platform);
-
-    // Якщо на шляху ТІЛЬКИ тонка і ми її ігноруємо — проходимо крізь
-    if (_only_thin && _ignore_thin)
+    var _solid_support_after_x = _find_platform_support_y(false);
+    if (!is_undefined(_solid_support_after_x))
     {
-        // Нічого не робимо
+        y = _solid_support_after_x;
+        vspd = 0;
+        _on_solid = true;
     }
     else
     {
-        while (!place_meeting(x, y + sign(vspd), obj_platform)
-               || (_ignore_thin && place_meeting(x, y + sign(vspd), obj_thin_platform)))
+        var _thin_support_after_x = _find_platform_support_y(true);
+        if (!is_undefined(_thin_support_after_x))
         {
-            y += sign(vspd);
+            y = _thin_support_after_x;
+            vspd = 0;
+            _on_thin = true;
         }
-        vspd = 0;
+    }
+
+    _on_ground = _on_solid || _on_thin;
+}
+else if (drop_timer > 0)
+{
+    // Під час drop-through thin не може знову привласнити ground-state.
+    _on_thin = false;
+    _on_ground = _on_solid;
+}
+
+// --- Стрибок ---
+var _jumped_this_step = false;
+if (_on_ground && _jump)
+{
+    vspd = -12;
+    _jumped_this_step = true;
+    _on_ground = false;
+    _on_solid = false;
+    _on_thin = false;
+
+    if (audio_exists(snd_jump)) audio_play_sound(snd_jump, 1, false);
+}
+
+// Стоячи на опорі, герой залишається з vspd=0. Гравітація починається
+// тільки у повітрі. На кадрі самого стрибка не віднімаємо 0.8 від імпульсу,
+// щоб зберегти попередню висоту стрибка (-12).
+if (!_on_ground && !_jumped_this_step)
+{
+    vspd += grv;
+    if (vspd > 20) vspd = 20;
+}
+else if (_on_ground)
+{
+    vspd = 0;
+}
+
+// --- Вертикаль ---
+// Рух дробиться на кроки <= 1 px. Solid перевіряється першим, а thin
+// використовує swept-перетин верхньої грані, тому падіння з великої висоти
+// не може тунелювати крізь тонку платформу.
+var _vertical_move = vspd;
+
+if (_vertical_move != 0)
+{
+    var _v_steps = max(1, ceil(abs(_vertical_move)));
+    var _v_step  = _vertical_move / _v_steps;
+
+    repeat (_v_steps)
+    {
+        var _next_y = y + _v_step;
+
+        // Тверда геометрія має пріоритет навіть під час drop-through.
+        if (_meets_solid_platform(x, _next_y))
+        {
+            vspd = 0;
+            break;
+        }
+
+        // One-way collision тільки при падінні зверху і тільки коли S-drop
+        // не активний.
+        if (_v_step > 0 && drop_timer <= 0)
+        {
+            var _landing_y = _thin_landing_y(_next_y);
+            if (!is_undefined(_landing_y))
+            {
+                y = _landing_y;
+                vspd = 0;
+                break;
+            }
+        }
+
+        // Вгору, збоку або під час drop-through thin повністю прозора.
+        y = _next_y;
     }
 }
-y += vspd;
 
 // ════════════════════════════════════════
 // БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДІЯ)

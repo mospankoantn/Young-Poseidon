@@ -8,8 +8,11 @@ if (anim_action_weapon >= 0 && anim_action_weapon != current_weapon)
     anim_action_weapon = -1;
 }
 
-var _ground_now = vspd == 0 && drop_timer <= 0
-    && place_meeting(x, y + 1, obj_platform);
+// drop_timer стосується лише one-way платформ. Якщо під час drop-through
+// герой приземлився на solid, він одразу має вважатися grounded.
+var _ground_now = vspd == 0
+    && (_is_standing_on_solid_platform()
+        || (drop_timer <= 0 && _is_standing_on_thin_platform()));
 var _hurt_now = hp < anim_last_hp || (is_damage && !anim_was_damage);
 
 if (_hurt_now && hp > 0)

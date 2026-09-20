@@ -167,37 +167,37 @@ function _room_route_exit(_target_room, _tag, _dir, _required_item)
 
     var _x = room_width - 40;
     var _y = room_height - 128;
-    var _w = 48;
-    var _h = 128;
+    var _w = 96;
+    var _h = 160;
 
     switch (_dir)
     {
         case "left":
             _x = 40;
             _y = room_height - 128;
-            _w = 48;
-            _h = 128;
+            _w = 96;
+            _h = 160;
             break;
 
         case "right":
             _x = room_width - 40;
             _y = room_height - 128;
-            _w = 48;
-            _h = 128;
+            _w = 96;
+            _h = 160;
             break;
 
         case "up":
             _x = room_width * 0.5;
             _y = 64;
-            _w = 128;
-            _h = 64;
+            _w = 160;
+            _h = 128;
             break;
 
         case "down":
             _x = room_width * 0.5;
             _y = room_height - 64;
-            _w = 128;
-            _h = 64;
+            _w = 160;
+            _h = 128;
             break;
     }
 
@@ -251,182 +251,180 @@ function room_route_exits_rebuild()
     switch (room)
     {
         case rm_sea_1:
-            _room_route_exit(rm_sea_2, "sea1_sea2", "right", "");
+            _room_route_exit(rm_sea_2, "sea_1__sea_2", "right", "");
             break;
 
         case rm_sea_2:
-            _room_route_exit(rm_sea_1, "sea1_sea2", "left", "");
-            _room_route_exit(rm_sea_3, "sea2_sea3", "right", "");
+            _room_route_exit(rm_sea_1, "sea_1__sea_2", "left", "");
+            _room_route_exit(rm_sea_3, "sea_2__to__sea_3", "up", "");
             break;
 
         case rm_sea_3:
-            _room_route_exit(rm_sea_2, "sea2_sea3", "left", "");
-            _room_route_exit(rm_sea_4, "sea3_sea4", "right", "trident");
+            _room_route_exit(rm_sea_4, "sea_3__sea_4", "down", "trident");
+            _room_route_exit(rm_sea_5, "sea_3__sea_5", "right", "trident");
             break;
 
         case rm_sea_4:
-            _room_route_exit(rm_sea_3, "sea3_sea4", "left", "");
-            _room_route_exit(rm_sea_5, "sea4_sea5", "right", "");
+            _room_route_exit(rm_sea_3, "sea_3__sea_4", "right", "");
             break;
 
         case rm_sea_5:
-            _room_route_exit(rm_sea_4, "sea4_sea5", "left", "");
-            _room_route_exit(rm_coast_1, "sea5_coast1", "right", "");
+            _room_route_exit(rm_sea_3, "sea_3__sea_5", "left", "");
+            _room_route_exit(rm_coast_1, "sea_5__to__coast_1", "right", "");
             break;
 
         case rm_coast_1:
-            _room_route_exit(rm_sea_5, "sea5_coast1", "left", "");
-            _room_route_exit(rm_coast_2, "coast1_coast2", "right", "");
+            _room_route_exit(rm_sea_3, "coast_1__to__sea_3", "left", "");
+            _room_route_exit(rm_coast_2, "coast_1__coast_2", "right", "");
             break;
 
         case rm_coast_2:
-            _room_route_exit(rm_coast_1, "coast1_coast2", "left", "");
-            _room_route_exit(rm_coast_3, "coast2_coast3", "right", "");
+            _room_route_exit(rm_coast_1, "coast_1__coast_2", "left", "");
+            _room_route_exit(rm_coast_3, "coast_2__coast_3", "up", "");
             break;
 
         case rm_coast_3:
-            _room_route_exit(rm_coast_2, "coast2_coast3", "left", "");
-            _room_route_exit(rm_coast_4, "coast3_coast4", "right", "");
+            _room_route_exit(rm_coast_2, "coast_2__coast_3", "down", "");
+            _room_route_exit(rm_coast_4, "coast_3__coast_4", "up", "");
             break;
 
         case rm_coast_4:
-            _room_route_exit(rm_coast_3, "coast3_coast4", "left", "");
-            _room_route_exit(rm_coast_5, "coast4_coast5", "right", "");
+            _room_route_exit(rm_coast_3, "coast_3__coast_4", "down", "");
+            _room_route_exit(rm_coast_5, "coast_4__coast_5", "up", "");
             break;
 
         case rm_coast_5:
-            _room_route_exit(rm_coast_4, "coast4_coast5", "left", "");
-            _room_route_exit(rm_mines_1, "coast5_mines1", "right", "spear");
+            _room_route_exit(rm_coast_4, "coast_4__coast_5", "down", "");
+            _room_route_exit(rm_mines_1, "coast_5__mines_1", "right", "spear");
             break;
 
         case rm_mines_1:
-            _room_route_exit(rm_coast_5, "coast5_mines1", "left", "");
-            _room_route_exit(rm_mines_2, "mines1_mines2", "right", "");
+            _room_route_exit(rm_coast_5, "coast_5__mines_1", "left", "");
+            _room_route_exit(rm_mines_2, "mines_1__mines_2", "right", "");
             break;
 
         case rm_mines_2:
-            _room_route_exit(rm_mines_1, "mines1_mines2", "left", "");
-            _room_route_exit(rm_mines_3, "mines2_mines3", "right", "");
+            _room_route_exit(rm_mines_1, "mines_1__mines_2", "left", "");
+            _room_route_exit(rm_mines_3, "mines_2__mines_3", "up", "");
+            _room_route_exit(rm_greece_1, "greece_1__mines_2", "right", "pickaxe");
             break;
 
         case rm_mines_3:
-            _room_route_exit(rm_mines_2, "mines2_mines3", "left", "");
-            _room_route_exit(rm_mines_4, "mines3_mines4", "right", "");
+            _room_route_exit(rm_mines_4, "mines_3__mines_4", "up", "");
+            _room_route_exit(rm_mines_2, "mines_2__mines_3", "down", "");
             break;
 
         case rm_mines_4:
-            _room_route_exit(rm_mines_3, "mines3_mines4", "left", "");
-            _room_route_exit(rm_mines_5, "mines4_mines5", "right", "pickaxe");
+            _room_route_exit(rm_mines_5, "mines_4__mines_5", "right", "pickaxe");
+            _room_route_exit(rm_mines_3, "mines_3__mines_4", "up", "");
             break;
 
         case rm_mines_5:
-            _room_route_exit(rm_mines_4, "mines4_mines5", "left", "");
-            _room_route_exit(rm_greece_1, "mines5_greece1", "right", "");
-            _room_route_exit_at(rm_hades_1, "mines5_hades1", "right", "", room_width * 0.5, room_height - 128, 96, 128);
+            _room_route_exit(rm_mines_4, "mines_4__mines_5", "left", "");
+            _room_route_exit(rm_hades_1, "hades_1__mines_5", "right", "");
             break;
 
         case rm_hades_1:
-            _room_route_exit(rm_mines_5, "mines5_hades1", "left", "");
-            _room_route_exit(rm_hades_2, "hades1_hades2", "right", "");
+            _room_route_exit(rm_mines_5, "hades_1__mines_5", "down", "");
+            _room_route_exit(rm_hades_2, "hades_1__to__hades_2", "left", "");
             break;
 
         case rm_hades_2:
-            _room_route_exit(rm_hades_1, "hades1_hades2", "left", "");
-            _room_route_exit(rm_hades_3, "hades2_hades3", "right", "");
+            _room_route_exit(rm_mines_1, "hades_2__to__mines_1", "down", "");
+            _room_route_exit(rm_hades_3, "hades_2__to__hades_3", "up", "");
             break;
 
         case rm_hades_3:
-            _room_route_exit(rm_hades_2, "hades2_hades3", "left", "");
-            _room_route_exit(rm_hades_4, "hades3_hades4", "right", "");
+            _room_route_exit(rm_mines_2, "hades_3__to__mines_2", "up", "");
+            _room_route_exit(rm_hades_4, "hades_3__to__hades_4", "left", "");
+            _room_route_exit(rm_hades_5, "hades_3__to__hades_5", "right", "");
             break;
 
         case rm_hades_4:
-            _room_route_exit(rm_hades_3, "hades3_hades4", "left", "");
-            _room_route_exit(rm_hades_5, "hades4_hades5", "right", "");
+            _room_route_exit(rm_mines_3, "hades_4__to__mines_3", "left", "");
             break;
 
         case rm_hades_5:
-            _room_route_exit(rm_hades_4, "hades4_hades5", "left", "");
+            _room_route_exit(rm_mines_3, "hades_5__to__mines_3", "left", "scythe");
             break;
 
         case rm_greece_1:
-            _room_route_exit(rm_mines_5, "mines5_greece1", "left", "");
-            _room_route_exit(rm_greece_2, "greece1_greece2", "right", "");
+            _room_route_exit(rm_mines_2, "greece_1__mines_2", "down", "");
+            _room_route_exit(rm_greece_2, "greece_1__greece_2", "up", "");
             break;
 
         case rm_greece_2:
-            _room_route_exit(rm_greece_1, "greece1_greece2", "left", "");
-            _room_route_exit(rm_greece_3, "greece2_greece3", "right", "");
+            _room_route_exit(rm_greece_1, "greece_1__greece_2", "down", "");
+            _room_route_exit(rm_greece_3, "greece_2__greece_3", "right", "");
             break;
 
         case rm_greece_3:
-            _room_route_exit(rm_greece_2, "greece2_greece3", "left", "");
-            _room_route_exit(rm_greece_4, "greece3_greece4", "right", "");
+            _room_route_exit(rm_greece_2, "greece_2__greece_3", "left", "");
+            _room_route_exit(rm_greece_4, "greece_3__greece_4", "up", "");
             break;
 
         case rm_greece_4:
-            _room_route_exit(rm_greece_3, "greece3_greece4", "left", "");
-            _room_route_exit(rm_greece_5, "greece4_greece5", "right", "");
+            _room_route_exit(rm_greece_3, "greece_3__greece_4", "down", "");
+            _room_route_exit(rm_greece_5, "greece_4__greece_5", "right", "oar");
             break;
 
         case rm_greece_5:
-            _room_route_exit(rm_greece_4, "greece4_greece5", "left", "");
-            _room_route_exit(rm_battlefield_1, "greece5_battlefield1", "right", "oar");
+            _room_route_exit(rm_battlefield_1, "battlefield_1__greece_5", "right", "oar");
+            _room_route_exit(rm_greece_4, "greece_4__greece_5", "up", "");
             break;
 
         case rm_battlefield_1:
-            _room_route_exit(rm_greece_5, "greece5_battlefield1", "left", "");
-            _room_route_exit(rm_battlefield_2, "battlefield1_battlefield2", "right", "");
+            _room_route_exit(rm_greece_5, "battlefield_1__greece_5", "down", "");
+            _room_route_exit(rm_battlefield_2, "battlefield_1__battlefield_2", "left", "");
             break;
 
         case rm_battlefield_2:
-            _room_route_exit(rm_battlefield_1, "battlefield1_battlefield2", "left", "");
-            _room_route_exit(rm_battlefield_3, "battlefield2_battlefield3", "right", "");
+            _room_route_exit(rm_battlefield_1, "battlefield_1__battlefield_2", "right", "");
+            _room_route_exit(rm_battlefield_3, "battlefield_2__battlefield_3", "up", "");
             break;
 
         case rm_battlefield_3:
-            _room_route_exit(rm_battlefield_2, "battlefield2_battlefield3", "left", "");
-            _room_route_exit(rm_battlefield_4, "battlefield3_battlefield4", "right", "");
+            _room_route_exit(rm_battlefield_2, "battlefield_2__battlefield_3", "down", "");
+            _room_route_exit(rm_battlefield_4, "battlefield_3__battlefield_4", "right", "");
             break;
 
         case rm_battlefield_4:
-            _room_route_exit(rm_battlefield_3, "battlefield3_battlefield4", "left", "");
-            _room_route_exit(rm_battlefield_5, "battlefield4_battlefield5", "right", "");
+            _room_route_exit(rm_battlefield_3, "battlefield_3__battlefield_4", "left", "");
+            _room_route_exit(rm_battlefield_5, "battlefield_4__battlefield_5", "right", "");
             break;
 
         case rm_battlefield_5:
-            _room_route_exit(rm_battlefield_4, "battlefield4_battlefield5", "left", "");
-            _room_route_exit(rm_olympus_1, "battlefield5_olympus1", "right", "sword");
+            _room_route_exit(rm_olympus_1, "battlefield_5__olympus_1", "up", "sword");
+            _room_route_exit(rm_battlefield_4, "battlefield_4__battlefield_5", "left", "");
             break;
 
         case rm_olympus_1:
-            _room_route_exit(rm_battlefield_5, "battlefield5_olympus1", "left", "");
-            _room_route_exit(rm_olympus_2, "olympus1_olympus2", "right", "");
+            _room_route_exit(rm_battlefield_5, "battlefield_5__olympus_1", "down", "");
+            _room_route_exit(rm_olympus_2, "olympus_1__olympus_2", "right", "");
             break;
 
         case rm_olympus_2:
-            _room_route_exit(rm_olympus_1, "olympus1_olympus2", "left", "");
-            _room_route_exit(rm_olympus_3, "olympus2_olympus3", "right", "");
+            _room_route_exit(rm_olympus_1, "olympus_1__olympus_2", "left", "");
+            _room_route_exit(rm_olympus_3, "olympus_2__olympus_3", "up", "");
             break;
 
         case rm_olympus_3:
-            _room_route_exit(rm_olympus_2, "olympus2_olympus3", "left", "");
-            _room_route_exit(rm_olympus_4, "olympus3_olympus4", "right", "");
+            _room_route_exit(rm_olympus_2, "olympus_2__olympus_3", "down", "");
+            _room_route_exit(rm_olympus_4, "olympus_3__olympus_4", "right", "");
             break;
 
         case rm_olympus_4:
-            _room_route_exit(rm_olympus_3, "olympus3_olympus4", "left", "");
-            _room_route_exit(rm_olympus_5, "olympus4_olympus5", "right", "");
+            _room_route_exit(rm_olympus_3, "olympus_3__olympus_4", "left", "");
+            _room_route_exit(rm_olympus_5, "olympus_4__olympus_5", "up", "");
             break;
 
         case rm_olympus_5:
-            _room_route_exit(rm_olympus_4, "olympus4_olympus5", "left", "");
+            _room_route_exit(rm_olympus_4, "olympus_4__olympus_5", "down", "");
             break;
 
         default:
             return false;
     }
-
     return true;
 }
 

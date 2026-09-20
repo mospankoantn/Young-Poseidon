@@ -31,6 +31,149 @@ vspd = 0;    // Вертикальна швидкість
 grv  = 0.8;  // Гравітація
 drop_timer = 0;   // коли > 0 — падаємо крізь тонку платформу
 
+// ════ КОЛІЗІЇ ПЛАТФОРМ ════
+// obj_thin_platform успадковується від obj_platform, тому звичайний
+// place_meeting(..., obj_platform) бачить і тверді, і односторонні платформи.
+// Для гравця розділяємо ці типи явно: тонкі не блокують рух збоку/знизу,
+// а тверді завжди залишаються повноцінною колізією.
+_is_thin_platform_instance = function(_inst)
+{
+    if (!instance_exists(_inst)) return false;
+
+    var _obj = _inst.object_index;
+    return (_obj == obj_thin_platform)
+        || object_is_ancestor(_obj, obj_thin_platform);
+};
+
+_meets_solid_platform = function(_test_x, _test_y)
+{
+    // Швидкий шлях: немає жодної платформи.
+    if (!place_meeting(_test_x, _test_y, obj_platform)) return false;
+
+    // Якщо немає тонкої платформи, зіткнення точно тверде.
+    if (!place_meeting(_test_x, _test_y, obj_thin_platform)) return true;
+
+    // На стиках тонкої і твердої платформи треба перевірити всі колізії,
+    // інакше thin-платформа може приховати solid-платформу.
+    var _hits = ds_list_create();
+    var _count = instance_place_list(_test_x, _test_y, obj_platform, _hits, false);
+    var _solid_hit = false;
+
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _hit = _hits[| _i];
+        if (instance_exists(_hit) && !_is_thin_platform_instance(_hit))
+        {
+            _solid_hit = true;
+            break;
+        }
+    }
+
+    ds_list_destroy(_hits);
+    return _solid_hit;
+};
+
+// Повертає Y, на якому ноги героя рівно стоять на найближчій поверхні
+// потрібного типу, якщо вона знаходиться в межах невеликого ground-probe.
+// Це прибирає субпіксельне "підстрибування" після гравітації: герой не
+// повинен щокадру провалюватися на 0.8 px, а потім ловитися колізією.
+_find_platform_support_y = function(_want_thin, _max_gap = 2.5)
+{
+    var _feet  = bbox_bottom;
+    var _left  = bbox_left;
+    var _right = bbox_right;
+    var _found = false;
+    var _best_delta = 1000000;
+
+    // Пошук через obj_platform охоплює також його дочірні об'єкти;
+    // thin-нащадків відділяємо явно.
+    var _count = instance_number(obj_platform);
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _hit = instance_find(obj_platform, _i);
+        if (!instance_exists(_hit)) continue;
+
+        var _is_thin = _is_thin_platform_instance(_hit);
+        if (_is_thin != _want_thin) continue;
+
+        // Для опори потрібне реальне горизонтальне перекриття стоп із платформою.
+        if (_right < _hit.bbox_left || _left > _hit.bbox_right) continue;
+
+        // У spr_player нижній піксель маски лежить на 1 px вище поверхні,
+        // коли origin героя стоїть рівно на верхній грані платформи.
+        var _target_feet = _hit.bbox_top - 1;
+        var _delta = _target_feet - _feet;
+
+        // Дозволяємо невеликий запас як вниз, так і вгору. Від'ємний допуск
+        // ремонтує дрібне субпіксельне занурення, але не витягує героя зі стіни.
+        if (_delta < -1.25 || _delta > _max_gap) continue;
+
+        if (!_found || abs(_delta) < abs(_best_delta))
+        {
+            _best_delta = _delta;
+            _found = true;
+        }
+    }
+
+    return _found ? (y + _best_delta) : undefined;
+};
+
+// true лише коли ноги героя реально спираються на верх solid-платформи.
+_is_standing_on_solid_platform = function()
+{
+    return !is_undefined(_find_platform_support_y(false));
+};
+
+// true лише коли ноги героя реально спираються на верх thin-платформи.
+_is_standing_on_thin_platform = function()
+{
+    return !is_undefined(_find_platform_support_y(true));
+};
+
+// Повертає Y точного приземлення при перетині верхньої грані thin-платформи
+// зверху вниз. Перевірка є swept-перевіркою: вона не залежить від того,
+// чи place_meeting() випадково побачив тонку 10px маску на конкретному
+// субпіксельному кроці, тому великі швидкості падіння не дають tunnelling.
+_thin_landing_y = function(_next_y)
+{
+    if (_next_y <= y) return undefined;
+
+    var _current_bottom = bbox_bottom;
+    var _next_bottom = _current_bottom + (_next_y - y);
+    var _left  = bbox_left;
+    var _right = bbox_right;
+
+    var _found = false;
+    var _best_y = 0;
+    var _count = instance_number(obj_thin_platform);
+
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _hit = instance_find(obj_thin_platform, _i);
+        if (!instance_exists(_hit)) continue;
+
+        // Бокове проходження крізь one-way platform дозволене; приземлення
+        // можливе лише коли ширина героя перекриває ширину платформи.
+        if (_right < _hit.bbox_left || _left > _hit.bbox_right) continue;
+
+        var _top = _hit.bbox_top;
+
+        // Ноги мають перейти верхню грань саме зверху вниз. Якщо герой уже
+        // нижче верхньої грані (зайшов збоку/стрибає знизу), платформа прозора.
+        if (_current_bottom < _top && _next_bottom >= _top)
+        {
+            var _candidate_y = y + ((_top - 1) - _current_bottom);
+            if (!_found || _candidate_y < _best_y)
+            {
+                _best_y = _candidate_y;
+                _found = true;
+            }
+        }
+    }
+
+    return _found ? _best_y : undefined;
+};
+
 // ════ СТАН ════
 l_right      = true;
 is_damage    = false;
@@ -87,7 +230,7 @@ _reset_player_animation = function()
     anim_action_sprite = -1;
     anim_action_timer = 0;
     anim_action_weapon = -1;
-    anim_was_on_ground = place_meeting(x, y + 1, obj_platform);
+    anim_was_on_ground = _is_standing_on_solid_platform() || _is_standing_on_thin_platform();
     anim_was_damage = is_damage;
     anim_last_hp = hp;
     anim_last_x = x;
