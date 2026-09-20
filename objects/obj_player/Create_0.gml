@@ -30,6 +30,7 @@ hspd = 0;    // Горизонтальна швидкість (knockback)
 vspd = 0;    // Вертикальна швидкість
 grv  = 0.8;  // Гравітація
 drop_timer = 0;   // коли > 0 — падаємо крізь тонку платформу
+grounded = false;  // єдине джерело істини для стану опори між Step/End Step
 
 // ════ КОЛІЗІЇ ПЛАТФОРМ ════
 // obj_thin_platform успадковується від obj_platform, тому звичайний
@@ -118,6 +119,55 @@ _find_platform_support_y = function(_want_thin, _max_gap = 2.5)
     return _found ? (y + _best_delta) : undefined;
 };
 
+// Якщо герой уже опинився трохи ВСЕРЕДИНІ solid-платформи зверху
+// (наприклад після respawn/load/checkpoint), звичайний ground-probe не бачить
+// опору: персонаж має vspd=0, але назавжди лишається "в повітрі".
+// Ця функція знаходить верхню грань solid під нижньою частиною маски й
+// повертає Y, який акуратно підніме героя НА поверхню. Бічні стіни не
+// виправляємо: верх платформи має проходити тільки через нижні _max_penetration
+// пікселів маски героя, а результат обов'язково перевіряється на відсутність
+// solid-overlap.
+_recover_solid_overlap_y = function(_max_penetration = 24)
+{
+    var _left = bbox_left;
+    var _right = bbox_right;
+    var _top_player = bbox_top;
+    var _bottom = bbox_bottom;
+
+    var _found = false;
+    var _best_y = 0;
+    var _best_penetration = 1000000;
+    var _count = instance_number(obj_platform);
+
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _hit = instance_find(obj_platform, _i);
+        if (!instance_exists(_hit)) continue;
+        if (_is_thin_platform_instance(_hit)) continue;
+
+        if (_right < _hit.bbox_left || _left > _hit.bbox_right) continue;
+
+        var _surface = _hit.bbox_top;
+        // Платформа повинна перетинати саме нижню частину героя.
+        if (_surface <= _top_player || _surface > _bottom) continue;
+
+        var _penetration = _bottom - (_surface - 1);
+        if (_penetration <= 0 || _penetration > _max_penetration) continue;
+
+        var _candidate_y = y - _penetration;
+        if (_meets_solid_platform(x, _candidate_y)) continue;
+
+        if (!_found || _penetration < _best_penetration)
+        {
+            _best_penetration = _penetration;
+            _best_y = _candidate_y;
+            _found = true;
+        }
+    }
+
+    return _found ? _best_y : undefined;
+};
+
 // true лише коли ноги героя реально спираються на верх solid-платформи.
 _is_standing_on_solid_platform = function()
 {
@@ -128,6 +178,46 @@ _is_standing_on_solid_platform = function()
 _is_standing_on_thin_platform = function()
 {
     return !is_undefined(_find_platform_support_y(true));
+};
+
+// Повертає Y точного приземлення на верх solid-платформи при русі вниз.
+// На відміну від простого _meets_solid_platform(), ця функція ще й точно
+// притискає стопи до верхньої грані. Це критично після drop-through: герой
+// не залишається на частку пікселя над землею з vspd=0 і false ground-state.
+_solid_landing_y = function(_next_y)
+{
+    if (_next_y <= y) return undefined;
+
+    var _current_bottom = bbox_bottom;
+    var _next_bottom = _current_bottom + (_next_y - y);
+    var _left  = bbox_left;
+    var _right = bbox_right;
+
+    var _found = false;
+    var _best_y = 0;
+    var _count = instance_number(obj_platform);
+
+    for (var _i = 0; _i < _count; _i++)
+    {
+        var _hit = instance_find(obj_platform, _i);
+        if (!instance_exists(_hit)) continue;
+        if (_is_thin_platform_instance(_hit)) continue;
+
+        if (_right < _hit.bbox_left || _left > _hit.bbox_right) continue;
+
+        var _top = _hit.bbox_top;
+        if (_current_bottom < _top && _next_bottom >= _top)
+        {
+            var _candidate_y = y + ((_top - 1) - _current_bottom);
+            if (!_found || _candidate_y < _best_y)
+            {
+                _best_y = _candidate_y;
+                _found = true;
+            }
+        }
+    }
+
+    return _found ? _best_y : undefined;
 };
 
 // Повертає Y точного приземлення при перетині верхньої грані thin-платформи
@@ -230,12 +320,32 @@ _reset_player_animation = function()
     anim_action_sprite = -1;
     anim_action_timer = 0;
     anim_action_weapon = -1;
-    anim_was_on_ground = _is_standing_on_solid_platform() || _is_standing_on_thin_platform();
+    image_xscale = l_right ? 1 : -1;
+
+    // Спочатку встановлюємо нормальний locomotion sprite/mask, а вже потім
+    // визначаємо землю. Це робить respawn/load незалежним від death/hurt sprite.
+    _set_player_animation(spr_player_idle, 1, true);
+
+    // Аварійне виправлення старих/неточних spawn-точок, що кладуть маску
+    // героя на кілька пікселів усередину obj_platform. Без цього vspd кожен
+    // кадр обнулявся collision-ом, але jump залишався забороненим.
+    var _recover_y = _recover_solid_overlap_y();
+    if (!is_undefined(_recover_y))
+    {
+        y = _recover_y;
+        hspd = 0;
+        vspd = 0;
+        drop_timer = 0;
+    }
+
+    grounded = (vspd == 0)
+        && (_is_standing_on_solid_platform()
+            || (drop_timer <= 0 && _is_standing_on_thin_platform()));
+
+    anim_was_on_ground = grounded;
     anim_was_damage = is_damage;
     anim_last_hp = hp;
     anim_last_x = x;
-    image_xscale = l_right ? 1 : -1;
-    _set_player_animation(spr_player_idle, 1, true);
 };
 
 _begin_player_death = function()

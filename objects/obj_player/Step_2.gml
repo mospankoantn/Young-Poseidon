@@ -10,9 +10,14 @@ if (anim_action_weapon >= 0 && anim_action_weapon != current_weapon)
 
 // drop_timer стосується лише one-way платформ. Якщо під час drop-through
 // герой приземлився на solid, він одразу має вважатися grounded.
-var _ground_now = vspd == 0
-    && (_is_standing_on_solid_platform()
-        || (drop_timer <= 0 && _is_standing_on_thin_platform()));
+// Фізичний Step уже виконав усі swept/snap/recovery перевірки.
+// Використовуємо його результат напряму, щоб анімація не розходилася
+// з реальною можливістю стрибати. vspd != 0 усе одно означає повітря.
+var _ground_now = variable_instance_exists(id, "grounded")
+    ? (grounded && vspd == 0)
+    : (vspd == 0
+        && (_is_standing_on_solid_platform()
+            || (drop_timer <= 0 && _is_standing_on_thin_platform())));
 var _hurt_now = hp < anim_last_hp || (is_damage && !anim_was_damage);
 
 if (_hurt_now && hp > 0)

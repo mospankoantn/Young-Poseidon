@@ -101,6 +101,21 @@ if (_move < 0) { l_right = false; image_xscale = -1; }
 
 if (drop_timer > 0) drop_timer--;
 
+// Respawn/load/checkpoint може посадити героя на 1-24 px усередину верхньої
+// грані solid. У такому стані support probe не бачить землю, а residual
+// collision лише щокадру обнуляє vspd — звідси "вічний стрибок".
+// Виправляємо такий top-overlap ДО будь-яких ground/jump перевірок.
+if (vspd >= 0)
+{
+    var _spawn_recover_y = _recover_solid_overlap_y();
+    if (!is_undefined(_spawn_recover_y))
+    {
+        y = _spawn_recover_y;
+        vspd = 0;
+        drop_timer = 0;
+    }
+}
+
 // --- Опора до горизонтального руху ---
 var _on_solid = false;
 var _on_thin  = false;
@@ -114,6 +129,9 @@ if (vspd >= 0)
         y = _solid_support_y;
         vspd = 0;
         _on_solid = true;
+        // Drop-through стосується лише one-way платформ. Контакт із реальною
+        // землею завершує режим пропускання негайно, а не через решту таймера.
+        drop_timer = 0;
     }
     else if (drop_timer <= 0)
     {
@@ -167,9 +185,10 @@ if (_total_hspd != 0)
 hspd *= 0.75;
 if (abs(hspd) < 0.5) hspd = 0;
 
-// Після горизонтального руху перевіряємо опору ще раз. Це не залишає
-// "фантомної землі" на один кадр, коли герой щойно зійшов із краю.
-if (vspd >= 0 && drop_timer <= 0)
+// Після горизонтального руху перевіряємо опору ще раз. Solid перевіряється
+// ЗАВЖДИ, навіть поки drop_timer активний. Таймер має робити прозорими лише
+// thin-платформи, а не заважати визнати звичайну землю під ногами.
+if (vspd >= 0)
 {
     _on_solid = false;
     _on_thin = false;
@@ -180,8 +199,9 @@ if (vspd >= 0 && drop_timer <= 0)
         y = _solid_support_after_x;
         vspd = 0;
         _on_solid = true;
+        drop_timer = 0;
     }
-    else
+    else if (drop_timer <= 0)
     {
         var _thin_support_after_x = _find_platform_support_y(true);
         if (!is_undefined(_thin_support_after_x))
@@ -193,12 +213,6 @@ if (vspd >= 0 && drop_timer <= 0)
     }
 
     _on_ground = _on_solid || _on_thin;
-}
-else if (drop_timer > 0)
-{
-    // Під час drop-through thin не може знову привласнити ground-state.
-    _on_thin = false;
-    _on_ground = _on_solid;
 }
 
 // --- Стрибок ---
@@ -228,9 +242,9 @@ else if (_on_ground)
 }
 
 // --- Вертикаль ---
-// Рух дробиться на кроки <= 1 px. Solid перевіряється першим, а thin
-// використовує swept-перетин верхньої грані, тому падіння з великої висоти
-// не може тунелювати крізь тонку платформу.
+// Рух дробиться на кроки <= 1 px. Для падіння solid має власну swept-
+// перевірку верхньої грані та точний snap. Це важливо, коли герой щойно
+// пройшов крізь одну/кілька thin-платформ і земля знаходиться близько нижче.
 var _vertical_move = vspd;
 
 if (_vertical_move != 0)
@@ -242,30 +256,105 @@ if (_vertical_move != 0)
     {
         var _next_y = y + _v_step;
 
-        // Тверда геометрія має пріоритет навіть під час drop-through.
-        if (_meets_solid_platform(x, _next_y))
+        if (_v_step > 0)
         {
-            vspd = 0;
-            break;
-        }
-
-        // One-way collision тільки при падінні зверху і тільки коли S-drop
-        // не активний.
-        if (_v_step > 0 && drop_timer <= 0)
-        {
-            var _landing_y = _thin_landing_y(_next_y);
-            if (!is_undefined(_landing_y))
+            // Спочатку точне приземлення на solid. Воно одразу завершує
+            // drop-through, бо після контакту з землею режим ігнорування
+            // one-way платформ більше не має сенсу.
+            var _solid_landing = _solid_landing_y(_next_y);
+            if (!is_undefined(_solid_landing))
             {
-                y = _landing_y;
+                y = _solid_landing;
                 vspd = 0;
+                _on_solid = true;
+                _on_thin = false;
+                _on_ground = true;
+                drop_timer = 0;
                 break;
             }
+
+            // One-way collision тільки при падінні зверху і тільки коли S-drop
+            // не активний.
+            if (drop_timer <= 0)
+            {
+                var _landing_y = _thin_landing_y(_next_y);
+                if (!is_undefined(_landing_y))
+                {
+                    y = _landing_y;
+                    vspd = 0;
+                    _on_solid = false;
+                    _on_thin = true;
+                    _on_ground = true;
+                    break;
+                }
+            }
+        }
+
+        // Залишкова solid-колізія потрібна для стелі/стін і нетипової
+        // геометрії, яку не описує простий top-crossing.
+        if (_meets_solid_platform(x, _next_y))
+        {
+            // Якщо це не стіна/стеля, а невелике проникнення зверху,
+            // одразу перетворюємо контакт на нормальне grounded-приземлення.
+            var _old_y_for_recovery = y;
+            y = _next_y;
+            var _contact_recover_y = (_v_step > 0) ? _recover_solid_overlap_y() : undefined;
+            y = _old_y_for_recovery;
+
+            if (!is_undefined(_contact_recover_y))
+            {
+                y = _contact_recover_y;
+                vspd = 0;
+                _on_solid = true;
+                _on_thin = false;
+                _on_ground = true;
+                drop_timer = 0;
+            }
+            else
+            {
+                vspd = 0;
+            }
+            break;
         }
 
         // Вгору, збоку або під час drop-through thin повністю прозора.
         y = _next_y;
     }
 }
+
+// Фінальна reconciliation після вертикального руху. Раніше ground-state
+// визначався переважно ДО падіння, тому кадр фактичного контакту із solid
+// міг завершитися з vspd=0, але _on_ground=false. Якщо drop_timer ще жив,
+// це могло перетворитися на "вічний стрибок" до зовнішнього knockback.
+if (vspd >= 0)
+{
+    var _solid_support_final = _find_platform_support_y(false);
+    if (!is_undefined(_solid_support_final))
+    {
+        y = _solid_support_final;
+        vspd = 0;
+        _on_solid = true;
+        _on_thin = false;
+        _on_ground = true;
+        drop_timer = 0;
+    }
+    else if (drop_timer <= 0)
+    {
+        var _thin_support_final = _find_platform_support_y(true);
+        if (!is_undefined(_thin_support_final))
+        {
+            y = _thin_support_final;
+            vspd = 0;
+            _on_solid = false;
+            _on_thin = true;
+            _on_ground = true;
+        }
+    }
+}
+
+// Єдине джерело ground-state для End Step/анімацій.
+// Не змушуємо анімаційну систему повторно вгадувати колізію іншим probe.
+grounded = _on_ground && (vspd == 0);
 
 // ════════════════════════════════════════
 // БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДІЯ)
