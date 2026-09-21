@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 90)
+    yp_trigger_hint("mine_cart", "hint_mine_cart", 240);
+
 if(has_player && (!instance_exists(obj_player) || obj_player.is_dead || obj_player.hp<=0)) {
     if(instance_exists(obj_player)) obj_player.riding_cart=noone;
     has_player=false;

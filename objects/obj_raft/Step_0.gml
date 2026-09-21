@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 110)
+    yp_trigger_hint("raft", "hint_raft", 240);
+
 has_player=false;
 if(instance_exists(obj_player) && !obj_player.is_dead && obj_player.hp>0) {
     has_player=obj_player.bbox_right>bbox_left && obj_player.bbox_left<bbox_right

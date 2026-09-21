@@ -8,6 +8,26 @@ if (is_dead)
     exit;
 }
 
+// Modal cutscene owns player control. Freeze motion without touching death/save state.
+if (variable_global_exists("cutscene_active") && global.cutscene_active)
+{
+    hspd = 0;
+    vspd = 0;
+    exit;
+}
+
+// One-time onboarding after the prologue/biome modal has been dismissed.
+yp_trigger_hint("basic_move", "hint_basic_move", 300);
+
+var _unlocked_count = 0;
+for (var _hint_wi = 0; _hint_wi < array_length(weapon_unlocked); _hint_wi++)
+    if (weapon_unlocked[_hint_wi]) _unlocked_count++;
+
+if (weapon_unlocked[0] || weapon_unlocked[1])
+    yp_trigger_hint("throw_return", "hint_throw_return", 300);
+if (_unlocked_count >= 2)
+    yp_trigger_hint("weapon_switch", "hint_weapon_switch", 260);
+
 // ════════════════════════════════════════
 // АНІМАЦІЙНІ ТАЙМЕРИ
 // ════════════════════════════════════════
@@ -355,6 +375,8 @@ if (vspd >= 0)
 // Єдине джерело ground-state для End Step/анімацій.
 // Не змушуємо анімаційну систему повторно вгадувати колізію іншим probe.
 grounded = _on_ground && (vspd == 0);
+if (_on_thin && grounded)
+    yp_trigger_hint("thin_platform", "hint_thin_platform", 260);
 
 // ════════════════════════════════════════
 // БЛОК 6: ЗБРОЯ — E (КИДОК) і F (ПОВЕРНЕННЯ/ВЗАЄМОДІЯ)
@@ -369,17 +391,21 @@ if (_can_throw)
 
     if (instance_exists(_t))
     {
-        // E — кинути поточно вибрану метальну зброю.
+        // E — кинути поточно вибрану метальну зброю ТІЛЬКИ якщо вона в руках.
         if (_e_pressed)
         {
-            // Якщо саме ЦЯ зброя була платформою у стіні, знімаємо лише її.
-            if (_t.stuck)
+            if (_t.stuck || _t.thrown || !_weapon_in_hand())
             {
-                _destroy_throwable_platform(_t);
-                _t.stuck = false;
+                // Never auto-pull a stuck weapon or spawn a duplicate throw.
+                // The player must recall it with F and wait until it is physically back in hand.
+                if (instance_exists(obj_ui_controller))
+                {
+                    var _ui_recall = instance_find(obj_ui_controller, 0);
+                    if (instance_exists(_ui_recall) && variable_instance_exists(_ui_recall, "show_hint"))
+                        _ui_recall.show_hint(lc("hint_recall_first"), 90);
+                }
             }
-
-            if (!_t.thrown && !_t.stuck)
+            else
             {
                 if (audio_exists(snd_swing)) audio_play_sound(snd_swing, 1, false);
 

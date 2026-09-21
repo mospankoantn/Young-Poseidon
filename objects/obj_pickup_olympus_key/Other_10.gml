@@ -6,13 +6,10 @@ with (obj_player)
 {
     has_olympus_key = true;
 }
- 
-// Активуємо всі двері в кімнаті
-with (obj_olympus_door)
-{
-    event_user(0);   // Відкрити двері
-}
 
+// The key no longer opens every Olympus door automatically. The player must
+// approach the final gate and use the normal interaction action [F].
+show_weapon_cutscene("key");
 autosave_game();
 
 if (instance_exists(obj_ui_controller))

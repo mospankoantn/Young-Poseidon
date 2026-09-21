@@ -8,6 +8,7 @@ if (can_pickup)
     {
         potion_speed_count++;
     }
+    yp_trigger_hint("potion_speed", "hint_potion_speed", 260);
     // audio_play_sound(snd_pickup, 1, false);
     instance_destroy();
 }

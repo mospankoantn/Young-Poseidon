@@ -716,7 +716,9 @@ function start_new_game()
         obj_ui_controller.game_paused = false;
 
     with (obj_player) instance_destroy();
-    room_goto(rm_sea_1);
+
+    // New games always begin with the story prologue. Loading a save does not.
+    show_intro_cutscene();
 }
 
 

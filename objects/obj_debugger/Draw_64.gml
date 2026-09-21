@@ -16,10 +16,12 @@ if (!is_open)
 }
 
 // Статус рядок (завжди видний навіть коли закрито)
-var _status_y = _gh - 20;
+var _status_y = max(24, _gh - 74); // над нижнім HUD, а не поверх нього
+var _status_w = min(420, _gw - 20);
+var _status_x = max(10, _gw - _status_w - 10);
 draw_set_alpha(0.7);
 draw_set_color(c_black);
-draw_rectangle(0, _status_y - 2, 500, _gh, false);
+draw_rectangle(_status_x, _status_y - 2, _status_x + _status_w, _status_y + 20, false);
 draw_set_alpha(1);
 
 var _status = "F1-Debug";
@@ -34,15 +36,15 @@ if (instance_exists(obj_player))
 draw_set_halign(fa_left);
 draw_set_valign(fa_bottom);
 draw_set_color(make_color_rgb(180, 255, 180));
-draw_text(6, _gh - 3, _status);
+draw_text(_status_x + 6, _status_y + 17, _status);
 
 // ════════════════════════════════════════
 // ГОЛОВНА ПАНЕЛЬ
 // ════════════════════════════════════════
-var _px = panel_x;
-var _py = panel_y;
-var _pw = panel_w;
-var _ph = panel_h;
+var _pw = min(panel_w, _gw - 20);
+var _ph = min(panel_h, _gh - max(panel_y, 50) - 24);
+var _px = clamp(panel_x, 8, max(8, _gw - _pw - 8));
+var _py = clamp(max(panel_y, 50), 50, max(50, _gh - _ph - 24));
 
 // Тло
 draw_set_alpha(0.92);
@@ -215,11 +217,18 @@ else if (active_tab == 1)
         ["F7  Швидкість",   show_velocity, make_color_rgb(180, 255, 180)],
     ];
 
+    // 2x2 layout instead of four cramped buttons in one row.
+    // This keeps Ukrainian labels inside their rectangles on the 960x540 GUI.
+    var _btn_cols = 2;
+    var _btn_gap = 6;
+    var _btn_w = (_pw - 16 - _btn_gap) / _btn_cols;
     for (var _bi = 0; _bi < array_length(_btns); _bi++)
     {
-        var _bx   = _px + 8 + _bi * ((_pw - 16) / 4);
-        var _bw   = (_pw - 16) / 4 - 4;
-        var _by   = _ly;
+        var _col = _bi mod _btn_cols;
+        var _row = floor(_bi / _btn_cols);
+        var _bx   = _px + 8 + _col * (_btn_w + _btn_gap);
+        var _bw   = _btn_w;
+        var _by   = _ly + _row * 30;
         var _bon  = _btns[_bi][1];
         var _bcol = _btns[_bi][2];
         var _bhov = (_mx >= _bx && _mx <= _bx + _bw
@@ -235,6 +244,7 @@ else if (active_tab == 1)
 
         draw_set_color(_bon ? c_white : make_color_rgb(140, 160, 200));
         draw_set_halign(fa_center);
+        draw_set_valign(fa_middle);
         draw_text(_bx + _bw / 2, _by + 12, _btns[_bi][0]);
 
         if (_bhov && mouse_check_button_pressed(mb_left))
@@ -249,7 +259,8 @@ else if (active_tab == 1)
         }
     }
     draw_set_halign(fa_left);
-    _ly += 32;
+    draw_set_valign(fa_top);
+    _ly += 64;
 
     // ── Статистика гравця ──
     if (instance_exists(obj_player))
@@ -287,10 +298,11 @@ else if (active_tab == 1)
 
     // ── Кнопки швидких дій ──
     var _action_btns = [
-        ["F4 Вся зброя",    vk_f4],
-        ["F5 Повне HP",     vk_f5],
-        ["F9 Всі предмети", vk_f9],
-        ["F10 Ключ",        vk_f10],
+        ["F4 Вся зброя",        vk_f4],
+        ["F5 Повне HP",         vk_f5],
+        ["F9 Всі предмети",     vk_f9],
+        ["F10 Ключ",            vk_f10],
+        ["F11 Перший запуск",   vk_f11],
     ];
 
     for (var _abi = 0; _abi < array_length(_action_btns); _abi++)

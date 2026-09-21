@@ -3,7 +3,7 @@
 function yp_defaults() {
     return {master:1, music:0.7, sfx:1, resolution:0, fullscreen:false,
         vsync:true, smoothing:false, auto_pause:true, hints:true, language:"UA",
-        keys:[65,68,87,83,69,70,81,90,88,67]};
+        keys:[65,68,87,83,69,70,81,90,88,67], first_run_completed:false};
 }
 
 function yp_settings_init() {
@@ -13,6 +13,7 @@ function yp_settings_init() {
     global.yp_display_pending = false;
     global.yp_display_previous = undefined;
     global.yp_display_deadline = 0;
+    global.yp_startup_sequence_done = false;
     global.yp_settings = yp_defaults();
     yp_settings_read();
     display_set_gui_size(960,640);
@@ -40,6 +41,7 @@ function yp_settings_read() {
     }
     _s.language = ini_read_string("options","language",_s.language);
     if (_s.language != "UA" && _s.language != "EN") _s.language = "UA";
+    _s.first_run_completed = (ini_read_real("meta","first_run_completed",0) == 1);
     var _valid = true;
     for (var _i=0; _i<10; _i++) {
         var _key = ini_read_real("keys",string(_i),_s.keys[_i]);
@@ -69,6 +71,7 @@ function yp_settings_save() {
         ini_write_real("options",_key,variable_struct_get(_source,_key));
     }
     ini_write_string("options","language",_s.language);
+    ini_write_real("meta","first_run_completed", _s.first_run_completed ? 1 : 0);
     for (var _i=0; _i<10; _i++) ini_write_real("keys",string(_i),_s.keys[_i]);
     ini_close();
 }
@@ -79,6 +82,7 @@ function yp_apply_audio() {
     audio_sound_gain(snd_olympus_overture,_s.music,0);
     audio_sound_gain(snd_jump,_s.sfx,0);
     audio_sound_gain(snd_swing,_s.sfx,0);
+    audio_sound_gain(snd_startup_jingle,max(_s.music,_s.sfx) * 0.55,0);
 }
 
 function yp_apply_display() {

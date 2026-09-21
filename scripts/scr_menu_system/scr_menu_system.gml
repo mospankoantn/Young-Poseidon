@@ -97,7 +97,9 @@ function yp_pause(_enable) {
         pause_instances=[];
         var _owner=id;
         with (all) {
-            if (id != _owner) array_push(other.pause_instances,id);
+            // Modal cutscene UI must remain active while gameplay actors are paused.
+            if (id != _owner && object_index != obj_cutscene_screen)
+                array_push(other.pause_instances,id);
         }
         for (var _i=0; _i<array_length(pause_instances); _i++)
             instance_deactivate_object(pause_instances[_i]);

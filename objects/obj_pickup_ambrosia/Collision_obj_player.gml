@@ -9,6 +9,7 @@ if (can_pickup)
         max_hp += 1;
         hp      = max_hp;
     }
+    yp_trigger_hint("ambrosia", "hint_ambrosia", 260);
     // audio_play_sound(snd_pickup_ambrosia, 1, false);
     instance_destroy();
 }

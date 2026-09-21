@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 96)
+    yp_trigger_hint("checkpoint", "hint_checkpoint", 240);
+
 /// @description
 /// obj_checkpoint — Step Event
 

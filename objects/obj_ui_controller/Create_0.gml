@@ -59,6 +59,19 @@ gh = display_get_gui_height();
 
 room_hud_update_zone();
 
+// First-entry biome cutscenes are world-state backed, so returning to a zone
+// or loading a save does not repeat a scene already seen.
+switch (room)
+{
+    case rm_sea_1:        show_biome_cutscene("sea"); break;
+    case rm_coast_1:      show_biome_cutscene("coast"); break;
+    case rm_mines_1:      show_biome_cutscene("mines"); break;
+    case rm_hades_1:      show_biome_cutscene("hades"); break;
+    case rm_greece_1:     show_biome_cutscene("greece"); break;
+    case rm_battlefield_1:show_biome_cutscene("battlefield"); break;
+    case rm_olympus_1:    show_biome_cutscene("olympus"); break;
+}
+
 if (variable_global_exists("save_notice_key") && global.save_notice_key != "")
 {
     show_hint(lc(global.save_notice_key), global.save_notice_timer);

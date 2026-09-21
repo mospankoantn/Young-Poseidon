@@ -8,5 +8,6 @@ if (can_pickup)
     {
         perm_spd_bonus += 0.3;   
     }
+    yp_trigger_hint("sandal", "hint_sandal", 260);
     instance_destroy();
 }

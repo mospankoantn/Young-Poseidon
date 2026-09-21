@@ -9,6 +9,7 @@ if (can_pickup)
     {
         potion_strength_count++;
     }
+    yp_trigger_hint("potion_strength", "hint_potion_strength", 260);
     // audio_play_sound(snd_pickup, 1, false);
     instance_destroy();
 }

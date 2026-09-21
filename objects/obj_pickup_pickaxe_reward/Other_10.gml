@@ -3,6 +3,7 @@
 
 world_state_mark_instance(id, "pickup");
 with (obj_player) { _unlock_weapon(2); }
+show_weapon_cutscene("pickaxe");
 autosave_game();
 
 if (instance_exists(obj_ui_controller))

@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 100)
+    yp_trigger_hint("thicket", "hint_thicket", 240);
+
 if(is_cutting){
     cut_timer++;image_alpha=max(0,1-cut_timer/20);
     if(cut_timer>=20) instance_destroy();

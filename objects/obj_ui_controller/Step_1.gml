@@ -1,3 +1,6 @@
+/// Do not open/operate pause menu underneath a modal cutscene.
+if (variable_global_exists("cutscene_active") && global.cutscene_active) exit;
+
 /// Begin Step keeps menu input ahead of gameplay Step events.
 yp_display_tick();
 gw=display_get_gui_width(); gh=display_get_gui_height();

@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 100)
+    yp_trigger_hint("boulder", "hint_boulder", 240);
+
 /// @description 
 /// obj_stone_boulder — Step Event
 

@@ -91,6 +91,31 @@ if (keyboard_check_pressed(vk_f10) && instance_exists(obj_player))
     debug_log("Ключ Олімпу отримано");
 }
 
+// F11 — Скинути стан першого запуску для тестування мовного вибору
+if (keyboard_check_pressed(vk_f11))
+{
+    if (variable_global_exists("yp_settings"))
+    {
+        global.yp_settings.first_run_completed = false;
+        yp_settings_save();
+    }
+    if (variable_global_exists("yp_startup_sequence_done"))
+        global.yp_startup_sequence_done = false;
+
+    debug_log("Скинуто перший запуск: logo + language select");
+
+    if (room == rm_menu && instance_exists(obj_main_menu))
+    {
+        var _menu = instance_find(obj_main_menu, 0);
+        if (instance_exists(_menu) && variable_instance_exists(_menu, "startup_begin"))
+            _menu.startup_begin();
+    }
+    else
+    {
+        room_goto(rm_menu);
+    }
+}
+
 // ════ ЗАСТОСУВАННЯ РЕЖИМІВ ════
 _apply_modes();
 

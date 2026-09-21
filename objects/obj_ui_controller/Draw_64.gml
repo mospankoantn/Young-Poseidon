@@ -106,8 +106,14 @@ draw_text(_pause_x + 15, _pause_y + 14, "II");
 // Center hint toast. It appears only when there is something useful to say.
 if (hint_alpha > 0.05 && global.yp_settings.hints)
 {
-    var _hint_w = min(gw - 72, max(260, string_width(hint_text) + 42));
-    var _hint_h = 40;
+    // Measure with the same font/width used for rendering. Long tutorial hints
+    // receive a taller toast instead of spilling over the fixed 40 px box.
+    if (font_exists(fnt_main)) draw_set_font(fnt_main);
+    var _hint_max_w = min(gw - 72, 620);
+    var _hint_w = min(_hint_max_w, max(280, string_width(hint_text) + 42));
+    var _hint_sep = 16;
+    var _hint_text_h = string_height_ext(hint_text, _hint_sep, _hint_w - 24);
+    var _hint_h = clamp(_hint_text_h + 16, 40, 96);
     var _hint_x = gw * 0.5 - _hint_w * 0.5;
     var _hint_y = _top_h + 8;
 
@@ -120,15 +126,17 @@ if (hint_alpha > 0.05 && global.yp_settings.hints)
     draw_set_color(c_white);
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
-    draw_text_ext(gw * 0.5, _hint_y + 8, hint_text, 18, _hint_w - 22);
+    draw_text_ext(gw * 0.5, _hint_y + 8, hint_text, _hint_sep, _hint_w - 24);
     draw_set_alpha(1);
 }
 
 // Dialog bubbles are no longer reserved on screen when inactive.
 if (player_dialog_alpha > 0.05)
 {
-    var _dw = min(390, gw * 0.45);
-    var _dh = 74;
+    var _dw = min(420, gw * 0.46);
+    var _dialog_sep = 17;
+    var _dialog_body_h = string_height_ext(player_dialog_text, _dialog_sep, _dw - 24);
+    var _dh = clamp(_dialog_body_h + 50, 74, 132);
     var _dx = _pad;
     var _dy = _bot_y - _dh - 10;
 
@@ -143,7 +151,7 @@ if (player_dialog_alpha > 0.05)
     draw_set_valign(fa_top);
     draw_text(_dx + 12, _dy + 8, lc("dialog_player"));
     draw_set_color(c_white);
-    draw_text_ext(_dx + 12, _dy + 28, player_dialog_text, 18, _dw - 24);
+    draw_text_ext(_dx + 12, _dy + 28, player_dialog_text, _dialog_sep, _dw - 24);
     draw_set_color(_soft);
     draw_set_halign(fa_right);
     draw_text(_dx + _dw - 10, _dy + _dh - 20, "Q");
@@ -152,8 +160,10 @@ if (player_dialog_alpha > 0.05)
 
 if (npc_dialog_alpha > 0.05)
 {
-    var _ndw = min(390, gw * 0.45);
-    var _ndh = 74;
+    var _ndw = min(420, gw * 0.46);
+    var _ndialog_sep = 17;
+    var _ndialog_body_h = string_height_ext(npc_dialog_text, _ndialog_sep, _ndw - 24);
+    var _ndh = clamp(_ndialog_body_h + 50, 74, 132);
     var _ndx = gw - _pad - _ndw;
     var _ndy = _bot_y - _ndh - 10;
 
@@ -168,7 +178,7 @@ if (npc_dialog_alpha > 0.05)
     draw_set_valign(fa_top);
     draw_text(_ndx + 12, _ndy + 8, lc("dialog_npc"));
     draw_set_color(c_white);
-    draw_text_ext(_ndx + 12, _ndy + 28, npc_dialog_text, 18, _ndw - 24);
+    draw_text_ext(_ndx + 12, _ndy + 28, npc_dialog_text, _ndialog_sep, _ndw - 24);
     draw_set_color(make_color_rgb(255, 206, 178));
     draw_set_halign(fa_right);
     draw_text(_ndx + _ndw - 10, _ndy + _ndh - 20, "Q");

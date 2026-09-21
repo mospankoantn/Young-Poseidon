@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 120)
+    yp_trigger_hint("stalactite", "hint_stalactite", 240);
+
 /// @description
 /// obj_stalactite — Step Event
 

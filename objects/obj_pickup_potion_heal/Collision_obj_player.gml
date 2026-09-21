@@ -8,6 +8,7 @@ if (can_pickup)
     {
         potion_heal_count++;
     }
+    yp_trigger_hint("potion_heal", "hint_potion_heal", 260);
     // audio_play_sound(snd_pickup, 1, false);
     instance_destroy();
 }

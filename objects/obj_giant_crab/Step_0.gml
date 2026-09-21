@@ -1,3 +1,6 @@
+if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 150)
+    yp_trigger_hint("crab", "hint_crab", 240);
+
 /// @description Логіка поведінки крабу
 // obj_giant_crab Step Event
 

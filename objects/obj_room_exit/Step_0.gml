@@ -15,6 +15,8 @@ player_in_range = (_px > x - exit_width  / 2
 // Плавна поява підказки
 var _target_alpha = (player_in_range && show_prompt) ? 1 : 0;
 prompt_alpha      = lerp(prompt_alpha, _target_alpha, 0.14);
+if (player_in_range)
+    yp_trigger_hint("room_exit", "hint_room_exit", 220);
  
 // ---- ЗАТРЯСІННЯ (якщо заблокований і намагаються пройти) ----
 if (lock_shake > 0)
