@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description 
 /// obj_boss_war_ghost — Step Event
 
@@ -25,7 +26,11 @@ if (melee_cd  > 0) melee_cd--;
 if (summon_cd > 0) summon_cd--;
  
 // Підраховуємо живих духів
-spirits_alive = instance_number(obj_fallen_spirit);
+spirits_alive = 0;
+with (obj_fallen_spirit) {
+    if (hp > 0 && variable_instance_exists(id,"summon_owner") && summon_owner == other.id)
+        other.spirits_alive++;
+}
  
 // Пульсація прозорості
 image_alpha = is_vulnerable
@@ -71,15 +76,17 @@ switch (state)
             var _bp_x = variable_global_exists("bone_pile_x")
                         ? global.bone_pile_x : x;
  
-            for (var _si = 0; _si < 5; _si++)
+            for (var _si = 0; _si < 3; _si++)
             {
                 var _sp = instance_create_layer(
                     _bp_x + irandom_range(-60, 60),
                     room_height - 100,
                     "Instances", obj_fallen_spirit);
                 // Духи в бою зі слабшими характеристиками
-                _sp.hp  = 8;
-                _sp.atk = 3;
+                _sp.hp  = 6;
+                _sp.atk = 1;
+                _sp.summon_owner = id;
+                _sp.hurt_timer = room_speed;
             }
             summon_wave++;
             state = 0;   // Летимо поки духи живуть
@@ -97,7 +104,7 @@ switch (state)
  
         // Атака в ближньому бою
         if (distance_to_object(obj_player) <= melee_range
-            && melee_cd <= 0 && !obj_player.is_damage)
+            && melee_cd <= 0 && !obj_player.is_damage && enemy_can_damage(id))
         {
             obj_player.hp       -= atk;
             var _kd = point_direction(x, y, obj_player.x, obj_player.y);

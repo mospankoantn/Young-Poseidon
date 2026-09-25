@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 150)
     yp_trigger_hint("crab", "hint_crab", 240);
 
@@ -51,7 +52,7 @@ if (attack_cd > 0) attack_cd--;
  
 if (instance_exists(obj_player) && attack_cd <= 0)
 {
-    if (distance_to_object(obj_player) <= attack_range && !obj_player.is_damage)
+    if (distance_to_object(obj_player) <= attack_range && !obj_player.is_damage && enemy_can_damage(id))
     {
         obj_player.hp       -= atk;
         var _dir             = point_direction(x, y, obj_player.x, obj_player.y);

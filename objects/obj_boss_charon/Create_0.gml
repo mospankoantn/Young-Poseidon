@@ -2,9 +2,9 @@
 /// obj_boss_charon — Create Event
 
 boss_name_key = "boss_charon";
-max_hp    = 100;
+max_hp    = 80;
 hp        = max_hp;
-atk       = 3;
+atk       = 2;
 phase     = 1;
  
 // ---- РУХ ЧОВНОМ ----
@@ -16,8 +16,8 @@ move_dir    = 1;
  
 // ---- КОСА-БУМЕРАНГ ----
 scythe_instance  = noone;  // ID кинутої коси
-scythe_cd        = 0;
-scythe_cd_max    = room_speed * 3;   // Кидає кожні 3 секунди
+scythe_cd        = room_speed * 2;
+scythe_cd_max    = room_speed * 4;
 scythe_fly_speed = 7;
 scythe_damage    = atk;
  
@@ -38,3 +38,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

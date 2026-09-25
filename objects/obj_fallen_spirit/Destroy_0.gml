@@ -1,7 +1,7 @@
 /// @description 
 ///  obj_fallen_spirit — Destroy Event
 
-if (instance_exists(obj_boss_war_ghost))
+if (hp <= 0 && variable_instance_exists(id, "summon_owner") && instance_exists(summon_owner))
 {
-    obj_boss_war_ghost.hp -= 5;  // Кожен вбитий дух = 5 шкоди босу
+    enemy_take_hit(summon_owner, 5, x);
 }

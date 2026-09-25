@@ -14,5 +14,5 @@ draw_sprite_ext(sprite_index, image_index, _s2x, _s2y,
     image_xscale, 1, 0, make_color_rgb(180, 100, 255), 1);
 draw_set_alpha(1);
  
-draw_self();
+enemy_draw_body();
  

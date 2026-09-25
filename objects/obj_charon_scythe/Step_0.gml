@@ -2,6 +2,7 @@
 /// obj_charon_scythe — Step Event
 
 image_angle += 12;   // Крутиться
+if (!instance_exists(owner) || owner.hp <= 0) { instance_destroy(); exit; }
 lifetime--;
 if (lifetime <= 0) { instance_destroy(); exit; }
  
@@ -20,7 +21,7 @@ if (!returning)
  
     // Шкода гравцю під час польоту
     if (instance_exists(obj_player) && place_meeting(x, y, obj_player)
-        && !obj_player.is_damage)
+        && !obj_player.is_dead && !obj_player.is_damage && enemy_can_damage(owner))
     {
         obj_player.hp       -= dmg;
         obj_player.is_damage = true;

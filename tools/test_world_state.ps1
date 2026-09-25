@@ -6,7 +6,7 @@ $checkpoint=Get-Content -LiteralPath (Join-Path $root 'objects/obj_checkpoint/St
 $menu=Get-Content -LiteralPath (Join-Path $root 'scripts/scr_menu_system/scr_menu_system.gml') -Raw
 if($playerCreate.Contains('apply_pending_load_to_player();')){throw 'Load is still applied from obj_player Create before UI Create order is guaranteed'}
 if(!$saveSystem.Contains('variable_instance_exists(_ui, "show_hint")')){throw 'Save notifications do not guard show_hint initialization'}
-if(!$checkpoint.Contains('global.checkpoint_x    = _safe[1];')){throw 'Checkpoint still does not save a validated player position'}
+if($checkpoint -notmatch 'global\.checkpoint_x\s*=\s*_safe\[1\]'){throw 'Checkpoint still does not save a validated player position'}
 if(!$checkpoint.Contains('autosave_game();')){throw 'Checkpoint no longer writes autosave slot 0'}
 if(!$saveSystem.Contains('#macro YP_SAVE_SLOT_MAX 10')){throw 'Ten manual save slots are not configured'}
 if(!$saveSystem.Contains('young_poseidon_autosave.ini')){throw 'Autosave slot file is missing'}
@@ -27,7 +27,7 @@ $keyReward=Get-Content -LiteralPath (Join-Path $root 'objects/obj_pickup_olympus
 if(!$keyReward.Contains('autosave_game();')){throw 'Olympus key reward no longer autosaves after collection'}
 $player=Get-Content -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'objects/obj_player/Step_0.gml') -Raw
 if($player.Contains('keyboard_check_pressed(ord("1"))')){throw 'Slot 1 still recalls the projectile'}
-if(!$player.Contains('if (_f_pressed)')){throw 'Recall no longer uses remappable F action'}
+if($player -notmatch 'if\s*\(_f_pressed\s*&&' -or !$player.Contains('yp_input("F",true)')){throw 'Recall no longer uses remappable F action'}
 $master=Get-Content -LiteralPath (Join-Path (Split-Path $PSScriptRoot -Parent) 'objects/obj_master/Create_0.gml') -Raw
 if(!$master.Contains('global.weapon_unlocked = [false, false, false, false, false, false];')){throw 'Master fallback weapon state differs'}
 & (Join-Path $PSScriptRoot 'test_player_death.ps1') -TestPrefix 'world_state' -SuccessMarker 'PASS: WORLD STATE SAVE TESTS'

@@ -315,6 +315,10 @@ _play_player_action = function(_sprite)
 
 _reset_player_animation = function()
 {
+    move_velocity = 0;
+    jump_buffer = 0;
+    coyote_timer = 0;
+    attack_cooldown = 0;
     is_dead = false;
     death_finished = false;
     anim_action_sprite = -1;
@@ -428,11 +432,24 @@ _damage_weapon_melee = function(_weapon_index)
     var _target = collision_rectangle(_x1, _y1, _x2, _y2, obj_enemy, false, true);
     if (instance_exists(_target) && variable_instance_exists(_target, "hp"))
     {
-        _target.hp -= weapon_atk[_weapon_index] + temp_atk_buff;
+        enemy_take_hit(_target, weapon_atk[_weapon_index] + temp_atk_buff, x);
         return _target;
     }
 
     return noone;
+};
+
+jump_buffer = 0;
+coyote_timer = 0;
+move_velocity = 0;
+attack_cooldown = 0;
+
+_interact_pose = function(_target_x)
+{
+    if (is_dead || hp <= 0) return;
+    if (_target_x != x) l_right = _target_x > x;
+    image_xscale = l_right ? 1 : -1;
+    _play_player_action(spr_player_interact);
 };
 
 // Розблокована зброя (false = ще не отримана)

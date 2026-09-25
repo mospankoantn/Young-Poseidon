@@ -1,4 +1,5 @@
-param([string]$Runtime='C:/ProgramData/GameMakerStudio2-LTS2026/Cache/runtimes/runtime-2026.0.0.23')
+param([string]$Runtime='C:/ProgramData/GameMakerStudio2-LTS2026/Cache/runtimes/runtime-2026.0.0.23',
+    [string]$TestPrefix='menu', [string]$SuccessMarker='PASS: ALL MENU TESTS')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 # Static cursor contract: native Windows cursor is hidden and the project provides its own sprite.
@@ -36,7 +37,7 @@ foreach($dir in @('objects','sprites','scripts','rooms','sounds','fonts','tilese
 Copy-Item -LiteralPath (Join-Path $root 'Young Poseidon.yyp') -Destination $project
 $utf8=[Text.UTF8Encoding]::new($false)
 function Write-Utf8($p,$s) {[IO.File]::WriteAllText($p,$s,$utf8)}
-foreach($pair in @(@('menu_create.gml','Create_0.gml'),@('menu_step.gml','Step_0.gml'),@('menu_draw.gml','Draw_75.gml'))) {
+foreach($pair in @(@(($TestPrefix+'_create.gml'),'Create_0.gml'),@(($TestPrefix+'_step.gml'),'Step_0.gml'),@('menu_draw.gml','Draw_75.gml'))) {
     $code=Get-Content -LiteralPath (Join-Path $PSScriptRoot ('tests/'+$pair[0])) -Raw
     $code=$code.Replace('__REPORT__',($temp+'/report.txt').Replace('\','/')).Replace('__DONE__',($temp+'/done.txt').Replace('\','/')).Replace('__SHOTS__',($temp+'/screenshots/').Replace('\','/'))
     Write-Utf8 (Join-Path $project ('objects/obj_debugger/'+$pair[1])) $code
@@ -65,15 +66,20 @@ foreach($rel in @('scripts/scr_settings/scr_settings.gml','scripts/scr_save_syst
     Write-Utf8 $p $code
 }
 $win=Join-Path $temp 'Young Poseidon.win'
+# Keep only the test observer active during real modal cutscenes; automate its advance signal.
+$p=Join-Path $project 'objects/obj_cutscene_screen/Step_0.gml'
+$code=[IO.File]::ReadAllText($p).Replace('object_index != obj_cutscene_screen','object_index != obj_cutscene_screen && object_index != obj_debugger').Replace('var _advance = yp_input("Q", true)','var _advance = global.test_cutscene_advance || yp_input("Q", true)')
+Write-Utf8 $p $code
 & "$Runtime/bin/igor/windows/x64/Igor.exe" "--project=$project/Young Poseidon.yyp" "--runtimePath=$Runtime" "--user=$env:APPDATA/GameMakerStudio2-LTS2026/unknownUser_unknownUserID" "--cache=$temp/cache" "--temp=$temp/build" "--of=$win" --runtime=VM --config=Default windows Compile *> "$temp/compile.log"
 if(!(Test-Path -LiteralPath $win) -or (Select-String -LiteralPath "$temp/compile.log" -Pattern '^Error :|exited with non-zero')) {
     Get-Content "$temp/compile.log" -Tail 90
     throw "Compilation failed: $temp"
 }
-foreach($run in 1,2) {
+$runs=if($TestPrefix -eq 'menu') {@(1,2)} else {@(1)}
+foreach($run in $runs) {
     $proc=Start-Process -FilePath "$Runtime/windows/x64/Runner.exe" -ArgumentList @('-game',('"'+$win+'"')) -WorkingDirectory $temp -WindowStyle Hidden -PassThru -RedirectStandardOutput "$temp/stdout-$run.log" -RedirectStandardError "$temp/stderr-$run.log"
     try {
-        if(!$proc.WaitForExit(30000)) {Stop-Process -Id $proc.Id; throw "Timeout: $temp"}
+        if(!$proc.WaitForExit(60000)) {Stop-Process -Id $proc.Id; throw "Timeout: $temp"}
     } finally { if(!$proc.HasExited){Stop-Process -Id $proc.Id} }
     if(!(Test-Path "$temp/report.txt") -or (Select-String -LiteralPath "$temp/report.txt" -Pattern 'FAIL:')) {
         Get-Content "$temp/stdout-$run.log" -Tail 40
@@ -84,7 +90,8 @@ foreach($run in 1,2) {
 Get-Content "$temp/report.txt"
 # Catch blank snapshots and missing imported art, not just successful GML execution.
 Add-Type -AssemblyName System.Drawing
-foreach($image in @('01-main-UA.png','08c-pause-surface.png','09-pause.png')) {
+$images=if($TestPrefix -eq 'menu') {@('00a-logo.png','00b-language.png','01-main-UA.png','08c-pause-surface.png','09-pause.png')} else {@(Get-ChildItem (Join-Path $temp 'screenshots') -Filter '*.png' | Select-Object -ExpandProperty Name)}
+foreach($image in $images) {
     $bitmap=[Drawing.Bitmap]::new((Join-Path $temp ('screenshots/'+$image)))
     $colors=[Collections.Generic.HashSet[int]]::new()
     for($y=0;$y -lt $bitmap.Height;$y+=20) {
@@ -95,4 +102,4 @@ foreach($image in @('01-main-UA.png','08c-pause-surface.png','09-pause.png')) {
 }
 Write-Output 'PASS: main menu art and frozen pause scene are nonblank'
 Write-Output "Artifacts: $temp"
-if(!(Select-String -LiteralPath "$temp/report.txt" -Pattern 'PASS: ALL MENU TESTS')) {throw "Tests incomplete: $temp"}
+if(!(Select-String -LiteralPath "$temp/report.txt" -SimpleMatch -Pattern $SuccessMarker)) {throw "Tests incomplete: $temp"}

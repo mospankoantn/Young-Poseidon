@@ -11,6 +11,7 @@ if (stones_left <= 0)
     exit;
 }
 if (hit_cd > 0) hit_cd--;
+if (strike_flash > 0) strike_flash--;
 
 // Гравець б'є кайлом (E або F) поблизу
 if (!instance_exists(obj_player)) exit;
@@ -22,6 +23,8 @@ if (_dist <= interact_range && hit_cd <= 0
     && (yp_input("E",true) || yp_input("F",true)))
 {
     stones_left--;
+    strike_flash = 20;
+    yp_sfx("stone", x);
     obj_player._play_weapon_action("special");
     hit_cd = room_speed * 0.5;
 

@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description 
 /// obj_boss_charon — Step Event
 
@@ -49,7 +50,7 @@ if (scythe_cd <= 0 && !instance_exists(scythe_instance))
 }
  
 // ---- КОНТАКТНА ШКОДА (човен б'є гравця) ----
-if (distance_to_object(obj_player) < 50 && !obj_player.is_damage)
+if (distance_to_object(obj_player) < 50 && !obj_player.is_damage && enemy_can_damage(id))
 {
     obj_player.hp       -= atk;
     var _kd = point_direction(x, y, obj_player.x, obj_player.y);

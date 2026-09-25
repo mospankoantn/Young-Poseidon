@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description
 /// obj_boss_uranus — Step Event
 
@@ -102,8 +103,9 @@ switch (state)
             enemy_anim_attack(spr_boss_uranus_attack);
             // audio_play_sound(snd_uranus_swing, 1, false);
 
-            // Шанс застрягнути (25% кожного удару)
-            if (irandom(3) == 0)
+            // Guaranteed recovery window after two swings or a broken barrier.
+            barrier_swings++;
+            if (barrier_swings mod 2 == 0 || _target_barrier.hp <= 0)
             {
                 is_stuck  = true;
                 state     = 2;
@@ -140,7 +142,7 @@ switch (state)
     case 3:
         image_xscale = (obj_player.x > x) ? 1 : -1;
 
-        if (action_cd <= 0 && !obj_player.is_damage)
+        if (action_cd <= 0 && !obj_player.is_damage && enemy_can_damage(id))
         {
             if (distance_to_object(obj_player) <= swing_range)
             {

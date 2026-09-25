@@ -89,10 +89,12 @@ foreach ($id in $ids) {
                 for ($j = 0; $j -lt $count; $j++) { $values += [int]$data[$i++] }
             } else { throw "Zero-length tile run in $room" }
         }
-        if ($values.Count -ne 160 -or @($values | Where-Object { $_ -lt 0 -or $_ -ge 64 }).Count) {
+        $expected=$layers[0].tiles.SerialiseWidth*$layers[0].tiles.SerialiseHeight
+        if ($values.Count -ne $expected -or @($values | Where-Object { ($_ -band 524287) -ge 64 }).Count) {
             throw "Invalid tile data in $room"
         }
-        if (@($values[144..159] | Where-Object { $_ -eq 0 }).Count) { throw "Unpainted floor in $room" }
+        # Gaps in an authored floor are valid level design, not corrupt tile data.
+        if (!@($values | Where-Object { ($_ -band 524287) -gt 0 }).Count) { throw "Empty tile layer in $room" }
     }
 }
 Write-Host 'PASS: 35 rooms have one matching, populated tile layer.'

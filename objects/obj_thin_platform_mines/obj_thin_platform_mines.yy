@@ -1,39 +1,42 @@
 {
-  "$GMObject":"",
-  "%Name":"obj_thin_platform_mines",
-  "eventList":[],
-  "managed":true,
-  "name":"obj_thin_platform_mines",
-  "overriddenProperties":[],
-  "parent":{
-    "name":"Объекты",
-    "path":"folders/Объекты.yy",
+  "$GMObject": "",
+  "%Name": "obj_thin_platform_mines",
+  "eventList": [],
+  "managed": true,
+  "name": "obj_thin_platform_mines",
+  "overriddenProperties": [],
+  "parent": {
+    "name": "Объекты",
+    "path": "folders/Объекты.yy"
   },
-  "parentObjectId":{
-    "name":"obj_thin_platform",
-    "path":"objects/obj_thin_platform/obj_thin_platform.yy",
+  "parentObjectId": {
+    "name": "obj_thin_platform",
+    "path": "objects/obj_thin_platform/obj_thin_platform.yy"
   },
-  "persistent":false,
-  "physicsAngularDamping":0.1,
-  "physicsDensity":0.5,
-  "physicsFriction":0.2,
-  "physicsGroup":1,
-  "physicsKinematic":false,
-  "physicsLinearDamping":0.1,
-  "physicsObject":false,
-  "physicsRestitution":0.1,
-  "physicsSensor":false,
-  "physicsShape":1,
-  "physicsShapePoints":[],
-  "physicsStartAwake":true,
-  "properties":[],
-  "resourceType":"GMObject",
-  "resourceVersion":"2.0",
-  "solid":false,
-  "spriteId":{
-    "name":"spr_thin_platform_sea",
-    "path":"sprites/spr_thin_platform_sea/spr_thin_platform_sea.yy",
+  "persistent": false,
+  "physicsAngularDamping": 0.1,
+  "physicsDensity": 0.5,
+  "physicsFriction": 0.2,
+  "physicsGroup": 1,
+  "physicsKinematic": false,
+  "physicsLinearDamping": 0.1,
+  "physicsObject": false,
+  "physicsRestitution": 0.1,
+  "physicsSensor": false,
+  "physicsShape": 1,
+  "physicsShapePoints": [],
+  "physicsStartAwake": true,
+  "properties": [],
+  "resourceType": "GMObject",
+  "resourceVersion": "2.0",
+  "solid": false,
+  "spriteId": {
+    "name": "spr_thin_platform_mines",
+    "path": "sprites/spr_thin_platform_mines/spr_thin_platform_mines.yy"
   },
-  "spriteMaskId":null,
-  "visible":true,
+  "spriteMaskId": {
+    "name": "spr_thin_platform_sea",
+    "path": "sprites/spr_thin_platform_sea/spr_thin_platform_sea.yy"
+  },
+  "visible": true
 }

@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description Логіка поведінки Грецького Воїна
 
 /// obj_greek_warrior — Step Event
@@ -80,7 +81,7 @@ switch (state)
     case 2:
         image_xscale = (obj_player.x > x) ? 1 : -1;
  
-        if (attack_cd <= 0 && !obj_player.is_damage)
+        if (attack_cd <= 0 && !obj_player.is_damage && enemy_can_damage(id))
         {
             obj_player.hp       -= atk;
             var _dir             = point_direction(x, y, obj_player.x, obj_player.y);

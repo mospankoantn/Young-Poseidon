@@ -22,6 +22,25 @@ if(second_run) {
     exit;
 }
 switch(tick) {
+    case 4:
+        obj_main_menu.startup_transition_active=false;
+        obj_main_menu.startup_transition_alpha=0;
+        obj_main_menu.startup_logo_age=60;
+        break;
+    case 6: screenshot="00a-logo.png"; break;
+    case 8:
+        obj_main_menu.startup_state="language";
+        break;
+    case 12: screenshot="00b-language.png"; break;
+    case 16:
+        with(obj_main_menu) {
+            startup_select_language("UA");
+            startup_transition_active=false;
+            startup_transition_alpha=0;
+            startup_finish();
+        }
+        check(global.yp_settings.first_run_completed,"startup language choice persisted");
+        break;
     case 20: screenshot="01-main-UA.png"; break;
     case 24:
         with(obj_main_menu) {
@@ -64,8 +83,13 @@ switch(tick) {
         yp_display_begin(1,false,true);
         yp_display_finish(true);
         break;
-    case 188: start_new_game(); break;
-    case 212: screenshot="08b-gameplay.png"; break;
+    case 188:
+        start_new_game();
+        world_state_mark("cutscene_v2_biome_sea");
+        break;
+    case 212:
+        screenshot="08b-gameplay.png";
+        break;
     case 216:
         check(instance_exists(obj_player) && instance_exists(obj_ui_controller),"new game starts");
         var _mode=global.yp_modes[1];
@@ -75,9 +99,8 @@ switch(tick) {
         p=instance_find(obj_player,0);
         px=p.x; py=p.y; php=p.hp; pf=p.image_index;
         with(obj_ui_controller) yp_pause(true);
+        check(buffer_exists(obj_ui_controller.pause_backup),"pause keeps CPU snapshot across display reset");
         instance_activate_object(id);
-        if(surface_exists(obj_ui_controller.pause_surface))
-            surface_save(obj_ui_controller.pause_surface,shots+"08c-pause-surface.png");
         break;
     case 232: screenshot="09-pause.png"; break;
     case 236:

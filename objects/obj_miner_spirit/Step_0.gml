@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description Логіка поведінки духа шахтаря
 
 /// obj_miner_spirit — Step Event
@@ -53,7 +54,7 @@ switch (state)
         image_xscale = (_move_x > 0) ? 1 : -1;
  
         // Атака в ближньому бою
-        if (_dist <= attack_range && attack_cd <= 0 && !obj_player.is_damage)
+        if (_dist <= attack_range && attack_cd <= 0 && !obj_player.is_damage && enemy_can_damage(id))
         {
             obj_player.hp       -= atk;
             var _kdir            = point_direction(x, y, obj_player.x, obj_player.y);

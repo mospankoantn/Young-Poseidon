@@ -5,6 +5,7 @@
 if (can_pickup)
 {
     world_state_mark_instance(id, "pickup");
+yp_sfx("pickup", x);
     with (other)
     {
         potion_strength_count++;

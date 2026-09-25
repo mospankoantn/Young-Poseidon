@@ -1,0 +1,182 @@
+[
+  {
+    "name": "intro",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-b3494407-f979-405b-a7e4-6ad506bab560.png",
+    "local": "Файли/Графіка/Полірування/scene_intro.png",
+    "prompt": "Use case: illustration-story. Create a polished wide 16:9 pixel-art narrative still for the game Young Poseidon, opening prologue. Young Poseidon is a small youthful boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic and bare feet, matching a 2D side-scrolling pixel-art game. Show him descending safely through a spiral of sparkling sea water from lofty white Greek temples on Mount Olympus toward the welcoming turquoise sea far below. Zeus is a distant silhouetted figure at the high temple, not the focus. Establish the long journey from the sea back to Olympus. Rich carefully clustered pixel art, warm sunlight against cyan sea, readable character face and clear environment, cinematic composition, all important content inside central 90%, no text, no typography, no borders, no UI. Actual complete scene, not a sprite sheet. Generate a single landscape image."
+  },
+  {
+    "name": "outro",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-c722bef9-a2e8-4823-b8ad-31d4501d2c0b.png",
+    "local": "Файли/Графіка/Полірування/scene_outro.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Show the triumphant boy welcomed at an open radiant gold Olympus gate, holding his golden trident high; white marble Greek temples and sunset clouds, distant sea visible below, satisfying hopeful end of a long journey."
+  },
+  {
+    "name": "sea",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-83ac22e9-956d-4c3a-809c-a290d0da2a0a.png",
+    "local": "Файли/Графіка/Полірування/scene_sea.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy stands on an ancient submerged golden-stone path in a magical turquoise underwater city, vibrant coral, schools of fish, marble ruins, caustic sunlight. No weapon in his hands."
+  },
+  {
+    "name": "coast",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-eea8573c-9708-41e8-be55-c9ba65d20f97.png",
+    "local": "Файли/Графіка/Полірування/scene_coast.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy arrives at a sunny Greek coastline with sandy beaches, palm trees, rugged limestone cliffs, turquoise surf and a ruined sea temple. He carries a gold trident."
+  },
+  {
+    "name": "mines",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-33017d41-12c8-43c8-b745-7b0eff59b2d8.png",
+    "local": "Файли/Графіка/Полірування/scene_mines.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy with golden spear enters forgotten Greek silver mines, timber supports, cart rails, warm lanterns, gray stone and luminous cyan mineral seams. Readable scene, not all dark."
+  },
+  {
+    "name": "hades",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-386b656b-e2da-4b38-be9e-6173a51fd047.png",
+    "local": "Файли/Графіка/Полірування/scene_hades.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy with bronze pickaxe approaches the river of Hades, pale green spectral reeds, old stone bridge, skull rocks, ghostly ferryman boat in distance, violet cliffs and muted green mist, eerie but adventurous."
+  },
+  {
+    "name": "greece",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-38231e80-a647-4ac4-a6cd-0a70bd7da4e2.png",
+    "local": "Файли/Графіка/Полірування/scene_greece.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy with bronze pickaxe arrives in a sunlit ancient Greek city, white marble colonnades, flowering vines, clay amphorae, distant blue hills and olive trees."
+  },
+  {
+    "name": "battlefield",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-935f6098-b67b-4676-b29e-a03a2629ecfd.png",
+    "local": "Файли/Графіка/Полірування/scene_battlefield.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy carrying a broad wooden oar crosses an ancient Greek battlefield after the battle, crumbled fortifications, bronze shields, red banners and ash drifting in a copper sunset, no gore, strong landscape composition."
+  },
+  {
+    "name": "olympus",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-1458a86e-9c4f-4277-9225-2dcecdc4ce6d.png",
+    "local": "Файли/Графіка/Полірування/scene_olympus.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Biome introduction: the boy carrying a short Greek sword ascends a monumental marble staircase into Olympus, towering white and gold temples, drifting clouds, waterfalls pouring into the sky, a bright azure and ivory palette."
+  },
+  {
+    "name": "trident",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-53a28c70-6187-499d-a40e-d40008f7f77f.png",
+    "local": "Файли/Графіка/Полірування/scene_trident.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: foreground young Poseidon joyfully raises a GOLDEN THREE-PRONGED TRIDENT over his head. Clearly behind him the defeated Triton, a blue-scaled muscular merman king with a long turquoise fish tail and gold shoulder armor, kneels exhausted among fallen rocks in an underwater ruin. Triton is defeated but alive, no gore. Hero, weapon and defeated boss all clearly readable."
+  },
+  {
+    "name": "spear",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-3e2dacee-6beb-4938-8143-627b13a50612.png",
+    "local": "Файли/Графіка/Полірування/scene_spear.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: young Poseidon raises a long GOLDEN SPEAR with ONE pointed spearhead. Behind him a defeated female forest nymph centaur warrior with green hair, golden armor and brown horse body kneels exhausted on a sandy coastal arena. Hero distinct from boss, no gore."
+  },
+  {
+    "name": "pickaxe",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-13ea5b69-8239-4e28-becc-c36517a856aa.png",
+    "local": "Файли/Графіка/Полірування/scene_pickaxe.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: young Poseidon raises a BRONZE MINING PICKAXE overhead with both hands. Behind him the defeated Uranus, a huge elderly bearded stone miner titan in weathered bronze work armor, sits slumped beside broken stone barriers in lantern-lit mines. No gore."
+  },
+  {
+    "name": "scythe",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-ea70fc84-6f3e-4453-bdba-8daf6c980623.png",
+    "local": "Файли/Графіка/Полірування/scene_scythe.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: young Poseidon raises a long-handled curved silver SCYTHE overhead. Behind him defeated Charon, a hooded spectral ferryman in dark teal robes, slumps in a grounded wooden boat on the river Styx beside shattered stalactites. Green-violet underworld lighting, clearly visible characters, no gore."
+  },
+  {
+    "name": "oar",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-f111963d-a264-40d7-aac8-8f1575338ff4.png",
+    "local": "Файли/Графіка/Полірування/scene_oar.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: young Poseidon raises a long broad-bladed WOODEN ROWING OAR overhead in triumph. Behind him the defeated Minotaur, a large bull-headed muscular warrior in bronze armor, kneels amongst six broken marble columns in a sunlit Greek courtyard. No gore."
+  },
+  {
+    "name": "sword",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-bc957316-3a02-4374-b05d-c57cba8dea8c.png",
+    "local": "Файли/Графіка/Полірування/scene_sword.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Boss reward scene: young Poseidon raises a bronze and gold short GREEK SWORD overhead. Behind him a defeated spectral Greek warlord, the Ghost of War in teal translucent armor and torn red cloak, kneels exhausted amid old shields, bones and banners on a sunset battlefield. No gore."
+  },
+  {
+    "name": "key",
+    "kind": "scene",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-868479a6-0061-47f2-966c-1685a7a05316.png",
+    "local": "Файли/Графіка/Полірування/scene_key.png",
+    "prompt": "Use case: illustration-story. Asset: a single wide 16:9 cutscene still for the 2D pixel-art game Young Poseidon. High quality consistent clustered pixel art, legible character silhouettes, detailed Greek myth setting, lively color and cinematic lighting. No text, UI, frame, montage or typography. Important subjects fit within central 90%. The protagonist is a youthful small boy with curly cobalt-blue hair, tan skin, bare chest, turquoise Greek waist tunic, gold clasp, bare feet. Final boss reward scene: young Poseidon raises a large radiant GOLDEN OLYMPUS KEY. Behind him the defeated THREE FATES, three elderly mystic women in violet, indigo and gold robes, sit calmly exhausted beside slack threads of fate on a white marble Olympus terrace. Clearly three defeated figures, no gore."
+  },
+  {
+    "name": "coast",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-e5025fc7-a1b7-462f-94d8-05a3eccc0863.png",
+    "local": "Файли/Графіка/Полірування/terrain_coast.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: sun-bleached sandstone cliffs with warm sandy edges and inset shells; pale gold, terracotta and turquoise accents. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "mines",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-977bfc01-2252-4385-85c1-dd8aa57bf885.png",
+    "local": "Файли/Графіка/Полірування/terrain_mines.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: dark charcoal-gray hewn mine blocks, iron reinforcements, cyan quartz seams, strong lighter stone top edges. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "hades",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-c8113163-12ca-40bf-b5ef-ce0492e0dba4.png",
+    "local": "Файли/Графіка/Полірування/terrain_hades.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: cracked dark violet underworld basalt, dull green moss, sparse jade luminous runes; clear stone upper surfaces. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "greece",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-dcb5d291-9a3d-4e49-b0e6-9fe8b256dae4.png",
+    "local": "Файли/Графіка/Полірування/terrain_greece.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: weathered ivory marble blocks, Greek meander gold friezes, olive vines, cool gray stone joints. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "battlefield",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-8fea9ffa-99bc-4d09-b1e8-9529f79f3f9a.png",
+    "local": "Файли/Графіка/Полірування/terrain_battlefield.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: dark red-brown scorched masonry, bronze fragments, chipped warm terracotta upper edges, subtle soot and ember cracks. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "olympus",
+    "kind": "terrain",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-a3ffe31b-4e06-4e1d-be4b-0446c848b8ee.png",
+    "local": "Файли/Графіка/Полірування/terrain_olympus.png",
+    "prompt": "Use case: stylized-concept. Production 2D side-scrolling pixel-art terrain material sheet for Young Poseidon. Square 1024x1024 image, exact regular 8 columns by 8 rows tile grid, no gutters, no outlines around the grid, no text, no labels, no scene perspective. Every cell is 128x128. Material: radiant white marble cloud-temple blocks, ornate but crisp gold Greek trim, pale cyan crystals, pearly highlights. Row 1 full solid material variations, row 2 full solid blocks with a flat bright walkable top lip aligned exactly at their top edge (ground surface tiles), row 3 left and right edge blocks alternating, row 4 bottom-edge blocks. Rows 5-8 additional full solid masonry blocks with restrained ornamental variations. All tiles occupy their entire cell; NO transparent background and NO scenery, characters, plants sticking out, UI, isolated floating islands or dark unused area. Crisp pixel clusters and sharp nearest-neighbor style. Rows must join cleanly into usable side-view game platforms. Avoid huge noisy diagonal scratches, avoid blurry photo textures. Build an attractive cohesive material atlas."
+  },
+  {
+    "name": "eclipse_wire",
+    "kind": "logo",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-8ae42bec-6302-47c1-89f3-693d0ddf15ab.png",
+    "local": "Файли/Графіка/Полірування/logo_eclipse_wire.png",
+    "prompt": "Use case: logo-brand. Create a professional transparent PNG studio logo for ECLIPSE WIRE, indie game studio. Clean silver-white antique Greek key silhouette with an eclipsed ring bow and precise geometric shaft, subtle engraved detail, strong small-size readability. Horizontal lockup with restrained uppercase custom serif wordmark ECLIPSE WIRE beside the icon, exactly this text, no tagline. Flat white and pale silver shapes, no dark filled rectangular background, genuine alpha transparency, no mockup, no extra text, no border, no grunge noise. Wide landscape aspect ratio. Crisp dignified mark appropriate for the startup splash of a Greek mythology pixel-art adventure."
+  },
+  {
+    "name": "zone_background_atlas",
+    "kind": "background_atlas",
+    "generated": "C:\\Users\\Олег\\.codex\\generated_images\\019dc5ef-83e1-7023-9d86-20a2ac4a60a3\\exec-7e7e2c9e-eef4-40fa-8a53-903d8c591626.png",
+    "local": "Файли/Графіка/Полірування/zone_background_atlas.png",
+    "width": 1254,
+    "height": 1254,
+    "columns": 2,
+    "rows": 3,
+    "order": [
+      "coast",
+      "mines",
+      "hades",
+      "greece",
+      "battlefield",
+      "olympus"
+    ],
+    "prompt": "Six pixel-art background panoramas in an exact 2-column by 3-row square atlas: turquoise Aegean coast; teal-lit forgotten mine; violet Hades with green river; Greek temples and cypresses in daylight; rose-red battlefield at dusk; bright cloudborne Olympus. No characters, foreground platforms, labels or UI. Quiet central gameplay space. Equal 3:2 panels, hard boundaries, no gutters."
+  }
+]

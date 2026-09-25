@@ -3,6 +3,8 @@
 
 room_hud_update_zone();
 room_route_exits_rebuild();
+yp_zone_audio_start();
+yp_zone_decor_start();
 
 if (variable_global_exists("load_pending") && global.load_pending)
 {

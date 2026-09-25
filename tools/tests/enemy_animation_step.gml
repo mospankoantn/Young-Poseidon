@@ -23,7 +23,8 @@ switch (phase)
         break;
     case 1:
         if (!instance_exists(current)) { fail("destroyed before attack"); break; }
-        if (current.mask_index != spr_giant_crab) { fail("collision mask changed"); break; }
+        var expected_mask = name == "giant_crab" ? spr_giant_crab_mask : spr_giant_crab;
+        if (current.mask_index != expected_mask) { fail("collision mask changed"); break; }
         if (current.sprite_index != idle && current.sprite_index != moving
             && !(current.sprite_index == attack && current.anim_attack_elapsed >= 0))
         {

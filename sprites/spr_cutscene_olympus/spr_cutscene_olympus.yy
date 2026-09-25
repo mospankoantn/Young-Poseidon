@@ -2,9 +2,9 @@
   "$GMSprite": "v2",
   "%Name": "spr_cutscene_olympus",
   "bboxMode": 0,
-  "bbox_bottom": 269,
+  "bbox_bottom": 539,
   "bbox_left": 0,
-  "bbox_right": 479,
+  "bbox_right": 959,
   "bbox_top": 0,
   "collisionKind": 1,
   "collisionTolerance": 0,
@@ -22,7 +22,7 @@
   ],
   "gridX": 0,
   "gridY": 0,
-  "height": 270,
+  "height": 540,
   "HTile": false,
   "layers": [
     {
@@ -143,5 +143,5 @@
   },
   "type": 0,
   "VTile": false,
-  "width": 480
+  "width": 960
 }

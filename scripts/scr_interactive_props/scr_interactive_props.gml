@@ -42,3 +42,19 @@ function prop_nearest_button() {
     }
     return _best;
 }
+function yp_zone_decor_start()
+{
+    var _object=asset_get_index("obj_decor_"+yp_zone_id());
+    if (_object == -1 || instance_exists(_object)) return;
+    if (!instance_exists(obj_zone_background))
+        instance_create_depth(0,0,150,obj_zone_background);
+    for(var _i=0;_i<12;_i++) {
+        var _decor=instance_create_depth((_i+0.5)*room_width/12,80+(_i*67 mod max(1,room_height-180)),100,_object);
+        _decor.ambient_source=(_i==0);
+    }
+}
+
+function yp_fx_alpha(_alpha)
+{
+    return clamp(_alpha * 0.68, 0, 0.38);
+}

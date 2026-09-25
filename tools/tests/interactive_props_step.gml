@@ -2,6 +2,7 @@ tick++;
 if(tick==20){
     for(var _weapon=0;_weapon<2;_weapon++) for(var _side=-1;_side<=1;_side+=2){
         p.x=300;p.y=300;p.vspd=0;p.l_right=_side>0;p.current_weapon=_weapon;p.weapon_unlocked[_weapon]=true;
+        t=p._find_throwable(_weapon,true);
         t.thrown=false;t.stuck=false;t.x=p.x;t.y=p.y;
         global.test_attack_pressed=true;
         with(p) event_perform(ev_step,ev_step_normal);
@@ -19,6 +20,7 @@ if(tick==20){
     var _b1=instance_create_layer(650,236,"Instances",obj_interactive_button);
     var _b2=instance_create_layer(740,236,"Instances",obj_interactive_button);
     check(_b1.press_button(),"button starts first rock");
+    check(p.anim_action_sprite==spr_player_interact && _b1.press_pulse>0,"button animates player and mechanism");
     check(_r1.state==1 && _r2.state==0,"one rock at a time");
     check(!_b2.press_button() && !_b2.is_pressed,"busy button is not consumed");
     with(_r1) repeat(100) event_perform(ev_step,ev_step_normal);
@@ -29,7 +31,7 @@ if(tick==20){
     check(_b2.press_button() && _r2.state==1,"next button launches next rock");
     with(_r2) repeat(400) event_perform(ev_step,ev_step_normal);
     p.weapon_unlocked[0]=false;_boss.x=600;_boss.y=0;
-    with(_boss) repeat(182) event_perform(ev_step,ev_step_normal);
+    with(_boss) repeat(212) event_perform(ev_step,ev_step_normal);
     check(_r1.state==0 && _r2.state==0 && !_r1.hit_boss,"wave recharges without a softlock");
     with(obj_falling_rocks) instance_destroy();instance_destroy(_boss);
     instance_destroy(_b1);instance_destroy(_b2);

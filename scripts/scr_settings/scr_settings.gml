@@ -83,10 +83,59 @@ function yp_apply_audio() {
     audio_sound_gain(snd_jump,_s.sfx,0);
     audio_sound_gain(snd_swing,_s.sfx,0);
     audio_sound_gain(snd_startup_jingle,max(_s.music,_s.sfx) * 0.55,0);
+    if (variable_global_exists("zone_music_voice") && audio_is_playing(global.zone_music_voice))
+        audio_sound_gain(global.zone_music_voice, _s.music * 0.55, 150);
+    var _effects = ["enemy_hit","boss_hit","enemy_death","boss_death","attack","pickup","reward",
+        "potion","button","stone","checkpoint","door","player_hurt","wind","water","fire","drip","wisp"];
+    for (var _i = 0; _i < array_length(_effects); _i++)
+    {
+        var _asset = asset_get_index("snd_fx_" + _effects[_i]);
+        if (_asset != -1) audio_sound_gain(_asset, _s.sfx * 0.5, 0);
+    }
+}
+
+function yp_zone_id()
+{
+    var _parts = string_split(room_get_name(room), "_");
+    return array_length(_parts) >= 3 ? _parts[1] : "";
+}
+
+function yp_sfx(_name, _x = -1)
+{
+    var _sound = asset_get_index("snd_fx_" + _name);
+    if (_sound == -1) return -1;
+    if (!variable_global_exists("sfx_last")) global.sfx_last = {};
+    if (variable_struct_exists(global.sfx_last, _name)
+        && current_time - variable_struct_get(global.sfx_last, _name) < 65) return -1;
+    variable_struct_set(global.sfx_last, _name, current_time);
+    var _voice = audio_play_sound(_sound, 2, false);
+    var _volume = variable_global_exists("yp_settings") ? global.yp_settings.sfx : 1;
+    if (_x >= 0 && instance_exists(obj_player))
+        _volume *= clamp(1 - abs(_x - obj_player.x) / 1400, 0.15, 1);
+    audio_sound_gain(_voice, _volume * 0.5, 0);
+    return _voice;
+}
+
+function yp_zone_audio_start()
+{
+    yp_settings_init();
+    var _asset = asset_get_index("snd_zone_" + yp_zone_id());
+    if (!variable_global_exists("zone_music_asset")) global.zone_music_asset = -1;
+    if (!variable_global_exists("zone_music_voice")) global.zone_music_voice = -1;
+    if (_asset == global.zone_music_asset && audio_is_playing(global.zone_music_voice)) return;
+    if (audio_is_playing(global.zone_music_voice)) audio_stop_sound(global.zone_music_voice);
+    global.zone_music_asset = _asset;
+    global.zone_music_voice = -1;
+    if (_asset == -1) return;
+    audio_stop_sound(snd_olympus_overture);
+    global.zone_music_voice = audio_play_sound(_asset, 5, true);
+    audio_sound_gain(global.zone_music_voice, 0, 0);
+    audio_sound_gain(global.zone_music_voice, global.yp_settings.music * 0.55, 800);
 }
 
 function yp_apply_display() {
     var _s = global.yp_settings;
+    global.yp_display_recovery_frames = 120;
     gpu_set_texfilter(_s.smoothing);
     display_reset(0,_s.vsync);
     window_set_fullscreen(_s.fullscreen);

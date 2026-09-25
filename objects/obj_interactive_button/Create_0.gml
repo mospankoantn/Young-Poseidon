@@ -22,6 +22,7 @@ interact_range = 60;
 // image_index = 1 → натиснута (внизу)
 image_index  = 0;
 image_speed  = 0;   // Керуємо кадрами вручну
+press_pulse = 0;
 press_button = function() {
     if(is_pressed) return false;
     var _ok=false;
@@ -32,6 +33,9 @@ press_button = function() {
         _ok=true;
     }
     if(!_ok) return false;
+    press_pulse = 18;
+    yp_sfx("button", x);
+    if (instance_exists(obj_player)) obj_player._interact_pose(x);
     is_pressed=true;image_index=1;
     if(one_time_use) world_state_mark_instance(id,"activated");
     if(!one_time_use) alarm[0]=max(1,round(room_speed*0.25));

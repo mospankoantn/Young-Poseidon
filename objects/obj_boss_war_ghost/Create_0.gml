@@ -4,7 +4,8 @@
 boss_name_key = "boss_war_ghost";
 max_hp    = 50;
 hp        = max_hp;
-atk       = 4;
+atk       = 2;
+contact_damage_enabled = false;
 phase     = 1;
  
 // ---- 5 ТОЧОК ЗИГЗАГУ (верхня частина кімнати) ----
@@ -49,3 +50,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

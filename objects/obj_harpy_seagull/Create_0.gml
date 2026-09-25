@@ -36,3 +36,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

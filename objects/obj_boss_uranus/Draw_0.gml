@@ -19,4 +19,4 @@ else
 {
     image_blend = c_white;
 }
-draw_self();
+enemy_draw_body();

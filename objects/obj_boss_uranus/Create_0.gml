@@ -4,7 +4,9 @@
 boss_name_key = "boss_uranus";
 max_hp    = 40;
 hp        = max_hp;
-atk       = 5;
+atk       = 2;
+contact_damage_enabled = false;
+barrier_swings = 0;
 phase     = 1;
  
 // ---- ПОЗИЦІЯ ----
@@ -41,3 +43,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

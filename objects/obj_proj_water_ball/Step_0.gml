@@ -12,7 +12,7 @@ if (lifetime <= 0 || place_meeting(x, y, obj_platform))
     exit;
 }
  
-if (instance_exists(obj_player) && place_meeting(x, y, obj_player) && !obj_player.is_damage)
+if (instance_exists(obj_player) && place_meeting(x, y, obj_player) && !obj_player.is_damage && !obj_player.is_dead)
 {
     obj_player.hp       -= damage;
     obj_player.hspd     = hspd * 0.5;

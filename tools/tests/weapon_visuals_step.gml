@@ -37,6 +37,7 @@ if (tick == 1)
         check(p.mask_index == spr_player, "player mask");
     }
     p.current_weapon = 1;
+    t = p._find_throwable(1, true);
     t.thrown = true;
     check(p._weapon_locomotion(false) == spr_player_idle, "duplicate held projectile");
     t.thrown = false;
@@ -47,6 +48,7 @@ if (tick == 1)
     check(sprite_get_width(ledge.mask_index) == 32 && sprite_get_height(ledge.mask_index) == 10, "ledge dimensions changed");
     instance_destroy(ledge);
     t.stuck = false;
+    t.x=p.x;t.y=p.y;p.anim_action_timer=0;p.is_damage=false;
     p.l_right = true;
     global.test_attack_pressed = true;
     with (p) event_perform(ev_step, ev_step_normal);
@@ -56,7 +58,7 @@ if (tick == 3)
 {
     check(t.visual_weapon == 1, "spear throw appearance: weapon=" + string(p.current_weapon) + " thrown=" + string(t.thrown));
     check(t.damage == p.weapon_atk[1], "spear projectile damage");
-    check(p.anim_action_sprite == spr_player_spear_cast, "cast input");
+    check(p.anim_action_sprite == spr_player_spear_cast, "cast input: sprite="+sprite_get_name(p.anim_action_sprite)+" timer="+string(p.anim_action_timer)+" thrown="+string(t.thrown));
     check(t.mask_index == spr_weapon_collision, "throw mask");
     global.test_recall_pressed = true;
     with (p) event_perform(ev_step, ev_step_normal);

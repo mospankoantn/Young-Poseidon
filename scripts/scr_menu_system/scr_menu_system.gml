@@ -82,9 +82,12 @@ function yp_pause(_enable) {
     if (_enable == game_paused) return;
     if (_enable) {
         with (obj_weapon_selector) instance_destroy();
+        // A display mode change can invalidate the cached surface between Draw and Step.
+        if (!surface_exists(pause_surface)) yp_capture_world();
         if (surface_exists(pause_surface)) {
             pause_width=surface_get_width(pause_surface);
             pause_height=surface_get_height(pause_surface);
+            if (buffer_exists(pause_backup)) buffer_delete(pause_backup);
             pause_backup=buffer_create(pause_width*pause_height*4,buffer_fixed,1);
             buffer_get_surface(pause_backup,pause_surface,0);
         }
@@ -131,6 +134,15 @@ function yp_capture_world() {
     }
     if(!surface_exists(pause_surface)) pause_surface=surface_create(_w,_h);
     surface_copy(pause_surface,0,0,application_surface);
+    // Retain a CPU copy briefly around display resets, when all GPU surfaces may disappear.
+    if (variable_global_exists("yp_display_recovery_frames") && global.yp_display_recovery_frames > 0) {
+        global.yp_display_recovery_frames--;
+        pause_width=_w;pause_height=_h;
+        var _bytes=_w*_h*4;
+        if (buffer_exists(pause_backup) && buffer_get_size(pause_backup)!=_bytes) buffer_delete(pause_backup);
+        if (!buffer_exists(pause_backup)) pause_backup=buffer_create(_bytes,buffer_fixed,1);
+        buffer_get_surface(pause_backup,pause_surface,0);
+    }
 }
 
 function yp_menu_rows() {

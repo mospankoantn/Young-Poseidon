@@ -4,8 +4,9 @@
 // ВАЖЛИВО: ця подія спрацьовує КОЖЕН кадр поки є зіткнення,
 // тому використовуємо is_damage як захист від подвійного урону
 
-if (!is_dead && hp > 0 && !is_damage)
+if (!is_dead && hp > 0 && !is_damage && enemy_can_damage(other))
 {
+    if (variable_instance_exists(other, "contact_damage_enabled") && !other.contact_damage_enabled) exit;
     // Не кожен нащадок obj_enemy має контактну атаку (наприклад, Мойри).
     // Відсутній atk трактуємо як 0, щоб зіткнення не падало з runtime error.
     var _contact_damage = variable_instance_exists(other, "atk") ? max(0, other.atk) : 0;

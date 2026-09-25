@@ -3,6 +3,7 @@ report="__REPORT__";
 done="__DONE__";
 shots="__SHOTS__";
 tick=0; screenshot="";
+global.test_cutscene_advance=true;
 depth=-1000000;
 second_run=file_exists(done);
 check=function(_ok,_message) {

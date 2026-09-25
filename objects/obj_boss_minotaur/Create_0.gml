@@ -4,7 +4,11 @@
 boss_name_key = "boss_minotaur";
 max_hp    = 60;
 hp        = max_hp;
-atk       = 4;
+atk       = 2;
+contact_damage_enabled = false;
+attack_windup = 0;
+attack_target_column = noone;
+attack_target_x = x;
 phase     = 1;
  
 // ---- РУХ ----
@@ -33,3 +37,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

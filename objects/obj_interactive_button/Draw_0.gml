@@ -1,4 +1,10 @@
 draw_self();
+if (press_pulse > 0) {
+    draw_set_color(make_color_rgb(100, 235, 208));
+    draw_set_alpha(press_pulse / 18);
+    draw_circle((bbox_left+bbox_right)*0.5, bbox_top+5, 12+(18-press_pulse)*1.8, true);
+    draw_set_alpha(1);draw_set_color(c_white);
+}
 if(!prop_player_near(interact_range) || prop_nearest_button()!=id) exit;
 var _text="["+yp_key_name("E")+"] "+yp_text("Скинути камінь","Drop rock");
 var _color=make_color_rgb(245,208,113);

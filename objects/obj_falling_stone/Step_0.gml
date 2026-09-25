@@ -12,12 +12,12 @@ while(_remaining>0) {
     if(place_meeting(x,y+_dy,obj_platform)){landed=true;image_index=1;vspd=0;break;}
     y+=_dy;_remaining-=_dy;
     if(!hit_boss && instance_exists(obj_boss_charon) && place_meeting(x,y,obj_boss_charon)){
-        if(obj_boss_charon.hp>0) obj_boss_charon.hp-=damage;
+        if(obj_boss_charon.hp>0) enemy_take_hit(obj_boss_charon,damage,x);
         hit_boss=true;
     }
     if(!hit_player && instance_exists(obj_player) && !obj_player.is_dead
         && place_meeting(x,y,obj_player) && !obj_player.is_damage) {
-        obj_player.hp-=damage;obj_player.vspd=-3;
+        obj_player.hp-=1;obj_player.vspd=-3;
         obj_player.is_damage=true;obj_player.alarm[0]=room_speed;hit_player=true;
     }
 }

@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description 
 /// obj_boss_triton — Step Event
 
@@ -69,7 +70,7 @@ else
  
 // ---- КОНТАКТНА ШКОДА ----
 if (contact_cd <= 0 && distance_to_object(obj_player) < 40
-    && !obj_player.is_damage)
+    && !obj_player.is_damage && enemy_can_damage(id))
 {
     obj_player.hp       -= atk;
     var _kd = point_direction(x, y, obj_player.x, obj_player.y);

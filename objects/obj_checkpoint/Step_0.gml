@@ -26,5 +26,5 @@ if (place_meeting(x, y, obj_player))
     // Slot 0 is reserved for autosave.
     autosave_game();
 
-    // audio_play_sound(snd_checkpoint, 1, false);
+    yp_sfx("checkpoint", x);
 }

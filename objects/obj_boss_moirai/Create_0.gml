@@ -24,9 +24,9 @@ wave_cd        = 0;
 wave_cd_max    = room_speed * 0.5;  // Не частіше ніж раз на 0.5с
  
 // ---- ВИКЛИК ВОГНЮ ----
-fire_cd     = 0;
-fire_cd_max = room_speed * 1.5;   // Новий вогонь кожні 1.5 секунди
-max_fires   = 8;                  // Максимум вогнів одночасно
+fire_cd     = room_speed * 2;
+fire_cd_max = room_speed * 2.5;
+max_fires   = 4;
  
 // ---- ДВІ ТІНІ ----
 shadow1_point = 1;
@@ -41,3 +41,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

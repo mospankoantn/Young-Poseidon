@@ -21,7 +21,10 @@ var _ground_now = variable_instance_exists(id, "grounded")
 var _hurt_now = hp < anim_last_hp || (is_damage && !anim_was_damage);
 
 if (_hurt_now && hp > 0)
+{
+    yp_sfx("player_hurt", x);
     _play_player_action(spr_player_hurt);
+}
 else if (_ground_now && !anim_was_on_ground && anim_action_timer <= 0)
     _play_player_action(spr_player_land);
 

@@ -2,9 +2,9 @@
   "$GMSprite": "v2",
   "%Name": "spr_logo_eclipse_wire",
   "bboxMode": 0,
-  "bbox_bottom": 511,
+  "bbox_bottom": 239,
   "bbox_left": 0,
-  "bbox_right": 767,
+  "bbox_right": 719,
   "bbox_top": 0,
   "collisionKind": 1,
   "collisionTolerance": 0,
@@ -22,7 +22,7 @@
   ],
   "gridX": 0,
   "gridY": 0,
-  "height": 512,
+  "height": 240,
   "HTile": false,
   "layers": [
     {
@@ -132,8 +132,8 @@
     ],
     "visibleRange": null,
     "volume": 1.0,
-    "xorigin": 384,
-    "yorigin": 256
+    "xorigin": 360,
+    "yorigin": 120
   },
   "swatchColours": null,
   "swfPrecision": 2.525,
@@ -143,5 +143,5 @@
   },
   "type": 0,
   "VTile": false,
-  "width": 768
+  "width": 720
 }

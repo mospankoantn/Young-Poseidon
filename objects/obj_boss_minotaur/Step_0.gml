@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description
 /// obj_boss_minotaur — Step Event
 
@@ -32,13 +33,37 @@ y += vspd;
 if (column_strike_cd > 0) column_strike_cd--;
 if (melee_cd         > 0) melee_cd--;
 
+if (attack_windup > 0)
+{
+    attack_windup--;
+    if (attack_windup == 0)
+    {
+        enemy_anim_attack(spr_boss_minotaur_attack);
+        yp_sfx("stone", x);
+        if (instance_exists(attack_target_column) && abs(attack_target_column.x-x) <= 110)
+            attack_target_column.hp--;
+        if (enemy_can_damage(id) && !obj_player.is_dead && !obj_player.is_damage
+            && abs(obj_player.x-attack_target_x) < 58 && distance_to_object(obj_player) <= 100)
+        {
+            obj_player.hp -= atk;
+            obj_player.hspd = (obj_player.x >= x ? 1 : -1) * 7;
+            obj_player.vspd = -5;
+            obj_player.is_damage = true;
+            obj_player.alarm[0] = room_speed;
+        }
+        melee_cd = melee_cd_max;
+        column_strike_cd = column_strike_cd_max;
+    }
+    exit;
+}
+
 // ---- РУХ ДО ГРАВЦЯ ----
 var _dir_x = sign(obj_player.x - x);
 var _move  = _dir_x * move_speed;
 
 if (!place_meeting(x + _move, y, obj_platform))
     x += _move;
-image_xscale = _dir_x;
+if (_dir_x != 0) image_xscale = _dir_x;
 
 var _dist = distance_to_object(obj_player);
 
@@ -59,34 +84,18 @@ for (var _i = 0; _i < _cn; _i++)
     }
 }
 
-if (instance_exists(_player_on_column) && column_strike_cd <= 0)
+if (instance_exists(_player_on_column) && column_strike_cd <= 0
+    && abs(_player_on_column.x-x) <= 95)
 {
-    // Б'ємо по колоні
-    _player_on_column.hp--;
-    column_strike_cd = column_strike_cd_max;
-    enemy_anim_attack(spr_boss_minotaur_attack);
-    // audio_play_sound(snd_minotaur_strike, 1, false);
-
-    // Шкода гравцю якщо він на колоні під час удару
-    if (!obj_player.is_damage)
-    {
-        obj_player.hp       -= atk;
-        obj_player.vspd     = -5;
-        obj_player.is_damage = true;
-        obj_player.alarm[0]  = room_speed;
-    }
+    attack_target_column = _player_on_column;
+    attack_target_x = obj_player.x;
+    attack_windup = round(room_speed * 0.65);
 }
 else if (!instance_exists(_player_on_column)
          && _dist <= melee_range && melee_cd <= 0
-         && !obj_player.is_damage)
+         && !obj_player.is_damage && enemy_can_damage(id))
 {
-    // Гравець на землі — звичайна атака
-    obj_player.hp       -= atk;
-    var _kd = point_direction(x, y, obj_player.x, obj_player.y);
-    obj_player.hspd     = lengthdir_x(9, _kd);
-    obj_player.vspd     = -5;
-    obj_player.is_damage = true;
-    obj_player.alarm[0]  = room_speed;
-    melee_cd = melee_cd_max;
-    enemy_anim_attack(spr_boss_minotaur_attack);
+    attack_target_column = noone;
+    attack_target_x = obj_player.x;
+    attack_windup = round(room_speed * 0.5);
 }

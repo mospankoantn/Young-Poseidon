@@ -2,6 +2,7 @@
 /// obj_pickup_trident_reward — User Event 0
 
 world_state_mark_instance(id, "pickup");
+yp_sfx("reward", x);
 with (obj_player) { _unlock_weapon(0); }
 show_weapon_cutscene("trident");
 autosave_game();

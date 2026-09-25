@@ -1,3 +1,4 @@
+if (press_pulse > 0) press_pulse--;
 if (instance_exists(obj_player) && point_distance(x, y, obj_player.x, obj_player.y) <= 90)
     yp_trigger_hint("triton_button", "hint_triton_button", 240);
 

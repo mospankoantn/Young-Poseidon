@@ -68,7 +68,7 @@ if (thrown && !invisible_time)
         var _bonus = variable_instance_exists(_player, "temp_atk_buff")
             ? _player.temp_atk_buff : 0;
         if (variable_instance_exists(_hit, "hp"))
-            _hit.hp -= damage + _bonus;
+            enemy_take_hit(_hit, damage + _bonus, x);
 
         thrown = false;
         timer = 0;

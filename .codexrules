@@ -50,6 +50,10 @@
 - Boss victory and reward collection are separate explicit world-state records. Never infer a defeated boss only
   from an unlocked weapon/key; debug rewards must not silently complete fights.
 - Do not change checkpoint coordinates, item-gated routes or save semantics as an unrelated fix.
+- Apply hostile actor damage through enemy_take_hit and guard retaliation with enemy_can_damage.
+- Enemy/projectile owners must not deal contact damage during hurt or death; preserve summon ownership.
+- Preserve six biome platform masks (spr_thin_platform_sea) independently from their visual sprites.
+- New polish resources are checked by validate_portfolio_resources.ps1; gameplay and presentation by test_portfolio.ps1 and test_world_presentation.ps1.
 
 ## Verification and Reporting
 - Use PowerShell 7 for tools. Run focused validators for the resources touched.

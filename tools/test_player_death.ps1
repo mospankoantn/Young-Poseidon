@@ -46,16 +46,28 @@ if($TestPrefix -eq 'weapon_visuals') {
     $code=$code.Replace('yp_input("F",true)','global.test_recall_pressed')
     [IO.File]::WriteAllText($playerStep,$code,$utf8)
 }
+if($TestPrefix -eq 'portfolio') {
+    $path=Join-Path $projectDir 'objects/obj_player/Step_0.gml'
+    $code=[IO.File]::ReadAllText($path).Replace('yp_input("W",true)','global.test_jump').Replace('yp_input("W",false)','global.test_jump_held').Replace('yp_input("D",false)','global.test_right').Replace('yp_input("E",true)','global.test_attack')
+    [IO.File]::WriteAllText($path,$code,$utf8)
+}
 if($TestPrefix -eq 'interactive_props') {
     foreach($file in Get-ChildItem -LiteralPath (Join-Path $projectDir 'objects') -Filter '*.gml' -Recurse) {
         $code=[IO.File]::ReadAllText($file.FullName)
         $code=$code.Replace('yp_input("E",true)','global.test_attack_pressed').Replace('yp_input("F",true)','global.test_recall_pressed')
+        $code=$code.Replace('yp_input("E", true)','global.test_attack_pressed').Replace('yp_input("F", true)','global.test_recall_pressed')
         [IO.File]::WriteAllText($file.FullName,$code,$utf8)
     }
     $draw=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/interactive_props_draw.gml') -Raw
     [IO.File]::WriteAllText((Join-Path $projectDir 'objects/obj_main_menu/Draw_64.gml'),$draw,$utf8)
 }
 $path=Join-Path $projectDir 'options/windows/options_windows.yy'
+# These isolated combat/save fixtures do not exercise modal UI. Menu tests use the real prologue.
+$cutscenePath=Join-Path $projectDir 'scripts/scr_cutscene_system/scr_cutscene_system.gml'
+$code=[IO.File]::ReadAllText($cutscenePath)
+$code=[regex]::Replace($code,'(function show_cutscene\(_pages, _close_action, _state_key\)\s*\{)','$1 return noone;')
+$code=[regex]::Replace($code,'(function show_intro_cutscene\(\)\s*\{)','$1 room_goto(rm_sea_1); return noone;')
+[IO.File]::WriteAllText($cutscenePath,$code,$utf8)
 $options=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json -Depth 100
 $options.option_windows_disable_sandbox=$true
 Save-Json $path $options

@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description Логіка поведінки гарпії
 
 ///  obj_harpy_seagull — Step Event
@@ -96,7 +97,7 @@ switch (dive_state)
         image_xscale = (_dx > 0) ? 1 : -1;
  
         // Перевірка удару
-        if (distance_to_object(obj_player) <= attack_range && !obj_player.is_damage)
+        if (distance_to_object(obj_player) <= attack_range && !obj_player.is_damage && enemy_can_damage(id))
         {
             obj_player.hp       -= atk;
             var _dir             = point_direction(x, y, obj_player.x, obj_player.y);

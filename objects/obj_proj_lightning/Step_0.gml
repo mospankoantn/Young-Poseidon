@@ -14,7 +14,7 @@ if (!struck)
         // Удар блискавки
         if (instance_exists(obj_player)
             && point_distance(target_x, target_y, obj_player.x, obj_player.y) < 50
-            && !obj_player.is_damage)
+            && !obj_player.is_damage && !obj_player.is_dead)
         {
             obj_player.hp       -= damage;
             obj_player.vspd     = -8;

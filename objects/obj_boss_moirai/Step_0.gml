@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description 
 /// obj_boss_moirai — Step Event
 
@@ -5,7 +6,7 @@ if (is_dead || !instance_exists(obj_player)) exit;
 if (world_state_boss_defeated("moirai"))
 {
     world_state_spawn_boss_reward("moirai", obj_pickup_olympus_key, x, y);
-    with (obj_olympus_fire) instance_destroy();
+    with (obj_olympus_fire) if (variable_instance_exists(id,"summon_owner") && summon_owner == other.id) instance_destroy();
     instance_destroy();
     exit;
 }
@@ -17,7 +18,7 @@ if (hp <= 0)
     world_state_mark_boss_defeated("moirai");
     world_state_spawn_boss_reward("moirai", obj_pickup_olympus_key, x, y);
     // Знищуємо всі вогні
-    with (obj_olympus_fire) instance_destroy();
+    with (obj_olympus_fire) if (variable_instance_exists(id,"summon_owner") && summon_owner == other.id) instance_destroy();
     autosave_game();
     instance_destroy();
     exit;
@@ -30,7 +31,7 @@ if (wave_cd > 0) wave_cd--;
 if (hp < last_hp && wave_cd <= 0)
 {
     // Отримали шкоду — хвиля відкидає гравця
-    if (instance_exists(obj_player) && !obj_player.is_damage)
+    if (instance_exists(obj_player) && !obj_player.is_damage && enemy_can_damage(id) && distance_to_object(obj_player) < 180)
     {
         var _kd = point_direction(x, y, obj_player.x, obj_player.y);
         obj_player.hspd     = lengthdir_x(wave_knockback, _kd);
@@ -71,9 +72,12 @@ if (fire_cd <= 0 && instance_number(obj_olympus_fire) < max_fires)
     // Створюємо вогонь в рандомному місці вгорі
     var _fx = obj_player.x + irandom_range(-200, 200);
     var _fy = obj_player.y - irandom_range(100, 200);
-    instance_create_layer(clamp(_fx, 50, room_width - 50),
+    var _fire = instance_create_layer(clamp(_fx, 50, room_width - 50),
                           clamp(_fy, 50, room_height / 2),
                           "Instances", obj_olympus_fire);
+    _fire.hurt_timer = room_speed;
+    _fire.summon_owner = id;
+    _fire.atk = 1;
     fire_cd = fire_cd_max;
     // audio_play_sound(snd_moirai_summon, 1, false);
 }

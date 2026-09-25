@@ -29,7 +29,7 @@ grv  = 0.8;
 // Стріли закривають все поле АЛЕ є 2-3 безпечних пропуски
 barrage_gap_positions = [];   // Безпечні X-позиції (рандомні)
 barrage_arrows_total  = 20;   // Всього стріл у залпі
-barrage_gap_width     = 50;   // Ширина безпечного пропуску
+barrage_gap_width     = 140;
  
 is_dead = false;
 image_speed = 0.12;
@@ -40,3 +40,5 @@ anim_death_started = false;
 anim_death_elapsed = 0;
 anim_prev_x = x;
 anim_prev_y = y;
+
+enemy_combat_init();

@@ -44,7 +44,12 @@ image_xscale = l_right ? 1 : -1;
 // ════════════════════════════════════════
 var _left  = yp_input("A",false) || keyboard_check(vk_left);
 var _right = yp_input("D",false) || keyboard_check(vk_right);
-var _jump  = yp_input("W",true) || keyboard_check_pressed(vk_up);
+var _jump  = yp_input("W",true) || keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_space);
+var _jump_held = yp_input("W",false) || keyboard_check(vk_up) || keyboard_check(vk_space);
+if (jump_buffer > 0) jump_buffer--;
+if (coyote_timer > 0) coyote_timer--;
+if (attack_cooldown > 0) attack_cooldown--;
+if (_jump) jump_buffer = max(1, round(room_speed * 0.12));
 var _drop  = yp_input("S",true) || keyboard_check_pressed(vk_down);
 
 var _e_pressed = yp_input("E",true);   // Кидок зброї
@@ -106,7 +111,10 @@ var _move = _right - _left;
 
 var _weapon_spd  = (current_weapon >= 0) ? weapon_spd_mult[current_weapon] : 1.0;
 var _current_spd = spd * _weapon_spd * 10 + (perm_spd_bonus + temp_spd_buff) * 10;
-var _move_hspd   = _move * _current_spd;
+var _target_speed = _move * _current_spd;
+var _accel = (_move == 0 || sign(move_velocity) != _move) ? 5 : 3;
+move_velocity += clamp(_target_speed - move_velocity, -_accel, _accel);
+var _move_hspd = move_velocity;
 
 if (_move > 0) { l_right = true;  image_xscale =  1; }
 if (_move < 0) { l_right = false; image_xscale = -1; }
@@ -166,6 +174,7 @@ if (vspd >= 0)
 }
 
 var _on_ground = _on_solid || _on_thin;
+if (_on_ground) coyote_timer = max(1, round(room_speed * 0.09));
 
 // --- S: проскочити крізь thin ---
 // Solid має безумовний пріоритет. На стику thin+solid drop-through не
@@ -173,6 +182,8 @@ var _on_ground = _on_solid || _on_thin;
 if (_drop && _on_thin && !_on_solid)
 {
     drop_timer = 20;
+    coyote_timer = 0;
+    jump_buffer = 0;
     _on_thin = false;
     _on_ground = false;
 }
@@ -199,7 +210,7 @@ if (_total_hspd != 0)
         x += _h_step;
     }
 
-    if (_h_blocked) hspd = 0;
+    if (_h_blocked) { hspd = 0; move_velocity = 0; }
 }
 
 hspd *= 0.75;
@@ -237,8 +248,10 @@ if (vspd >= 0)
 
 // --- Стрибок ---
 var _jumped_this_step = false;
-if (_on_ground && _jump)
+if ((_on_ground || coyote_timer > 0) && jump_buffer > 0 && !is_frozen)
 {
+    jump_buffer = 0;
+    coyote_timer = 0;
     vspd = -12;
     _jumped_this_step = true;
     _on_ground = false;
@@ -253,6 +266,7 @@ if (_on_ground && _jump)
 // щоб зберегти попередню висоту стрибка (-12).
 if (!_on_ground && !_jumped_this_step)
 {
+    if (!_jump_held && vspd < -5) vspd = -5;
     vspd += grv;
     if (vspd > 20) vspd = 20;
 }
@@ -438,8 +452,10 @@ if (_can_throw)
 
 // Кайло / коса / весло / меч — звичайна ближня атака.
 // Спеціальні взаємодії інструментів із брилами/хащами/плотом залишаються в їхніх об'єктах.
-if (_e_pressed && current_weapon >= 2 && current_weapon <= 5)
+if (_e_pressed && attack_cooldown <= 0 && current_weapon >= 2 && current_weapon <= 5)
 {
+    attack_cooldown = max(1, round(room_speed * 0.25));
+    yp_sfx("attack", x);
     _play_weapon_action("attack");
 
     // Меч зберігає свій швидкий випад уперед.
@@ -472,7 +488,7 @@ if (_z_pressed && potion_heal_count > 0 && hp < max_hp)
 {
     hp = min(hp + 5, max_hp);
     potion_heal_count--;
-    // audio_play_sound(snd_potion_heal, 1, false);
+    yp_sfx("potion", x);
 }
 
 // X — Зілля Геракла: +5 ATK на 60 секунд (з дизайн-документу)
@@ -481,7 +497,7 @@ if (_x_pressed && potion_strength_count > 0 && buff_duration <= 0)
     potion_strength_count--;
     temp_atk_buff = 5;
     buff_duration = room_speed * 60;   // 60 секунд
-    // audio_play_sound(snd_potion_strength, 1, false);
+    yp_sfx("potion", x);
 }
 
 // C — Зілля Гермеса: +1 SPD на 60 секунд (з дизайн-документу)
@@ -490,7 +506,7 @@ if (_c_pressed && potion_speed_count > 0 && buff_duration <= 0)
     potion_speed_count--;
     temp_spd_buff = 1;
     buff_duration = room_speed * 60;   // 60 секунд
-    // audio_play_sound(snd_potion_speed, 1, false);
+    yp_sfx("potion", x);
 }
 
 // ════════════════════════════════════════

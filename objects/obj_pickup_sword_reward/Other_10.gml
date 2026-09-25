@@ -2,6 +2,7 @@
 /// obj_pickup_sword_reward — User Event 0
 
 world_state_mark_instance(id, "pickup");
+yp_sfx("reward", x);
 with (obj_player) { _unlock_weapon(5); }
 show_weapon_cutscene("sword");
 autosave_game();

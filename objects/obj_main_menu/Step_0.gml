@@ -72,11 +72,14 @@ if (startup_state != "done")
         var _x2 = _x1 + _flag_w + _gap;
         var _y2 = _y1;
 
-        var _ua_hover = point_in_rectangle(_mx, _my, _x1 - 16, _y1 - 18, _x1 + _flag_w + 16, _y1 + _flag_h + 70);
-        var _en_hover = point_in_rectangle(_mx, _my, _x2 - 16, _y2 - 18, _x2 + _flag_w + 16, _y2 + _flag_h + 70);
-
-        if (_ua_hover) startup_lang_selected = 0;
-        if (_en_hover) startup_lang_selected = 1;
+        var _ua=startup_language_rect(0), _en=startup_language_rect(1);
+        var _ua_hover=point_in_rectangle(_mx,_my,_ua[0],_ua[1],_ua[2],_ua[3]);
+        var _en_hover=point_in_rectangle(_mx,_my,_en[0],_en[1],_en[2],_en[3]);
+        if (_mx != startup_mouse_x || _my != startup_mouse_y) {
+            if (_ua_hover) startup_lang_selected = 0;
+            if (_en_hover) startup_lang_selected = 1;
+        }
+        startup_mouse_x=_mx;startup_mouse_y=_my;
 
         if (keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("A")))
             startup_lang_selected = 0;
@@ -85,7 +88,7 @@ if (startup_state != "done")
         if (keyboard_check_pressed(vk_tab))
             startup_lang_selected = 1 - startup_lang_selected;
 
-        if (mouse_check_button_pressed(mb_left))
+        if (startup_skip_delay <= 0 && mouse_check_button_pressed(mb_left))
         {
             if (_ua_hover)
             {

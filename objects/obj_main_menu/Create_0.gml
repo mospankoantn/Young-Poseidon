@@ -18,6 +18,15 @@ startup_transition_active = false;
 startup_transition_phase = ""; // "in" / "out"
 startup_transition_alpha = 0;
 startup_transition_target = ""; // "language" / "done"
+startup_mouse_x = device_mouse_x_to_gui(0);
+startup_mouse_y = device_mouse_y_to_gui(0);
+startup_language_rect = function(_index) {
+    var _w = display_get_gui_width(), _h = display_get_gui_height();
+    var _cw = min(260, (_w-120)/2);
+    var _left = _w/2-(_cw*2+24)/2+_index*(_cw+24);
+    var _top = _h*0.4;
+    return [_left,_top,_left+_cw,_top+146];
+};
 
 startup_has_pending_first_run = function()
 {

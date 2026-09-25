@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description Логіка поведінки Духа Полеглого
 
 /// obj_fallen_spirit — Step Event
@@ -83,6 +84,7 @@ switch (state)
             var _arrow = instance_create_layer(x + image_xscale * 16, y - 8,
                                                "Instances", obj_arrow);
             _arrow.direction_x  = sign(obj_player.x - x);
+            _arrow.source_enemy = id;
             _arrow.fly_speed    = 8;
             _arrow.damage       = atk;
             bow_cd = bow_cd_max;
@@ -98,7 +100,7 @@ switch (state)
     case 3:
         image_xscale = (obj_player.x > x) ? 1 : -1;
  
-        if (melee_cd <= 0 && !obj_player.is_damage)
+        if (melee_cd <= 0 && !obj_player.is_damage && enemy_can_damage(id))
         {
             obj_player.hp       -= atk;
             var _dir             = point_direction(x, y, obj_player.x, obj_player.y);

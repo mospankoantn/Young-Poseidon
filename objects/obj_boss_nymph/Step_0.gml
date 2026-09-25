@@ -1,3 +1,4 @@
+if (enemy_combat_tick()) exit;
 /// @description 
 /// obj_boss_nymph — Step Event
 
@@ -58,7 +59,7 @@ switch (state)
                 repeat (3)
                 {
                     array_push(barrage_gap_positions,
-                        50 + irandom(_room_w - 100));
+                        clamp(120 + array_length(barrage_gap_positions) * (_room_w - 240) / 2, 80, _room_w - 80));
                 }
             }
         }
@@ -99,11 +100,12 @@ switch (state)
  
                 if (!_in_gap)
                 {
-                    var _arr      = instance_create_layer(_ax, y - 50,
+                    var _arr      = instance_create_layer(_ax, 32,
                                         "Instances", obj_arrow);
                     _arr.direction_x = 0;    // Летять вниз
+                    _arr.source_enemy = id;
                     _arr.direction_y = 1;
-                    _arr.fly_speed   = 8;
+                    _arr.fly_speed   = 6;
                     _arr.damage      = atk;
                     _arr.image_angle = 270;  // Стріла летить вниз
                 }
@@ -125,7 +127,7 @@ switch (state)
 }
  
 // ---- КОНТАКТНА ШКОДА ----
-if (distance_to_object(obj_player) < 50 && !obj_player.is_damage)
+if (distance_to_object(obj_player) < 50 && !obj_player.is_damage && enemy_can_damage(id))
 {
     obj_player.hp       -= atk;
     var _kd = point_direction(x, y, obj_player.x, obj_player.y);
