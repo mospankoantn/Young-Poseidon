@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.379,
+  "duration":1.38,
   "exportDir":"",
   "name":"snd_startup_jingle",
   "parent":{
